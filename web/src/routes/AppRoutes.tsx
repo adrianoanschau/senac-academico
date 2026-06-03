@@ -10,7 +10,7 @@ import { Feriados } from '../pages/Feriados';
 import { Subjects } from '../pages/Subjects';
 import { ClassGroups } from '../pages/ClassGroups';
 import { Curriculums } from '../pages/Curriculums';
-import { Aulas } from '../pages/Aulas';
+import { Schedule } from '../pages/Schedule';
 import { Courses } from '../pages/Courses';
 
 export const AppRoutes: React.FC = () => {
@@ -23,7 +23,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="alunos" element={<Placeholder />} />
           <Route path="cursos" element={<Courses />} />
           <Route path="turmas" element={<ClassGroups />} />
-          <Route path="aulas" element={<Aulas />} />
+          <Route path="aulas" element={<Schedule />} />
           <Route path="matriz-curricular" element={<Curriculums />} />
           <Route path="matriculas" element={<Placeholder />} />
           <Route path="perfil" element={<Placeholder />} />

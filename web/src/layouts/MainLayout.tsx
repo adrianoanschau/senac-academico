@@ -2,6 +2,48 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutGrid, Folder, Settings, MessageSquare, LogOut, Bell, Search, GraduationCap, Users, MapPin, CalendarDays, BookOpen, Layers, Network, CalendarClock } from 'lucide-react';
 
+interface NavItemProps {
+  to: string;
+  icon: React.ElementType;
+  label: string;
+  activeClass: string;
+  end?: boolean;
+}
+
+const NAV_ITEMS: NavItemProps[] = [
+  { to: '/', label: 'Dashboard', icon: LayoutGrid, activeClass: 'bg-blue-50 text-[#004a8d]', end: true },
+  { to: '/turmas', label: 'Turmas', icon: Layers, activeClass: 'bg-emerald-50 text-emerald-600' },
+  { to: '/aulas', label: 'Aulas e Encontros', icon: CalendarClock, activeClass: 'bg-blue-50 text-[#004a8d]' },
+  { to: '/cursos', label: 'Cursos', icon: GraduationCap, activeClass: 'bg-blue-50 text-[#004a8d]' },
+  { to: '/disciplinas', label: 'Unidades Curriculares', icon: BookOpen, activeClass: 'bg-indigo-50 text-indigo-500' },
+  { to: '/matriz-curricular', label: 'Matriz Curricular', icon: Network, activeClass: 'bg-purple-50 text-purple-600' },
+  { to: '/professores', label: 'Professores', icon: Users, activeClass: 'bg-blue-50 text-[#004a8d]' },
+  { to: '/salas', label: 'Salas e Ambientes', icon: MapPin, activeClass: 'bg-orange-50 text-[#f37021]' },
+  { to: '/feriados', label: 'Calendário Base', icon: CalendarDays, activeClass: 'bg-rose-50 text-rose-500' },
+];
+
+const BOTTOM_NAV_ITEMS: NavItemProps[] = [
+  { to: '/alunos', label: 'Alunos', icon: Folder, activeClass: 'bg-blue-50 text-[#004a8d]' },
+  { to: '/perfil', label: 'Configurações e Perfil', icon: Settings, activeClass: 'bg-blue-50 text-[#004a8d]' },
+];
+
+const SidebarItem = ({ to, icon: Icon, label, activeClass, end }: NavItemProps) => (
+  <NavLink
+    to={to}
+    end={end}
+    className={({ isActive }) =>
+      `group relative flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+        isActive ? activeClass : 'text-slate-300 hover:text-slate-500 hover:bg-slate-50'
+      }`
+    }
+  >
+    <Icon size={24} />
+    <div className="absolute left-full ml-3 px-3 py-2 bg-white text-slate-700 text-sm font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 delay-150 group-hover:delay-0 whitespace-nowrap shadow-lg border border-slate-100 z-50 pointer-events-none flex items-center">
+      {label}
+    </div>
+  </NavLink>
+);
+
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
 
@@ -11,161 +53,42 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-[#f8f9fc] font-sans text-slate-800 overflow-hidden">
-      {/* Left Sidebar */}
-      <aside className="w-24 bg-white flex flex-col items-center py-8 shrink-0 shadow-[4px_0_24px_rgb(0,0,0,0.02)] z-10 overflow-y-auto">
+      <aside className="w-24 bg-white flex flex-col items-center py-8 shrink-0 shadow-[4px_0_24px_rgb(0,0,0,0.02)] z-20 overflow-visible">
         <div className="mb-12 shrink-0">
-          {/* Logo Senac minimized / Icon format */}
           <div className="w-12 h-12 flex items-center justify-center">
             <img src="/logo.png" alt="Senac" className="w-full h-full object-contain" />
           </div>
         </div>
 
         <nav className="flex-1 flex flex-col gap-6 w-full px-6 shrink-0">
-          <NavLink
-            to="/"
-            end
-            title="Dashboard"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <LayoutGrid size={24} />
-          </NavLink>
-          <NavLink
-            to="/turmas"
-            title="Turmas"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Layers size={24} />
-          </NavLink>
-          <NavLink
-            to="/aulas"
-            title="Aulas e Encontros"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <CalendarClock size={24} />
-          </NavLink>
-          <NavLink
-            to="/cursos"
-            title="Cursos"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <GraduationCap size={24} />
-          </NavLink>
-          <NavLink
-            to="/disciplinas"
-            title="Unidades Curriculares"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-indigo-50 text-indigo-500' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <BookOpen size={24} />
-          </NavLink>
-          <NavLink
-            to="/matriz-curricular"
-            title="Matriz Curricular"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-purple-50 text-purple-600' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Network size={24} />
-          </NavLink>
-          <NavLink
-            to="/professores"
-            title="Professores"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Users size={24} />
-          </NavLink>
-          <NavLink
-            to="/salas"
-            title="Salas e Ambientes"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-orange-50 text-[#f37021]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <MapPin size={24} />
-          </NavLink>
-          <NavLink
-            to="/feriados"
-            title="Calendário Base"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-rose-50 text-rose-500' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <CalendarDays size={24} />
-          </NavLink>
+          {NAV_ITEMS.map((item) => (
+            <SidebarItem key={item.to} {...item} />
+          ))}
           
           <div className="w-full border-t border-slate-100 my-2 shrink-0"></div>
           
-          <NavLink
-            to="/alunos"
-            title="Alunos"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Folder size={24} />
-          </NavLink>
-          <NavLink
-            to="/perfil"
-            title="Configurações e Perfil"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Settings size={24} />
-          </NavLink>
+          {BOTTOM_NAV_ITEMS.map((item) => (
+            <SidebarItem key={item.to} {...item} />
+          ))}
         </nav>
 
         <button
           onClick={handleLogout}
-          title="Sair"
-          className="text-slate-300 hover:text-rose-500 transition-colors mt-8 shrink-0"
+          className="group relative flex items-center justify-center h-12 w-12 rounded-2xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors mt-8 shrink-0"
         >
           <LogOut size={24} />
+          <div className="absolute left-full ml-3 px-3 py-2 bg-white text-slate-700 text-sm font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 delay-150 group-hover:delay-0 whitespace-nowrap shadow-lg border border-slate-100 z-50 pointer-events-none flex items-center">
+            Sair
+          </div>
         </button>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 overflow-x-hidden overflow-y-auto px-10 py-8 bg-neutral-200">
         <Outlet />
       </main>
 
-      {/* Right Sidebar (Profile & Widgets) */}
       <aside className="w-96 bg-white shrink-0 overflow-y-auto shadow-[-4px_0_24px_rgb(0,0,0,0.02)] z-10 hidden xl:block">
         <div className="p-8">
-          {/* Top Tabs */}
           <div className="flex justify-between items-center mb-10 text-sm font-semibold">
             <span className="text-slate-800 border-b-2 border-slate-800 pb-1 cursor-pointer">Perfil</span>
             <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">Histórico</span>
@@ -173,7 +96,6 @@ export const MainLayout: React.FC = () => {
             <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">Estatísticas</span>
           </div>
 
-          {/* Profile Section */}
           <div className="flex items-center justify-between mb-8">
             <div className="relative cursor-pointer">
               <Bell size={24} className="text-slate-400" />
@@ -181,7 +103,6 @@ export const MainLayout: React.FC = () => {
             </div>
             
             <div className="flex flex-col items-center">
-              {/* Avatar with Senac orange progress ring */}
               <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#f37021] to-[#f37021] mb-3">
                 <div className="w-full h-full rounded-full border-2 border-white overflow-hidden bg-[#004a8d] text-white flex items-center justify-center font-bold text-xl">
                   AD
@@ -198,7 +119,6 @@ export const MainLayout: React.FC = () => {
 
           <hr className="border-slate-100 mb-8" />
 
-          {/* Current Courses / Projects */}
           <div className="mb-10">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2 text-slate-800 font-bold">
@@ -209,7 +129,6 @@ export const MainLayout: React.FC = () => {
             </div>
 
             <div className="flex gap-4">
-              {/* Dark Card - Senac Blue */}
               <div className="flex-1 bg-[#004a8d] rounded-[1.5rem] p-5 text-white shadow-[0_8px_20px_rgb(0,74,141,0.3)]">
                 <h4 className="font-bold mb-1 line-clamp-1">Téc. em TI</h4>
                 <p className="text-xs text-blue-200 mb-6">Módulo 2</p>
@@ -218,7 +137,6 @@ export const MainLayout: React.FC = () => {
                 </div>
                 <div className="text-xs font-bold mt-2 text-right">68%</div>
               </div>
-              {/* Light Card */}
               <div className="flex-1 bg-slate-50 rounded-[1.5rem] p-5 border border-slate-100">
                 <h4 className="font-bold text-slate-800 mb-1 line-clamp-1">Design</h4>
                 <p className="text-xs text-slate-400 mb-6">Módulo 1</p>
@@ -230,7 +148,6 @@ export const MainLayout: React.FC = () => {
             </div>
           </div>
 
-          {/* Last Enrolled / Clients */}
           <div>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-slate-800 font-bold">Últimas Matrículas</h3>

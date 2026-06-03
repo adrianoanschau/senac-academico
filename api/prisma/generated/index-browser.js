@@ -182,6 +182,18 @@ exports.Prisma.ClassGroupScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ScheduleScalarFieldEnum = {
+  id: 'id',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  classGroupId: 'classGroupId',
+  subjectId: 'subjectId',
+  professorId: 'professorId',
+  roomId: 'roomId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -205,7 +217,8 @@ exports.Prisma.ModelName = {
   Curriculum: 'Curriculum',
   Subject: 'Subject',
   CurriculumSubject: 'CurriculumSubject',
-  ClassGroup: 'ClassGroup'
+  ClassGroup: 'ClassGroup',
+  Schedule: 'Schedule'
 };
 
 /**
