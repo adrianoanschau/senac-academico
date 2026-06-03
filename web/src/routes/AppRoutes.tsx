@@ -4,7 +4,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { Home } from '../pages/Home';
 import { Placeholder } from '../pages/Placeholder';
 import { Login } from '../pages/Login';
-import { Professores } from '../pages/Professores';
+import { Professors } from '../pages/Professors';
 import { Salas } from '../pages/Salas';
 import { Feriados } from '../pages/Feriados';
 import { Disciplinas } from '../pages/Disciplinas';
@@ -26,7 +26,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="matriz-curricular" element={<MatrizCurricular />} />
           <Route path="matriculas" element={<Placeholder />} />
           <Route path="perfil" element={<Placeholder />} />
-          <Route path="professores" element={<Professores />} />
+          <Route path="professores" element={<Professors />} />
           <Route path="salas" element={<Salas />} />
           <Route path="feriados" element={<Feriados />} />
           <Route path="disciplinas" element={<Disciplinas />} />
