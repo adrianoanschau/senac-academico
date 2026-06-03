@@ -21,6 +21,11 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/prisma/*": ["prisma/generated/*"],
+      "@/auth/*": ["src/auth/*"]
+    }
+  },
+  "include": ["src/**/*", "prisma/generated/**/*"]
 }
