@@ -139,6 +139,38 @@ exports.Prisma.RoomScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CourseScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CurriculumScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  active: 'active',
+  courseId: 'courseId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  hours: 'hours',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CurriculumSubjectScalarFieldEnum = {
+  curriculumId: 'curriculumId',
+  subjectId: 'subjectId',
+  module: 'module'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -157,7 +189,11 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Professor: 'Professor',
-  Room: 'Room'
+  Room: 'Room',
+  Course: 'Course',
+  Curriculum: 'Curriculum',
+  Subject: 'Subject',
+  CurriculumSubject: 'CurriculumSubject'
 };
 
 /**

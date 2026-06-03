@@ -5,9 +5,12 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ProfessorsModule } from './professors/professors.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { SubjectsModule } from './subjects/subjects.module';
+import { CoursesModule } from './courses/courses.module';
+import { CurriculumsModule } from './curriculums/curriculums.module';
 
 @Module({
-  imports: [AuthModule, ProfessorsModule, RoomsModule],
+  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

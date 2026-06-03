@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "generated"
@@ -16,8 +11,8 @@ model Professor {
   id         String   @id @default(uuid())
   name       String
   email      String   @unique
-  degree     String? // Specialist, Master, PhD
-  department String? // Software Engineering, Mathematics
+  degree     String?
+  department String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -26,11 +21,63 @@ model Professor {
 
 model Room {
   id        String   @id @default(uuid())
-  name      String   @unique // "Sala 201", "Lab de Informática 3"
-  capacity  Int // Capacidade máxima de alunos
-  type      String // "Classroom", "Laboratory", "Auditorium"
+  name      String   @unique
+  capacity  Int
+  type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("rooms")
+}
+
+model Course {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  curriculums Curriculum[]
+
+  @@map("courses")
+}
+
+model Curriculum {
+  id        String   @id @default(uuid())
+  name      String
+  active    Boolean  @default(true)
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id])
+
+  subjects CurriculumSubject[]
+
+  @@map("curriculums")
+}
+
+model Subject {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  hours     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  curriculums CurriculumSubject[]
+
+  @@map("subjects")
+}
+
+model CurriculumSubject {
+  curriculumId String
+  subjectId    String
+  module       Int
+
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@id([curriculumId, subjectId])
+  @@map("curriculum_subjects")
 }
