@@ -1,16 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, BookOpen, X } from 'lucide-react';
+import axios from 'axios';
+
+interface Subject {
+  id?: string | number;
+  name: string;
+  code: string;
+  hours: number;
+}
+
+const initialFormState: Subject = {
+  name: '',
+  hours: 0,
+  code: '',
+};
 
 export const Subjects: React.FC = () => {
-  const [disciplinas] = useState([
-    { id: 1, nome: 'Lógica de Programação', ch: 60, eixo: 'Tecnologia' },
-    { id: 2, nome: 'Banco de Dados', ch: 80, eixo: 'Tecnologia' },
-    { id: 3, nome: 'Comunicação Empresarial', ch: 40, eixo: 'Comum' },
-    { id: 4, nome: 'Design de Interfaces (UI)', ch: 60, eixo: 'Design' },
-    { id: 5, nome: 'Desenvolvimento Web Front-end', ch: 120, eixo: 'Tecnologia' },
-  ]);
-
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState<Subject>(initialFormState);
+
+  const fetchSubjects = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/api/subjects');
+      setSubjects(response.data.data || []);
+    } catch (error) {
+      console.error('Erro ao buscar unidades curriculares:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    (async () => { await fetchSubjects(); })();
+  }, []);
+
+  const handleOpenNewModal = () => {
+    setFormData(initialFormState);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (subject: Subject) => {
+    setFormData(subject);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string | number | undefined) => {
+    if (!id) return;
+    if (!window.confirm('Tem certeza que deseja excluir esta unidade curricular?')) return;
+
+    try {
+      await axios.delete(`/api/subjects/${id}`);
+      fetchSubjects();
+    } catch (error) {
+      console.error('Erro ao excluir unidade curricular:', error);
+      alert('Erro ao excluir. Verifique dependências antes de remover.');
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const isEditing = !!formData.id;
+      const url = isEditing ? `/api/subjects/${formData.id}` : '/api/subjects';
+
+      const payload: Partial<Subject> = { ...formData };
+      if (!isEditing) delete payload.id;
+
+      if (isEditing) {
+        await axios.patch(url, payload);
+      } else {
+        await axios.post(url, payload);
+      }
+
+      setIsModalOpen(false);
+      fetchSubjects();
+    } catch (error) {
+      console.error('Erro ao salvar unidade curricular:', error);
+      alert('Erro ao salvar os dados.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
@@ -26,7 +102,7 @@ export const Subjects: React.FC = () => {
           <p className="text-slate-500 mt-1">Gerencie a base de disciplinas e suas cargas horárias.</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenNewModal}
           className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]"
         >
           <Plus size={20} />
@@ -66,43 +142,60 @@ export const Subjects: React.FC = () => {
             <thead>
               <tr className="border-b border-slate-100">
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Nome da UC</th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">Eixo Tecnológico</th>
+                <th className="py-4 px-4 font-bold text-slate-400 text-sm">Código</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm text-center">Carga Horária Total</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {disciplinas.map((disc) => (
-                <tr key={disc.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td className="py-4 px-4 font-bold text-slate-800">{disc.nome}</td>
-                  <td className="py-4 px-4 text-slate-500 font-medium">{disc.eixo}</td>
-                  <td className="py-4 px-4 text-center font-bold text-[#f37021]">{disc.ch} horas</td>
-                  <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="p-2 text-slate-400 hover:text-[#004a8d] hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Carregando disciplinas...</td>
                 </tr>
-              ))}
+              ) : subjects.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Nenhuma disciplina cadastrada.</td>
+                </tr>
+              ) : (
+                subjects.map((subject) => (
+                  <tr key={subject.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td className="py-4 px-4 font-bold text-slate-800">{subject.name}</td>
+                    <td className="py-4 px-4 text-slate-500 font-medium">{subject.code}</td>
+                    <td className="py-4 px-4 text-center font-bold text-[#f37021]">{subject.hours} horas</td>
+                    <td className="py-4 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleOpenEditModal(subject)}
+                          className="p-2 text-slate-400 hover:text-[#004a8d] hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(subject.id)}
+                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100 text-sm font-medium text-slate-400">
-          <span>Mostrando 1 a 5 de 42 disciplinas</span>
+          <span>Mostrando {subjects.length} disciplina(s)</span>
           <div className="flex gap-2">
+            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">Anterior</button>
             <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-800 font-bold">1</button>
             <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">2</button>
             <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">3</button>
+            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">Próxima</button>
           </div>
         </div>
 
@@ -119,31 +212,26 @@ export const Subjects: React.FC = () => {
               </button>
             </div>
             
-            <form className="flex flex-col gap-5">
+            <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Nome da UC</label>
-                <input type="text" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: Lógica de Programação" />
+                <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: Lógica de Programação" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Eixo Tecnológico</label>
-                <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                  <option value="Tecnologia">Tecnologia</option>
-                  <option value="Design">Design</option>
-                  <option value="Comum">Base Comum</option>
-                  <option value="Gestão">Gestão</option>
-                </select>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Código da UC</label>
+                <input required type="text" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: LP" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Carga Horária Total</label>
-                <input type="number" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: 60" />
+                <input required type="number" value={formData.hours} onChange={(e) => setFormData({...formData, hours: Number(e.target.value)})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: 60" />
               </div>
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
                   Cancelar
                 </button>
-                <button type="button" className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
-                  Salvar
+                <button type="submit" disabled={isSaving} className="bg-[#004a8d] hover:bg-[#00386b] disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
+                  {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>

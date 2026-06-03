@@ -34,50 +34,6 @@ export const MainLayout: React.FC = () => {
             <LayoutGrid size={24} />
           </NavLink>
           <NavLink
-            to="/cursos"
-            title="Cursos"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <GraduationCap size={24} />
-          </NavLink>
-          <NavLink
-            to="/professores"
-            title="Professores"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <Users size={24} />
-          </NavLink>
-          <NavLink
-            to="/salas"
-            title="Salas e Ambientes"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-orange-50 text-[#f37021]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <MapPin size={24} />
-          </NavLink>
-          <NavLink
-            to="/disciplinas"
-            title="Unidades Curriculares"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-indigo-50 text-indigo-500' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <BookOpen size={24} />
-          </NavLink>
-          <NavLink
             to="/turmas"
             title="Turmas"
             className={({ isActive }) =>
@@ -100,6 +56,28 @@ export const MainLayout: React.FC = () => {
             <CalendarClock size={24} />
           </NavLink>
           <NavLink
+            to="/cursos"
+            title="Cursos"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <GraduationCap size={24} />
+          </NavLink>
+          <NavLink
+            to="/disciplinas"
+            title="Unidades Curriculares"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-indigo-50 text-indigo-500' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <BookOpen size={24} />
+          </NavLink>
+          <NavLink
             to="/matriz-curricular"
             title="Matriz Curricular"
             className={({ isActive }) =>
@@ -109,6 +87,28 @@ export const MainLayout: React.FC = () => {
             }
           >
             <Network size={24} />
+          </NavLink>
+          <NavLink
+            to="/professores"
+            title="Professores"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <Users size={24} />
+          </NavLink>
+          <NavLink
+            to="/salas"
+            title="Salas e Ambientes"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-orange-50 text-[#f37021]' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <MapPin size={24} />
           </NavLink>
           <NavLink
             to="/feriados"
