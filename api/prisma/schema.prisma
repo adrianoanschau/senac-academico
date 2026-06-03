@@ -16,6 +16,8 @@ model Professor {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  schedules Schedule[]
+
   @@map("professors")
 }
 
@@ -26,6 +28,8 @@ model Room {
   type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  schedules Schedule[]
 
   @@map("rooms")
 }
@@ -66,6 +70,7 @@ model Subject {
   updatedAt DateTime @updatedAt
 
   curriculums CurriculumSubject[]
+  schedules   Schedule[]
 
   @@map("subjects")
 }
@@ -93,6 +98,28 @@ model ClassGroup {
   updatedAt    DateTime  @updatedAt
 
   curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  schedules  Schedule[]
 
   @@map("class_groups")
+}
+
+model Schedule {
+  id        String   @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+
+  classGroupId String
+  subjectId    String
+  professorId  String
+  roomId       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Restrict)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  professor  Professor  @relation(fields: [professorId], references: [id], onDelete: Restrict)
+  room       Room       @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  @@map("schedules")
 }
