@@ -8,6 +8,9 @@ import { Professores } from '../pages/Professores';
 import { Salas } from '../pages/Salas';
 import { Feriados } from '../pages/Feriados';
 import { Disciplinas } from '../pages/Disciplinas';
+import { Turmas } from '../pages/Turmas';
+import { MatrizCurricular } from '../pages/MatrizCurricular';
+import { Aulas } from '../pages/Aulas';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -18,6 +21,9 @@ export const AppRoutes: React.FC = () => {
           <Route index element={<Home />} />
           <Route path="alunos" element={<Placeholder />} />
           <Route path="cursos" element={<Placeholder />} />
+          <Route path="turmas" element={<Turmas />} />
+          <Route path="aulas" element={<Aulas />} />
+          <Route path="matriz-curricular" element={<MatrizCurricular />} />
           <Route path="matriculas" element={<Placeholder />} />
           <Route path="perfil" element={<Placeholder />} />
           <Route path="professores" element={<Professores />} />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutGrid, Folder, Settings, MessageSquare, LogOut, Bell, Search, GraduationCap, Users, MapPin, CalendarDays, BookOpen } from 'lucide-react';
+import { LayoutGrid, Folder, Settings, MessageSquare, LogOut, Bell, Search, GraduationCap, Users, MapPin, CalendarDays, BookOpen, Layers, Network, CalendarClock } from 'lucide-react';
 
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -65,6 +65,39 @@ export const MainLayout: React.FC = () => {
             }
           >
             <BookOpen size={24} />
+          </NavLink>
+          <NavLink
+            to="/turmas"
+            title="Turmas"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-emerald-50 text-emerald-600' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <Layers size={24} />
+          </NavLink>
+          <NavLink
+            to="/aulas"
+            title="Aulas e Encontros"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <CalendarClock size={24} />
+          </NavLink>
+          <NavLink
+            to="/matriz-curricular"
+            title="Matriz Curricular"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-purple-50 text-purple-600' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <Network size={24} />
           </NavLink>
           <NavLink
             to="/feriados"
