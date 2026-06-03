@@ -11,6 +11,7 @@ import {
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -60,5 +61,11 @@ export class SchedulesController {
   async remove(@Param('id') id: string) {
     await this.schedulesService.remove(id);
     return { message: 'Schedule removed successfully' };
+  }
+
+  @Post('generate')
+  async generateBulk(@Body() generateSchedulesDto: GenerateSchedulesDto) {
+    const data = await this.schedulesService.generateBulk(generateSchedulesDto);
+    return { data };
   }
 }
