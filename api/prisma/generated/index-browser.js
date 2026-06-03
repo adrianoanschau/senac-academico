@@ -171,6 +171,17 @@ exports.Prisma.CurriculumSubjectScalarFieldEnum = {
   module: 'module'
 };
 
+exports.Prisma.ClassGroupScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  shift: 'shift',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  curriculumId: 'curriculumId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -193,7 +204,8 @@ exports.Prisma.ModelName = {
   Course: 'Course',
   Curriculum: 'Curriculum',
   Subject: 'Subject',
-  CurriculumSubject: 'CurriculumSubject'
+  CurriculumSubject: 'CurriculumSubject',
+  ClassGroup: 'ClassGroup'
 };
 
 /**

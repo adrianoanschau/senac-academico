@@ -8,9 +8,10 @@ import { RoomsModule } from './rooms/rooms.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { CoursesModule } from './courses/courses.module';
 import { CurriculumsModule } from './curriculums/curriculums.module';
+import { ClassGroupsModule } from './class-groups/class-groups.module';
 
 @Module({
-  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule],
+  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule, ClassGroupsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

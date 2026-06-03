@@ -43,6 +43,11 @@ export type Subject = $Result.DefaultSelection<Prisma.$SubjectPayload>
  * 
  */
 export type CurriculumSubject = $Result.DefaultSelection<Prisma.$CurriculumSubjectPayload>
+/**
+ * Model ClassGroup
+ * 
+ */
+export type ClassGroup = $Result.DefaultSelection<Prisma.$ClassGroupPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -224,6 +229,16 @@ export class PrismaClient<
     * ```
     */
   get curriculumSubject(): Prisma.CurriculumSubjectDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.classGroup`: Exposes CRUD operations for the **ClassGroup** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ClassGroups
+    * const classGroups = await prisma.classGroup.findMany()
+    * ```
+    */
+  get classGroup(): Prisma.ClassGroupDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -663,7 +678,8 @@ export namespace Prisma {
     Course: 'Course',
     Curriculum: 'Curriculum',
     Subject: 'Subject',
-    CurriculumSubject: 'CurriculumSubject'
+    CurriculumSubject: 'CurriculumSubject',
+    ClassGroup: 'ClassGroup'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -679,7 +695,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "professor" | "room" | "course" | "curriculum" | "subject" | "curriculumSubject"
+      modelProps: "professor" | "room" | "course" | "curriculum" | "subject" | "curriculumSubject" | "classGroup"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1127,6 +1143,80 @@ export namespace Prisma {
           }
         }
       }
+      ClassGroup: {
+        payload: Prisma.$ClassGroupPayload<ExtArgs>
+        fields: Prisma.ClassGroupFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ClassGroupFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ClassGroupFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          findFirst: {
+            args: Prisma.ClassGroupFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ClassGroupFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          findMany: {
+            args: Prisma.ClassGroupFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>[]
+          }
+          create: {
+            args: Prisma.ClassGroupCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          createMany: {
+            args: Prisma.ClassGroupCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ClassGroupCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>[]
+          }
+          delete: {
+            args: Prisma.ClassGroupDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          update: {
+            args: Prisma.ClassGroupUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          deleteMany: {
+            args: Prisma.ClassGroupDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ClassGroupUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ClassGroupUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>[]
+          }
+          upsert: {
+            args: Prisma.ClassGroupUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupPayload>
+          }
+          aggregate: {
+            args: Prisma.ClassGroupAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateClassGroup>
+          }
+          groupBy: {
+            args: Prisma.ClassGroupGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ClassGroupGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ClassGroupCountArgs<ExtArgs>
+            result: $Utils.Optional<ClassGroupCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1241,6 +1331,7 @@ export namespace Prisma {
     curriculum?: CurriculumOmit
     subject?: SubjectOmit
     curriculumSubject?: CurriculumSubjectOmit
+    classGroup?: ClassGroupOmit
   }
 
   /* Types for Logging */
@@ -1353,10 +1444,12 @@ export namespace Prisma {
 
   export type CurriculumCountOutputType = {
     subjects: number
+    classGroups: number
   }
 
   export type CurriculumCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subjects?: boolean | CurriculumCountOutputTypeCountSubjectsArgs
+    classGroups?: boolean | CurriculumCountOutputTypeCountClassGroupsArgs
   }
 
   // Custom InputTypes
@@ -1375,6 +1468,13 @@ export namespace Prisma {
    */
   export type CurriculumCountOutputTypeCountSubjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CurriculumSubjectWhereInput
+  }
+
+  /**
+   * CurriculumCountOutputType without action
+   */
+  export type CurriculumCountOutputTypeCountClassGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClassGroupWhereInput
   }
 
 
@@ -4735,6 +4835,7 @@ export namespace Prisma {
     updatedAt?: boolean
     course?: boolean | CourseDefaultArgs<ExtArgs>
     subjects?: boolean | Curriculum$subjectsArgs<ExtArgs>
+    classGroups?: boolean | Curriculum$classGroupsArgs<ExtArgs>
     _count?: boolean | CurriculumCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["curriculum"]>
 
@@ -4771,6 +4872,7 @@ export namespace Prisma {
   export type CurriculumInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     course?: boolean | CourseDefaultArgs<ExtArgs>
     subjects?: boolean | Curriculum$subjectsArgs<ExtArgs>
+    classGroups?: boolean | Curriculum$classGroupsArgs<ExtArgs>
     _count?: boolean | CurriculumCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CurriculumIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4785,6 +4887,7 @@ export namespace Prisma {
     objects: {
       course: Prisma.$CoursePayload<ExtArgs>
       subjects: Prisma.$CurriculumSubjectPayload<ExtArgs>[]
+      classGroups: Prisma.$ClassGroupPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5189,6 +5292,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     subjects<T extends Curriculum$subjectsArgs<ExtArgs> = {}>(args?: Subset<T, Curriculum$subjectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumSubjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    classGroups<T extends Curriculum$classGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Curriculum$classGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5646,6 +5750,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CurriculumSubjectScalarFieldEnum | CurriculumSubjectScalarFieldEnum[]
+  }
+
+  /**
+   * Curriculum.classGroups
+   */
+  export type Curriculum$classGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    where?: ClassGroupWhereInput
+    orderBy?: ClassGroupOrderByWithRelationInput | ClassGroupOrderByWithRelationInput[]
+    cursor?: ClassGroupWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ClassGroupScalarFieldEnum | ClassGroupScalarFieldEnum[]
   }
 
   /**
@@ -7869,6 +7997,1108 @@ export namespace Prisma {
 
 
   /**
+   * Model ClassGroup
+   */
+
+  export type AggregateClassGroup = {
+    _count: ClassGroupCountAggregateOutputType | null
+    _min: ClassGroupMinAggregateOutputType | null
+    _max: ClassGroupMaxAggregateOutputType | null
+  }
+
+  export type ClassGroupMinAggregateOutputType = {
+    id: string | null
+    code: string | null
+    shift: string | null
+    startDate: Date | null
+    endDate: Date | null
+    curriculumId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClassGroupMaxAggregateOutputType = {
+    id: string | null
+    code: string | null
+    shift: string | null
+    startDate: Date | null
+    endDate: Date | null
+    curriculumId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClassGroupCountAggregateOutputType = {
+    id: number
+    code: number
+    shift: number
+    startDate: number
+    endDate: number
+    curriculumId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ClassGroupMinAggregateInputType = {
+    id?: true
+    code?: true
+    shift?: true
+    startDate?: true
+    endDate?: true
+    curriculumId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClassGroupMaxAggregateInputType = {
+    id?: true
+    code?: true
+    shift?: true
+    startDate?: true
+    endDate?: true
+    curriculumId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClassGroupCountAggregateInputType = {
+    id?: true
+    code?: true
+    shift?: true
+    startDate?: true
+    endDate?: true
+    curriculumId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ClassGroupAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClassGroup to aggregate.
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroups to fetch.
+     */
+    orderBy?: ClassGroupOrderByWithRelationInput | ClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ClassGroups
+    **/
+    _count?: true | ClassGroupCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ClassGroupMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ClassGroupMaxAggregateInputType
+  }
+
+  export type GetClassGroupAggregateType<T extends ClassGroupAggregateArgs> = {
+        [P in keyof T & keyof AggregateClassGroup]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateClassGroup[P]>
+      : GetScalarType<T[P], AggregateClassGroup[P]>
+  }
+
+
+
+
+  export type ClassGroupGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClassGroupWhereInput
+    orderBy?: ClassGroupOrderByWithAggregationInput | ClassGroupOrderByWithAggregationInput[]
+    by: ClassGroupScalarFieldEnum[] | ClassGroupScalarFieldEnum
+    having?: ClassGroupScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ClassGroupCountAggregateInputType | true
+    _min?: ClassGroupMinAggregateInputType
+    _max?: ClassGroupMaxAggregateInputType
+  }
+
+  export type ClassGroupGroupByOutputType = {
+    id: string
+    code: string
+    shift: string
+    startDate: Date
+    endDate: Date | null
+    curriculumId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ClassGroupCountAggregateOutputType | null
+    _min: ClassGroupMinAggregateOutputType | null
+    _max: ClassGroupMaxAggregateOutputType | null
+  }
+
+  type GetClassGroupGroupByPayload<T extends ClassGroupGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ClassGroupGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ClassGroupGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ClassGroupGroupByOutputType[P]>
+            : GetScalarType<T[P], ClassGroupGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ClassGroupSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    shift?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    curriculumId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroup"]>
+
+  export type ClassGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    shift?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    curriculumId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroup"]>
+
+  export type ClassGroupSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    shift?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    curriculumId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroup"]>
+
+  export type ClassGroupSelectScalar = {
+    id?: boolean
+    code?: boolean
+    shift?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    curriculumId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ClassGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "shift" | "startDate" | "endDate" | "curriculumId" | "createdAt" | "updatedAt", ExtArgs["result"]["classGroup"]>
+  export type ClassGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }
+  export type ClassGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }
+  export type ClassGroupIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
+  }
+
+  export type $ClassGroupPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ClassGroup"
+    objects: {
+      curriculum: Prisma.$CurriculumPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      code: string
+      shift: string
+      startDate: Date
+      endDate: Date | null
+      curriculumId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["classGroup"]>
+    composites: {}
+  }
+
+  type ClassGroupGetPayload<S extends boolean | null | undefined | ClassGroupDefaultArgs> = $Result.GetResult<Prisma.$ClassGroupPayload, S>
+
+  type ClassGroupCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ClassGroupFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ClassGroupCountAggregateInputType | true
+    }
+
+  export interface ClassGroupDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ClassGroup'], meta: { name: 'ClassGroup' } }
+    /**
+     * Find zero or one ClassGroup that matches the filter.
+     * @param {ClassGroupFindUniqueArgs} args - Arguments to find a ClassGroup
+     * @example
+     * // Get one ClassGroup
+     * const classGroup = await prisma.classGroup.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ClassGroupFindUniqueArgs>(args: SelectSubset<T, ClassGroupFindUniqueArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ClassGroup that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ClassGroupFindUniqueOrThrowArgs} args - Arguments to find a ClassGroup
+     * @example
+     * // Get one ClassGroup
+     * const classGroup = await prisma.classGroup.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ClassGroupFindUniqueOrThrowArgs>(args: SelectSubset<T, ClassGroupFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClassGroup that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupFindFirstArgs} args - Arguments to find a ClassGroup
+     * @example
+     * // Get one ClassGroup
+     * const classGroup = await prisma.classGroup.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ClassGroupFindFirstArgs>(args?: SelectSubset<T, ClassGroupFindFirstArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClassGroup that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupFindFirstOrThrowArgs} args - Arguments to find a ClassGroup
+     * @example
+     * // Get one ClassGroup
+     * const classGroup = await prisma.classGroup.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ClassGroupFindFirstOrThrowArgs>(args?: SelectSubset<T, ClassGroupFindFirstOrThrowArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ClassGroups that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ClassGroups
+     * const classGroups = await prisma.classGroup.findMany()
+     * 
+     * // Get first 10 ClassGroups
+     * const classGroups = await prisma.classGroup.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const classGroupWithIdOnly = await prisma.classGroup.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ClassGroupFindManyArgs>(args?: SelectSubset<T, ClassGroupFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ClassGroup.
+     * @param {ClassGroupCreateArgs} args - Arguments to create a ClassGroup.
+     * @example
+     * // Create one ClassGroup
+     * const ClassGroup = await prisma.classGroup.create({
+     *   data: {
+     *     // ... data to create a ClassGroup
+     *   }
+     * })
+     * 
+     */
+    create<T extends ClassGroupCreateArgs>(args: SelectSubset<T, ClassGroupCreateArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ClassGroups.
+     * @param {ClassGroupCreateManyArgs} args - Arguments to create many ClassGroups.
+     * @example
+     * // Create many ClassGroups
+     * const classGroup = await prisma.classGroup.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ClassGroupCreateManyArgs>(args?: SelectSubset<T, ClassGroupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ClassGroups and returns the data saved in the database.
+     * @param {ClassGroupCreateManyAndReturnArgs} args - Arguments to create many ClassGroups.
+     * @example
+     * // Create many ClassGroups
+     * const classGroup = await prisma.classGroup.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ClassGroups and only return the `id`
+     * const classGroupWithIdOnly = await prisma.classGroup.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ClassGroupCreateManyAndReturnArgs>(args?: SelectSubset<T, ClassGroupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ClassGroup.
+     * @param {ClassGroupDeleteArgs} args - Arguments to delete one ClassGroup.
+     * @example
+     * // Delete one ClassGroup
+     * const ClassGroup = await prisma.classGroup.delete({
+     *   where: {
+     *     // ... filter to delete one ClassGroup
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ClassGroupDeleteArgs>(args: SelectSubset<T, ClassGroupDeleteArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ClassGroup.
+     * @param {ClassGroupUpdateArgs} args - Arguments to update one ClassGroup.
+     * @example
+     * // Update one ClassGroup
+     * const classGroup = await prisma.classGroup.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ClassGroupUpdateArgs>(args: SelectSubset<T, ClassGroupUpdateArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ClassGroups.
+     * @param {ClassGroupDeleteManyArgs} args - Arguments to filter ClassGroups to delete.
+     * @example
+     * // Delete a few ClassGroups
+     * const { count } = await prisma.classGroup.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ClassGroupDeleteManyArgs>(args?: SelectSubset<T, ClassGroupDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClassGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ClassGroups
+     * const classGroup = await prisma.classGroup.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ClassGroupUpdateManyArgs>(args: SelectSubset<T, ClassGroupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClassGroups and returns the data updated in the database.
+     * @param {ClassGroupUpdateManyAndReturnArgs} args - Arguments to update many ClassGroups.
+     * @example
+     * // Update many ClassGroups
+     * const classGroup = await prisma.classGroup.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ClassGroups and only return the `id`
+     * const classGroupWithIdOnly = await prisma.classGroup.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ClassGroupUpdateManyAndReturnArgs>(args: SelectSubset<T, ClassGroupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ClassGroup.
+     * @param {ClassGroupUpsertArgs} args - Arguments to update or create a ClassGroup.
+     * @example
+     * // Update or create a ClassGroup
+     * const classGroup = await prisma.classGroup.upsert({
+     *   create: {
+     *     // ... data to create a ClassGroup
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ClassGroup we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ClassGroupUpsertArgs>(args: SelectSubset<T, ClassGroupUpsertArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ClassGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupCountArgs} args - Arguments to filter ClassGroups to count.
+     * @example
+     * // Count the number of ClassGroups
+     * const count = await prisma.classGroup.count({
+     *   where: {
+     *     // ... the filter for the ClassGroups we want to count
+     *   }
+     * })
+    **/
+    count<T extends ClassGroupCountArgs>(
+      args?: Subset<T, ClassGroupCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ClassGroupCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ClassGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ClassGroupAggregateArgs>(args: Subset<T, ClassGroupAggregateArgs>): Prisma.PrismaPromise<GetClassGroupAggregateType<T>>
+
+    /**
+     * Group by ClassGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ClassGroupGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ClassGroupGroupByArgs['orderBy'] }
+        : { orderBy?: ClassGroupGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ClassGroupGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetClassGroupGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ClassGroup model
+   */
+  readonly fields: ClassGroupFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ClassGroup.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ClassGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    curriculum<T extends CurriculumDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CurriculumDefaultArgs<ExtArgs>>): Prisma__CurriculumClient<$Result.GetResult<Prisma.$CurriculumPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ClassGroup model
+   */
+  interface ClassGroupFieldRefs {
+    readonly id: FieldRef<"ClassGroup", 'String'>
+    readonly code: FieldRef<"ClassGroup", 'String'>
+    readonly shift: FieldRef<"ClassGroup", 'String'>
+    readonly startDate: FieldRef<"ClassGroup", 'DateTime'>
+    readonly endDate: FieldRef<"ClassGroup", 'DateTime'>
+    readonly curriculumId: FieldRef<"ClassGroup", 'String'>
+    readonly createdAt: FieldRef<"ClassGroup", 'DateTime'>
+    readonly updatedAt: FieldRef<"ClassGroup", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ClassGroup findUnique
+   */
+  export type ClassGroupFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroup to fetch.
+     */
+    where: ClassGroupWhereUniqueInput
+  }
+
+  /**
+   * ClassGroup findUniqueOrThrow
+   */
+  export type ClassGroupFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroup to fetch.
+     */
+    where: ClassGroupWhereUniqueInput
+  }
+
+  /**
+   * ClassGroup findFirst
+   */
+  export type ClassGroupFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroup to fetch.
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroups to fetch.
+     */
+    orderBy?: ClassGroupOrderByWithRelationInput | ClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClassGroups.
+     */
+    cursor?: ClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClassGroups.
+     */
+    distinct?: ClassGroupScalarFieldEnum | ClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroup findFirstOrThrow
+   */
+  export type ClassGroupFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroup to fetch.
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroups to fetch.
+     */
+    orderBy?: ClassGroupOrderByWithRelationInput | ClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClassGroups.
+     */
+    cursor?: ClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClassGroups.
+     */
+    distinct?: ClassGroupScalarFieldEnum | ClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroup findMany
+   */
+  export type ClassGroupFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroups to fetch.
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroups to fetch.
+     */
+    orderBy?: ClassGroupOrderByWithRelationInput | ClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ClassGroups.
+     */
+    cursor?: ClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClassGroups.
+     */
+    distinct?: ClassGroupScalarFieldEnum | ClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroup create
+   */
+  export type ClassGroupCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ClassGroup.
+     */
+    data: XOR<ClassGroupCreateInput, ClassGroupUncheckedCreateInput>
+  }
+
+  /**
+   * ClassGroup createMany
+   */
+  export type ClassGroupCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ClassGroups.
+     */
+    data: ClassGroupCreateManyInput | ClassGroupCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ClassGroup createManyAndReturn
+   */
+  export type ClassGroupCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * The data used to create many ClassGroups.
+     */
+    data: ClassGroupCreateManyInput | ClassGroupCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClassGroup update
+   */
+  export type ClassGroupUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ClassGroup.
+     */
+    data: XOR<ClassGroupUpdateInput, ClassGroupUncheckedUpdateInput>
+    /**
+     * Choose, which ClassGroup to update.
+     */
+    where: ClassGroupWhereUniqueInput
+  }
+
+  /**
+   * ClassGroup updateMany
+   */
+  export type ClassGroupUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ClassGroups.
+     */
+    data: XOR<ClassGroupUpdateManyMutationInput, ClassGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which ClassGroups to update
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * Limit how many ClassGroups to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClassGroup updateManyAndReturn
+   */
+  export type ClassGroupUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * The data used to update ClassGroups.
+     */
+    data: XOR<ClassGroupUpdateManyMutationInput, ClassGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which ClassGroups to update
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * Limit how many ClassGroups to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClassGroup upsert
+   */
+  export type ClassGroupUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ClassGroup to update in case it exists.
+     */
+    where: ClassGroupWhereUniqueInput
+    /**
+     * In case the ClassGroup found by the `where` argument doesn't exist, create a new ClassGroup with this data.
+     */
+    create: XOR<ClassGroupCreateInput, ClassGroupUncheckedCreateInput>
+    /**
+     * In case the ClassGroup was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ClassGroupUpdateInput, ClassGroupUncheckedUpdateInput>
+  }
+
+  /**
+   * ClassGroup delete
+   */
+  export type ClassGroupDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter which ClassGroup to delete.
+     */
+    where: ClassGroupWhereUniqueInput
+  }
+
+  /**
+   * ClassGroup deleteMany
+   */
+  export type ClassGroupDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClassGroups to delete
+     */
+    where?: ClassGroupWhereInput
+    /**
+     * Limit how many ClassGroups to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClassGroup without action
+   */
+  export type ClassGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroup
+     */
+    select?: ClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroup
+     */
+    omit?: ClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7949,6 +9179,20 @@ export namespace Prisma {
   };
 
   export type CurriculumSubjectScalarFieldEnum = (typeof CurriculumSubjectScalarFieldEnum)[keyof typeof CurriculumSubjectScalarFieldEnum]
+
+
+  export const ClassGroupScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    shift: 'shift',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    curriculumId: 'curriculumId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ClassGroupScalarFieldEnum = (typeof ClassGroupScalarFieldEnum)[keyof typeof ClassGroupScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8234,6 +9478,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Curriculum"> | Date | string
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
     subjects?: CurriculumSubjectListRelationFilter
+    classGroups?: ClassGroupListRelationFilter
   }
 
   export type CurriculumOrderByWithRelationInput = {
@@ -8245,6 +9490,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     course?: CourseOrderByWithRelationInput
     subjects?: CurriculumSubjectOrderByRelationAggregateInput
+    classGroups?: ClassGroupOrderByRelationAggregateInput
   }
 
   export type CurriculumWhereUniqueInput = Prisma.AtLeast<{
@@ -8259,6 +9505,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Curriculum"> | Date | string
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
     subjects?: CurriculumSubjectListRelationFilter
+    classGroups?: ClassGroupListRelationFilter
   }, "id">
 
   export type CurriculumOrderByWithAggregationInput = {
@@ -8396,6 +9643,76 @@ export namespace Prisma {
     curriculumId?: StringWithAggregatesFilter<"CurriculumSubject"> | string
     subjectId?: StringWithAggregatesFilter<"CurriculumSubject"> | string
     module?: IntWithAggregatesFilter<"CurriculumSubject"> | number
+  }
+
+  export type ClassGroupWhereInput = {
+    AND?: ClassGroupWhereInput | ClassGroupWhereInput[]
+    OR?: ClassGroupWhereInput[]
+    NOT?: ClassGroupWhereInput | ClassGroupWhereInput[]
+    id?: StringFilter<"ClassGroup"> | string
+    code?: StringFilter<"ClassGroup"> | string
+    shift?: StringFilter<"ClassGroup"> | string
+    startDate?: DateTimeFilter<"ClassGroup"> | Date | string
+    endDate?: DateTimeNullableFilter<"ClassGroup"> | Date | string | null
+    curriculumId?: StringFilter<"ClassGroup"> | string
+    createdAt?: DateTimeFilter<"ClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroup"> | Date | string
+    curriculum?: XOR<CurriculumScalarRelationFilter, CurriculumWhereInput>
+  }
+
+  export type ClassGroupOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    shift?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    curriculumId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    curriculum?: CurriculumOrderByWithRelationInput
+  }
+
+  export type ClassGroupWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    AND?: ClassGroupWhereInput | ClassGroupWhereInput[]
+    OR?: ClassGroupWhereInput[]
+    NOT?: ClassGroupWhereInput | ClassGroupWhereInput[]
+    shift?: StringFilter<"ClassGroup"> | string
+    startDate?: DateTimeFilter<"ClassGroup"> | Date | string
+    endDate?: DateTimeNullableFilter<"ClassGroup"> | Date | string | null
+    curriculumId?: StringFilter<"ClassGroup"> | string
+    createdAt?: DateTimeFilter<"ClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroup"> | Date | string
+    curriculum?: XOR<CurriculumScalarRelationFilter, CurriculumWhereInput>
+  }, "id" | "code">
+
+  export type ClassGroupOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    shift?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    curriculumId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ClassGroupCountOrderByAggregateInput
+    _max?: ClassGroupMaxOrderByAggregateInput
+    _min?: ClassGroupMinOrderByAggregateInput
+  }
+
+  export type ClassGroupScalarWhereWithAggregatesInput = {
+    AND?: ClassGroupScalarWhereWithAggregatesInput | ClassGroupScalarWhereWithAggregatesInput[]
+    OR?: ClassGroupScalarWhereWithAggregatesInput[]
+    NOT?: ClassGroupScalarWhereWithAggregatesInput | ClassGroupScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ClassGroup"> | string
+    code?: StringWithAggregatesFilter<"ClassGroup"> | string
+    shift?: StringWithAggregatesFilter<"ClassGroup"> | string
+    startDate?: DateTimeWithAggregatesFilter<"ClassGroup"> | Date | string
+    endDate?: DateTimeNullableWithAggregatesFilter<"ClassGroup"> | Date | string | null
+    curriculumId?: StringWithAggregatesFilter<"ClassGroup"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ClassGroup"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ClassGroup"> | Date | string
   }
 
   export type ProfessorCreateInput = {
@@ -8599,6 +9916,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     course: CourseCreateNestedOneWithoutCurriculumsInput
     subjects?: CurriculumSubjectCreateNestedManyWithoutCurriculumInput
+    classGroups?: ClassGroupCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumUncheckedCreateInput = {
@@ -8609,6 +9927,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subjects?: CurriculumSubjectUncheckedCreateNestedManyWithoutCurriculumInput
+    classGroups?: ClassGroupUncheckedCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumUpdateInput = {
@@ -8619,6 +9938,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     course?: CourseUpdateOneRequiredWithoutCurriculumsNestedInput
     subjects?: CurriculumSubjectUpdateManyWithoutCurriculumNestedInput
+    classGroups?: ClassGroupUpdateManyWithoutCurriculumNestedInput
   }
 
   export type CurriculumUncheckedUpdateInput = {
@@ -8629,6 +9949,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subjects?: CurriculumSubjectUncheckedUpdateManyWithoutCurriculumNestedInput
+    classGroups?: ClassGroupUncheckedUpdateManyWithoutCurriculumNestedInput
   }
 
   export type CurriculumCreateManyInput = {
@@ -8762,6 +10083,82 @@ export namespace Prisma {
     curriculumId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ClassGroupCreateInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    curriculum: CurriculumCreateNestedOneWithoutClassGroupsInput
+  }
+
+  export type ClassGroupUncheckedCreateInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    curriculumId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    curriculum?: CurriculumUpdateOneRequiredWithoutClassGroupsNestedInput
+  }
+
+  export type ClassGroupUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    curriculumId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupCreateManyInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    curriculumId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    curriculumId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -9002,7 +10399,17 @@ export namespace Prisma {
     none?: CurriculumSubjectWhereInput
   }
 
+  export type ClassGroupListRelationFilter = {
+    every?: ClassGroupWhereInput
+    some?: ClassGroupWhereInput
+    none?: ClassGroupWhereInput
+  }
+
   export type CurriculumSubjectOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ClassGroupOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -9117,6 +10524,64 @@ export namespace Prisma {
     module?: SortOrder
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type ClassGroupCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    shift?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    curriculumId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClassGroupMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    shift?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    curriculumId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClassGroupMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    shift?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    curriculumId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -9192,11 +10657,25 @@ export namespace Prisma {
     connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
   }
 
+  export type ClassGroupCreateNestedManyWithoutCurriculumInput = {
+    create?: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput> | ClassGroupCreateWithoutCurriculumInput[] | ClassGroupUncheckedCreateWithoutCurriculumInput[]
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutCurriculumInput | ClassGroupCreateOrConnectWithoutCurriculumInput[]
+    createMany?: ClassGroupCreateManyCurriculumInputEnvelope
+    connect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+  }
+
   export type CurriculumSubjectUncheckedCreateNestedManyWithoutCurriculumInput = {
     create?: XOR<CurriculumSubjectCreateWithoutCurriculumInput, CurriculumSubjectUncheckedCreateWithoutCurriculumInput> | CurriculumSubjectCreateWithoutCurriculumInput[] | CurriculumSubjectUncheckedCreateWithoutCurriculumInput[]
     connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutCurriculumInput | CurriculumSubjectCreateOrConnectWithoutCurriculumInput[]
     createMany?: CurriculumSubjectCreateManyCurriculumInputEnvelope
     connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+  }
+
+  export type ClassGroupUncheckedCreateNestedManyWithoutCurriculumInput = {
+    create?: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput> | ClassGroupCreateWithoutCurriculumInput[] | ClassGroupUncheckedCreateWithoutCurriculumInput[]
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutCurriculumInput | ClassGroupCreateOrConnectWithoutCurriculumInput[]
+    createMany?: ClassGroupCreateManyCurriculumInputEnvelope
+    connect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -9225,6 +10704,20 @@ export namespace Prisma {
     deleteMany?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
   }
 
+  export type ClassGroupUpdateManyWithoutCurriculumNestedInput = {
+    create?: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput> | ClassGroupCreateWithoutCurriculumInput[] | ClassGroupUncheckedCreateWithoutCurriculumInput[]
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutCurriculumInput | ClassGroupCreateOrConnectWithoutCurriculumInput[]
+    upsert?: ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput | ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput[]
+    createMany?: ClassGroupCreateManyCurriculumInputEnvelope
+    set?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    disconnect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    delete?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    connect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    update?: ClassGroupUpdateWithWhereUniqueWithoutCurriculumInput | ClassGroupUpdateWithWhereUniqueWithoutCurriculumInput[]
+    updateMany?: ClassGroupUpdateManyWithWhereWithoutCurriculumInput | ClassGroupUpdateManyWithWhereWithoutCurriculumInput[]
+    deleteMany?: ClassGroupScalarWhereInput | ClassGroupScalarWhereInput[]
+  }
+
   export type CurriculumSubjectUncheckedUpdateManyWithoutCurriculumNestedInput = {
     create?: XOR<CurriculumSubjectCreateWithoutCurriculumInput, CurriculumSubjectUncheckedCreateWithoutCurriculumInput> | CurriculumSubjectCreateWithoutCurriculumInput[] | CurriculumSubjectUncheckedCreateWithoutCurriculumInput[]
     connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutCurriculumInput | CurriculumSubjectCreateOrConnectWithoutCurriculumInput[]
@@ -9237,6 +10730,20 @@ export namespace Prisma {
     update?: CurriculumSubjectUpdateWithWhereUniqueWithoutCurriculumInput | CurriculumSubjectUpdateWithWhereUniqueWithoutCurriculumInput[]
     updateMany?: CurriculumSubjectUpdateManyWithWhereWithoutCurriculumInput | CurriculumSubjectUpdateManyWithWhereWithoutCurriculumInput[]
     deleteMany?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
+  }
+
+  export type ClassGroupUncheckedUpdateManyWithoutCurriculumNestedInput = {
+    create?: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput> | ClassGroupCreateWithoutCurriculumInput[] | ClassGroupUncheckedCreateWithoutCurriculumInput[]
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutCurriculumInput | ClassGroupCreateOrConnectWithoutCurriculumInput[]
+    upsert?: ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput | ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput[]
+    createMany?: ClassGroupCreateManyCurriculumInputEnvelope
+    set?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    disconnect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    delete?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    connect?: ClassGroupWhereUniqueInput | ClassGroupWhereUniqueInput[]
+    update?: ClassGroupUpdateWithWhereUniqueWithoutCurriculumInput | ClassGroupUpdateWithWhereUniqueWithoutCurriculumInput[]
+    updateMany?: ClassGroupUpdateManyWithWhereWithoutCurriculumInput | ClassGroupUpdateManyWithWhereWithoutCurriculumInput[]
+    deleteMany?: ClassGroupScalarWhereInput | ClassGroupScalarWhereInput[]
   }
 
   export type CurriculumSubjectCreateNestedManyWithoutSubjectInput = {
@@ -9307,6 +10814,24 @@ export namespace Prisma {
     upsert?: SubjectUpsertWithoutCurriculumsInput
     connect?: SubjectWhereUniqueInput
     update?: XOR<XOR<SubjectUpdateToOneWithWhereWithoutCurriculumsInput, SubjectUpdateWithoutCurriculumsInput>, SubjectUncheckedUpdateWithoutCurriculumsInput>
+  }
+
+  export type CurriculumCreateNestedOneWithoutClassGroupsInput = {
+    create?: XOR<CurriculumCreateWithoutClassGroupsInput, CurriculumUncheckedCreateWithoutClassGroupsInput>
+    connectOrCreate?: CurriculumCreateOrConnectWithoutClassGroupsInput
+    connect?: CurriculumWhereUniqueInput
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type CurriculumUpdateOneRequiredWithoutClassGroupsNestedInput = {
+    create?: XOR<CurriculumCreateWithoutClassGroupsInput, CurriculumUncheckedCreateWithoutClassGroupsInput>
+    connectOrCreate?: CurriculumCreateOrConnectWithoutClassGroupsInput
+    upsert?: CurriculumUpsertWithoutClassGroupsInput
+    connect?: CurriculumWhereUniqueInput
+    update?: XOR<XOR<CurriculumUpdateToOneWithWhereWithoutClassGroupsInput, CurriculumUpdateWithoutClassGroupsInput>, CurriculumUncheckedUpdateWithoutClassGroupsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -9458,6 +10983,31 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type CurriculumCreateWithoutCourseInput = {
     id?: string
     name: string
@@ -9465,6 +11015,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subjects?: CurriculumSubjectCreateNestedManyWithoutCurriculumInput
+    classGroups?: ClassGroupCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumUncheckedCreateWithoutCourseInput = {
@@ -9474,6 +11025,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subjects?: CurriculumSubjectUncheckedCreateNestedManyWithoutCurriculumInput
+    classGroups?: ClassGroupUncheckedCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumCreateOrConnectWithoutCourseInput = {
@@ -9555,6 +11107,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ClassGroupCreateWithoutCurriculumInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupUncheckedCreateWithoutCurriculumInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupCreateOrConnectWithoutCurriculumInput = {
+    where: ClassGroupWhereUniqueInput
+    create: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput>
+  }
+
+  export type ClassGroupCreateManyCurriculumInputEnvelope = {
+    data: ClassGroupCreateManyCurriculumInput | ClassGroupCreateManyCurriculumInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CourseUpsertWithoutCurriculumsInput = {
     update: XOR<CourseUpdateWithoutCurriculumsInput, CourseUncheckedUpdateWithoutCurriculumsInput>
     create: XOR<CourseCreateWithoutCurriculumsInput, CourseUncheckedCreateWithoutCurriculumsInput>
@@ -9607,6 +11189,36 @@ export namespace Prisma {
     module?: IntFilter<"CurriculumSubject"> | number
   }
 
+  export type ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput = {
+    where: ClassGroupWhereUniqueInput
+    update: XOR<ClassGroupUpdateWithoutCurriculumInput, ClassGroupUncheckedUpdateWithoutCurriculumInput>
+    create: XOR<ClassGroupCreateWithoutCurriculumInput, ClassGroupUncheckedCreateWithoutCurriculumInput>
+  }
+
+  export type ClassGroupUpdateWithWhereUniqueWithoutCurriculumInput = {
+    where: ClassGroupWhereUniqueInput
+    data: XOR<ClassGroupUpdateWithoutCurriculumInput, ClassGroupUncheckedUpdateWithoutCurriculumInput>
+  }
+
+  export type ClassGroupUpdateManyWithWhereWithoutCurriculumInput = {
+    where: ClassGroupScalarWhereInput
+    data: XOR<ClassGroupUpdateManyMutationInput, ClassGroupUncheckedUpdateManyWithoutCurriculumInput>
+  }
+
+  export type ClassGroupScalarWhereInput = {
+    AND?: ClassGroupScalarWhereInput | ClassGroupScalarWhereInput[]
+    OR?: ClassGroupScalarWhereInput[]
+    NOT?: ClassGroupScalarWhereInput | ClassGroupScalarWhereInput[]
+    id?: StringFilter<"ClassGroup"> | string
+    code?: StringFilter<"ClassGroup"> | string
+    shift?: StringFilter<"ClassGroup"> | string
+    startDate?: DateTimeFilter<"ClassGroup"> | Date | string
+    endDate?: DateTimeNullableFilter<"ClassGroup"> | Date | string | null
+    curriculumId?: StringFilter<"ClassGroup"> | string
+    createdAt?: DateTimeFilter<"ClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroup"> | Date | string
+  }
+
   export type CurriculumSubjectCreateWithoutSubjectInput = {
     module: number
     curriculum: CurriculumCreateNestedOneWithoutSubjectsInput
@@ -9650,6 +11262,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     course: CourseCreateNestedOneWithoutCurriculumsInput
+    classGroups?: ClassGroupCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumUncheckedCreateWithoutSubjectsInput = {
@@ -9659,6 +11272,7 @@ export namespace Prisma {
     courseId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    classGroups?: ClassGroupUncheckedCreateNestedManyWithoutCurriculumInput
   }
 
   export type CurriculumCreateOrConnectWithoutSubjectsInput = {
@@ -9707,6 +11321,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     course?: CourseUpdateOneRequiredWithoutCurriculumsNestedInput
+    classGroups?: ClassGroupUpdateManyWithoutCurriculumNestedInput
   }
 
   export type CurriculumUncheckedUpdateWithoutSubjectsInput = {
@@ -9716,6 +11331,7 @@ export namespace Prisma {
     courseId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroups?: ClassGroupUncheckedUpdateManyWithoutCurriculumNestedInput
   }
 
   export type SubjectUpsertWithoutCurriculumsInput = {
@@ -9747,6 +11363,62 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CurriculumCreateWithoutClassGroupsInput = {
+    id?: string
+    name: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    course: CourseCreateNestedOneWithoutCurriculumsInput
+    subjects?: CurriculumSubjectCreateNestedManyWithoutCurriculumInput
+  }
+
+  export type CurriculumUncheckedCreateWithoutClassGroupsInput = {
+    id?: string
+    name: string
+    active?: boolean
+    courseId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subjects?: CurriculumSubjectUncheckedCreateNestedManyWithoutCurriculumInput
+  }
+
+  export type CurriculumCreateOrConnectWithoutClassGroupsInput = {
+    where: CurriculumWhereUniqueInput
+    create: XOR<CurriculumCreateWithoutClassGroupsInput, CurriculumUncheckedCreateWithoutClassGroupsInput>
+  }
+
+  export type CurriculumUpsertWithoutClassGroupsInput = {
+    update: XOR<CurriculumUpdateWithoutClassGroupsInput, CurriculumUncheckedUpdateWithoutClassGroupsInput>
+    create: XOR<CurriculumCreateWithoutClassGroupsInput, CurriculumUncheckedCreateWithoutClassGroupsInput>
+    where?: CurriculumWhereInput
+  }
+
+  export type CurriculumUpdateToOneWithWhereWithoutClassGroupsInput = {
+    where?: CurriculumWhereInput
+    data: XOR<CurriculumUpdateWithoutClassGroupsInput, CurriculumUncheckedUpdateWithoutClassGroupsInput>
+  }
+
+  export type CurriculumUpdateWithoutClassGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    course?: CourseUpdateOneRequiredWithoutCurriculumsNestedInput
+    subjects?: CurriculumSubjectUpdateManyWithoutCurriculumNestedInput
+  }
+
+  export type CurriculumUncheckedUpdateWithoutClassGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    courseId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subjects?: CurriculumSubjectUncheckedUpdateManyWithoutCurriculumNestedInput
+  }
+
   export type CurriculumCreateManyCourseInput = {
     id?: string
     name: string
@@ -9762,6 +11434,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subjects?: CurriculumSubjectUpdateManyWithoutCurriculumNestedInput
+    classGroups?: ClassGroupUpdateManyWithoutCurriculumNestedInput
   }
 
   export type CurriculumUncheckedUpdateWithoutCourseInput = {
@@ -9771,6 +11444,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subjects?: CurriculumSubjectUncheckedUpdateManyWithoutCurriculumNestedInput
+    classGroups?: ClassGroupUncheckedUpdateManyWithoutCurriculumNestedInput
   }
 
   export type CurriculumUncheckedUpdateManyWithoutCourseInput = {
@@ -9786,6 +11460,16 @@ export namespace Prisma {
     module: number
   }
 
+  export type ClassGroupCreateManyCurriculumInput = {
+    id?: string
+    code: string
+    shift: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type CurriculumSubjectUpdateWithoutCurriculumInput = {
     module?: IntFieldUpdateOperationsInput | number
     subject?: SubjectUpdateOneRequiredWithoutCurriculumsNestedInput
@@ -9799,6 +11483,36 @@ export namespace Prisma {
   export type CurriculumSubjectUncheckedUpdateManyWithoutCurriculumInput = {
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ClassGroupUpdateWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupUncheckedUpdateWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupUncheckedUpdateManyWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shift?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CurriculumSubjectCreateManySubjectInput = {
