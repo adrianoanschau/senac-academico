@@ -1,15 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '../services/supabase';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      navigate('/');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Falha ao fazer login. Verifique suas credenciais.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,6 +64,12 @@ export const Login: React.FC = () => {
           
           <p className="text-slate-400 mb-10 text-center font-medium text-sm">Bem-vindo(a) de volta! Insira suas credenciais.</p>
           
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2" htmlFor="email">
@@ -57,9 +83,10 @@ export const Login: React.FC = () => {
                   id="email"
                   type="email"
                   required
+                  disabled={isLoading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
                   placeholder="usuario@senac.br"
                 />
               </div>
@@ -82,9 +109,10 @@ export const Login: React.FC = () => {
                   id="password"
                   type="password"
                   required
+                  disabled={isLoading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
                   placeholder="••••••••"
                 />
               </div>
@@ -92,10 +120,17 @@ export const Login: React.FC = () => {
             
             <button
               type="submit"
-              className="w-full bg-[#f37021] hover:bg-[#d96017] text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-[0_4px_14px_rgb(243,112,33,0.3)] hover:shadow-[0_6px_20px_rgb(243,112,33,0.4)]"
+              disabled={isLoading}
+              className="w-full bg-[#f37021] hover:bg-[#d96017] disabled:bg-[#f37021]/70 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-[0_4px_14px_rgb(243,112,33,0.3)] hover:shadow-[0_6px_20px_rgb(243,112,33,0.4)]"
             >
-              Entrar
-              <ArrowRight size={18} />
+              {isLoading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <>
+                  Entrar
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
           
