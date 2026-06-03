@@ -23,3 +23,14 @@ model Professor {
 
   @@map("professors")
 }
+
+model Room {
+  id        String   @id @default(uuid())
+  name      String   @unique // "Sala 201", "Lab de Informática 3"
+  capacity  Int // Capacidade máxima de alunos
+  type      String // "Classroom", "Laboratory", "Auditorium"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("rooms")
+}

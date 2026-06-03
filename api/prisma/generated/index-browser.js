@@ -130,6 +130,15 @@ exports.Prisma.ProfessorScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.RoomScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  capacity: 'capacity',
+  type: 'type',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -147,7 +156,8 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
-  Professor: 'Professor'
+  Professor: 'Professor',
+  Room: 'Room'
 };
 
 /**

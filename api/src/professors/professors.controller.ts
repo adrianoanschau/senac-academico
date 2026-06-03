@@ -34,15 +34,17 @@ export class ProfessorsController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProfessorDto: UpdateProfessorDto,
   ) {
-    return this.professorsService.update(id, updateProfessorDto);
+    const data = await this.professorsService.update(id, updateProfessorDto);
+    return { data };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.professorsService.remove(id);
+  async remove(@Param('id') id: string) {
+    const data = await this.professorsService.remove(id);
+    return { data };
   }
 }
