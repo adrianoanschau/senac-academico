@@ -1,6 +1,14 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { passportJwtSecret } from 'jwks-rsa';
+
+export interface JwtPayload {
+  sub: string;
+  email: string;
+  session_id: string;
+  role: string;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -8,12 +16,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'secretKey', // Em produção, use variável de ambiente
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: process.env.SUPABASE_JWKS_URL!,
+      }),
+      algorithms: ['ES256'],
     });
   }
 
-  async validate(payload: any) {
-    // O retorno deste método será injetado no Request (req.user)
-    return { userId: payload.sub, username: payload.username, roles: payload.roles };
+  validate(payload: JwtPayload) {
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      session: payload.session_id,
+      role: payload.role,
+    };
   }
 }
