@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-  IsDateString,
+  IsDate,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -16,14 +16,14 @@ export class CreateClassGroupDto {
   @IsNotEmpty()
   shift: string;
 
-  @IsDateString()
-  @IsNotEmpty()
   @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
   startDate: Date;
 
-  @IsDateString()
-  @IsOptional()
   @Type(() => Date)
+  @IsDate()
+  @IsOptional()
   endDate?: Date;
 
   @IsUUID()
