@@ -9,7 +9,7 @@ import { Rooms } from '../pages/Rooms';
 import { Feriados } from '../pages/Feriados';
 import { Subjects } from '../pages/Subjects';
 import { Turmas } from '../pages/Turmas';
-import { Curriculum } from '../pages/Curriculum';
+import { Curriculums } from '../pages/Curriculums';
 import { Aulas } from '../pages/Aulas';
 import { Courses } from '../pages/Courses';
 
@@ -24,7 +24,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="cursos" element={<Courses />} />
           <Route path="turmas" element={<Turmas />} />
           <Route path="aulas" element={<Aulas />} />
-          <Route path="matriz-curricular" element={<Curriculum />} />
+          <Route path="matriz-curricular" element={<Curriculums />} />
           <Route path="matriculas" element={<Placeholder />} />
           <Route path="perfil" element={<Placeholder />} />
           <Route path="professores" element={<Professors />} />
