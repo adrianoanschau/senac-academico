@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -8,27 +17,48 @@ export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
   @Post()
-  create(@Body() createScheduleDto: CreateScheduleDto) {
-    return this.schedulesService.create(createScheduleDto);
+  async create(@Body() createScheduleDto: CreateScheduleDto) {
+    const data = await this.schedulesService.create(createScheduleDto);
+    return { data };
   }
 
   @Get()
-  findAll() {
-    return this.schedulesService.findAll();
+  async findAll(
+    @Query('start') start?: string,
+    @Query('end') end?: string,
+    @Query('classGroupId') classGroupId?: string,
+    @Query('professorId') professorId?: string,
+    @Query('roomId') roomId?: string,
+  ) {
+    const data = await this.schedulesService.findAll(
+      start,
+      end,
+      classGroupId,
+      professorId,
+      roomId,
+    );
+
+    return { data };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.schedulesService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const schedule = await this.schedulesService.findOne(id);
+    return { schedule };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateScheduleDto: UpdateScheduleDto) {
-    return this.schedulesService.update(+id, updateScheduleDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateScheduleDto: UpdateScheduleDto,
+  ) {
+    const schedule = await this.schedulesService.update(id, updateScheduleDto);
+    return { schedule };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.schedulesService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.schedulesService.remove(id);
+    return { message: 'Schedule removed successfully' };
   }
 }

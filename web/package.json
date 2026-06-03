@@ -1,7 +1,7 @@
 {
   "name": "web",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1-dev",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -10,6 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/react": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
     "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.17.0",
     "lucide-react": "^1.17.0",
