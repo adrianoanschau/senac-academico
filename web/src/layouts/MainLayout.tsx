@@ -34,6 +34,17 @@ export const MainLayout: React.FC = () => {
             <LayoutGrid size={24} />
           </NavLink>
           <NavLink
+            to="/cursos"
+            title="Cursos"
+            className={({ isActive }) =>
+              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
+                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
+              }`
+            }
+          >
+            <GraduationCap size={24} />
+          </NavLink>
+          <NavLink
             to="/professores"
             title="Professores"
             className={({ isActive }) =>
@@ -123,17 +134,6 @@ export const MainLayout: React.FC = () => {
             }
           >
             <Folder size={24} />
-          </NavLink>
-          <NavLink
-            to="/cursos"
-            title="Cursos"
-            className={({ isActive }) =>
-              `flex justify-center items-center h-12 w-12 rounded-2xl mx-auto transition-colors ${
-                isActive ? 'bg-blue-50 text-[#004a8d]' : 'text-slate-300 hover:text-slate-500'
-              }`
-            }
-          >
-            <GraduationCap size={24} />
           </NavLink>
           <NavLink
             to="/perfil"

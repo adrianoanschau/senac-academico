@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, Network, X } from 'lucide-react';
 
-export const MatrizCurricular: React.FC = () => {
+export const Curriculum: React.FC = () => {
   const [vinculos] = useState([
     { id: 1, turma: 'TIN24-1M', disciplina: 'Lógica de Programação', professor: 'Ana Paula Silva' },
     { id: 2, turma: 'TIN24-1M', disciplina: 'Banco de Dados', professor: 'Carlos Eduardo Souza' },

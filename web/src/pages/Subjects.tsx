@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, BookOpen, X } from 'lucide-react';
 
-export const Disciplinas: React.FC = () => {
+export const Subjects: React.FC = () => {
   const [disciplinas] = useState([
     { id: 1, nome: 'Lógica de Programação', ch: 60, eixo: 'Tecnologia' },
     { id: 2, nome: 'Banco de Dados', ch: 80, eixo: 'Tecnologia' },
