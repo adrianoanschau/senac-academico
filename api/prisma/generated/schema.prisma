@@ -123,3 +123,21 @@ model Schedule {
 
   @@map("schedules")
 }
+
+enum OverrideType {
+  BLOCK
+  EXTRA_DAY
+}
+
+model ScheduleOverride {
+  id        String       @id @default(uuid())
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  type      OverrideType @default(BLOCK)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("schedule_overrides")
+}

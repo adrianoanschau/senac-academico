@@ -194,6 +194,16 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ScheduleOverrideScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  type: 'type',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -208,7 +218,10 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.OverrideType = exports.$Enums.OverrideType = {
+  BLOCK: 'BLOCK',
+  EXTRA_DAY: 'EXTRA_DAY'
+};
 
 exports.Prisma.ModelName = {
   Professor: 'Professor',
@@ -218,7 +231,8 @@ exports.Prisma.ModelName = {
   Subject: 'Subject',
   CurriculumSubject: 'CurriculumSubject',
   ClassGroup: 'ClassGroup',
-  Schedule: 'Schedule'
+  Schedule: 'Schedule',
+  ScheduleOverride: 'ScheduleOverride'
 };
 
 /**
