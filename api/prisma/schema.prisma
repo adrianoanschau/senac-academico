@@ -11,3 +11,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Professor {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  degree     String? // Specialist, Master, PhD
+  department String? // Software Engineering, Mathematics
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("professors")
+}

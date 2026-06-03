@@ -13,7 +13,11 @@ import $Result = runtime.Types.Result
 export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 
-
+/**
+ * Model Professor
+ * 
+ */
+export type Professor = $Result.DefaultSelection<Prisma.$ProfessorPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -24,8 +28,8 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Professors
+ * const professors = await prisma.professor.findMany()
  * ```
  *
  *
@@ -47,8 +51,8 @@ export class PrismaClient<
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Users
-   * const users = await prisma.user.findMany()
+   * // Fetch zero or more Professors
+   * const professors = await prisma.professor.findMany()
    * ```
    *
    *
@@ -136,7 +140,15 @@ export class PrismaClient<
     extArgs: ExtArgs
   }>>
 
-    
+      /**
+   * `prisma.professor`: Exposes CRUD operations for the **Professor** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Professors
+    * const professors = await prisma.professor.findMany()
+    * ```
+    */
+  get professor(): Prisma.ProfessorDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -571,7 +583,7 @@ export namespace Prisma {
 
 
   export const ModelName: {
-
+    Professor: 'Professor'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -587,10 +599,85 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: never
+      modelProps: "professor"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
-    model: {}
+    model: {
+      Professor: {
+        payload: Prisma.$ProfessorPayload<ExtArgs>
+        fields: Prisma.ProfessorFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProfessorFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProfessorFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          findFirst: {
+            args: Prisma.ProfessorFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProfessorFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          findMany: {
+            args: Prisma.ProfessorFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>[]
+          }
+          create: {
+            args: Prisma.ProfessorCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          createMany: {
+            args: Prisma.ProfessorCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProfessorCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>[]
+          }
+          delete: {
+            args: Prisma.ProfessorDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          update: {
+            args: Prisma.ProfessorUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProfessorDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProfessorUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProfessorUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProfessorUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfessorPayload>
+          }
+          aggregate: {
+            args: Prisma.ProfessorAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProfessor>
+          }
+          groupBy: {
+            args: Prisma.ProfessorGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProfessorGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProfessorCountArgs<ExtArgs>
+            result: $Utils.Optional<ProfessorCountAggregateOutputType> | number
+          }
+        }
+      }
+    }
   } & {
     other: {
       payload: any
@@ -697,7 +784,9 @@ export namespace Prisma {
      */
     comments?: runtime.SqlCommenterPlugin[]
   }
-  export type GlobalOmitConfig = {}
+  export type GlobalOmitConfig = {
+    professor?: ProfessorOmit
+  }
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -777,6 +866,1031 @@ export namespace Prisma {
    * Models
    */
 
+  /**
+   * Model Professor
+   */
+
+  export type AggregateProfessor = {
+    _count: ProfessorCountAggregateOutputType | null
+    _min: ProfessorMinAggregateOutputType | null
+    _max: ProfessorMaxAggregateOutputType | null
+  }
+
+  export type ProfessorMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    email: string | null
+    degree: string | null
+    department: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfessorMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    email: string | null
+    degree: string | null
+    department: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfessorCountAggregateOutputType = {
+    id: number
+    name: number
+    email: number
+    degree: number
+    department: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ProfessorMinAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    degree?: true
+    department?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfessorMaxAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    degree?: true
+    department?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfessorCountAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    degree?: true
+    department?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ProfessorAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Professor to aggregate.
+     */
+    where?: ProfessorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Professors to fetch.
+     */
+    orderBy?: ProfessorOrderByWithRelationInput | ProfessorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProfessorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Professors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Professors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Professors
+    **/
+    _count?: true | ProfessorCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProfessorMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProfessorMaxAggregateInputType
+  }
+
+  export type GetProfessorAggregateType<T extends ProfessorAggregateArgs> = {
+        [P in keyof T & keyof AggregateProfessor]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProfessor[P]>
+      : GetScalarType<T[P], AggregateProfessor[P]>
+  }
+
+
+
+
+  export type ProfessorGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfessorWhereInput
+    orderBy?: ProfessorOrderByWithAggregationInput | ProfessorOrderByWithAggregationInput[]
+    by: ProfessorScalarFieldEnum[] | ProfessorScalarFieldEnum
+    having?: ProfessorScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProfessorCountAggregateInputType | true
+    _min?: ProfessorMinAggregateInputType
+    _max?: ProfessorMaxAggregateInputType
+  }
+
+  export type ProfessorGroupByOutputType = {
+    id: string
+    name: string
+    email: string
+    degree: string | null
+    department: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ProfessorCountAggregateOutputType | null
+    _min: ProfessorMinAggregateOutputType | null
+    _max: ProfessorMaxAggregateOutputType | null
+  }
+
+  type GetProfessorGroupByPayload<T extends ProfessorGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProfessorGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProfessorGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProfessorGroupByOutputType[P]>
+            : GetScalarType<T[P], ProfessorGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProfessorSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    degree?: boolean
+    department?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["professor"]>
+
+  export type ProfessorSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    degree?: boolean
+    department?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["professor"]>
+
+  export type ProfessorSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    degree?: boolean
+    department?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["professor"]>
+
+  export type ProfessorSelectScalar = {
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    degree?: boolean
+    department?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ProfessorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "degree" | "department" | "createdAt" | "updatedAt", ExtArgs["result"]["professor"]>
+
+  export type $ProfessorPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Professor"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      email: string
+      degree: string | null
+      department: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["professor"]>
+    composites: {}
+  }
+
+  type ProfessorGetPayload<S extends boolean | null | undefined | ProfessorDefaultArgs> = $Result.GetResult<Prisma.$ProfessorPayload, S>
+
+  type ProfessorCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProfessorFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProfessorCountAggregateInputType | true
+    }
+
+  export interface ProfessorDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Professor'], meta: { name: 'Professor' } }
+    /**
+     * Find zero or one Professor that matches the filter.
+     * @param {ProfessorFindUniqueArgs} args - Arguments to find a Professor
+     * @example
+     * // Get one Professor
+     * const professor = await prisma.professor.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProfessorFindUniqueArgs>(args: SelectSubset<T, ProfessorFindUniqueArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Professor that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProfessorFindUniqueOrThrowArgs} args - Arguments to find a Professor
+     * @example
+     * // Get one Professor
+     * const professor = await prisma.professor.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProfessorFindUniqueOrThrowArgs>(args: SelectSubset<T, ProfessorFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Professor that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorFindFirstArgs} args - Arguments to find a Professor
+     * @example
+     * // Get one Professor
+     * const professor = await prisma.professor.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProfessorFindFirstArgs>(args?: SelectSubset<T, ProfessorFindFirstArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Professor that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorFindFirstOrThrowArgs} args - Arguments to find a Professor
+     * @example
+     * // Get one Professor
+     * const professor = await prisma.professor.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProfessorFindFirstOrThrowArgs>(args?: SelectSubset<T, ProfessorFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Professors that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Professors
+     * const professors = await prisma.professor.findMany()
+     * 
+     * // Get first 10 Professors
+     * const professors = await prisma.professor.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const professorWithIdOnly = await prisma.professor.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProfessorFindManyArgs>(args?: SelectSubset<T, ProfessorFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Professor.
+     * @param {ProfessorCreateArgs} args - Arguments to create a Professor.
+     * @example
+     * // Create one Professor
+     * const Professor = await prisma.professor.create({
+     *   data: {
+     *     // ... data to create a Professor
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProfessorCreateArgs>(args: SelectSubset<T, ProfessorCreateArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Professors.
+     * @param {ProfessorCreateManyArgs} args - Arguments to create many Professors.
+     * @example
+     * // Create many Professors
+     * const professor = await prisma.professor.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProfessorCreateManyArgs>(args?: SelectSubset<T, ProfessorCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Professors and returns the data saved in the database.
+     * @param {ProfessorCreateManyAndReturnArgs} args - Arguments to create many Professors.
+     * @example
+     * // Create many Professors
+     * const professor = await prisma.professor.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Professors and only return the `id`
+     * const professorWithIdOnly = await prisma.professor.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProfessorCreateManyAndReturnArgs>(args?: SelectSubset<T, ProfessorCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Professor.
+     * @param {ProfessorDeleteArgs} args - Arguments to delete one Professor.
+     * @example
+     * // Delete one Professor
+     * const Professor = await prisma.professor.delete({
+     *   where: {
+     *     // ... filter to delete one Professor
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProfessorDeleteArgs>(args: SelectSubset<T, ProfessorDeleteArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Professor.
+     * @param {ProfessorUpdateArgs} args - Arguments to update one Professor.
+     * @example
+     * // Update one Professor
+     * const professor = await prisma.professor.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProfessorUpdateArgs>(args: SelectSubset<T, ProfessorUpdateArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Professors.
+     * @param {ProfessorDeleteManyArgs} args - Arguments to filter Professors to delete.
+     * @example
+     * // Delete a few Professors
+     * const { count } = await prisma.professor.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProfessorDeleteManyArgs>(args?: SelectSubset<T, ProfessorDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Professors.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Professors
+     * const professor = await prisma.professor.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProfessorUpdateManyArgs>(args: SelectSubset<T, ProfessorUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Professors and returns the data updated in the database.
+     * @param {ProfessorUpdateManyAndReturnArgs} args - Arguments to update many Professors.
+     * @example
+     * // Update many Professors
+     * const professor = await prisma.professor.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Professors and only return the `id`
+     * const professorWithIdOnly = await prisma.professor.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProfessorUpdateManyAndReturnArgs>(args: SelectSubset<T, ProfessorUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Professor.
+     * @param {ProfessorUpsertArgs} args - Arguments to update or create a Professor.
+     * @example
+     * // Update or create a Professor
+     * const professor = await prisma.professor.upsert({
+     *   create: {
+     *     // ... data to create a Professor
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Professor we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProfessorUpsertArgs>(args: SelectSubset<T, ProfessorUpsertArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Professors.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorCountArgs} args - Arguments to filter Professors to count.
+     * @example
+     * // Count the number of Professors
+     * const count = await prisma.professor.count({
+     *   where: {
+     *     // ... the filter for the Professors we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProfessorCountArgs>(
+      args?: Subset<T, ProfessorCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProfessorCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Professor.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProfessorAggregateArgs>(args: Subset<T, ProfessorAggregateArgs>): Prisma.PrismaPromise<GetProfessorAggregateType<T>>
+
+    /**
+     * Group by Professor.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfessorGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProfessorGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProfessorGroupByArgs['orderBy'] }
+        : { orderBy?: ProfessorGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProfessorGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProfessorGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Professor model
+   */
+  readonly fields: ProfessorFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Professor.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProfessorClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Professor model
+   */
+  interface ProfessorFieldRefs {
+    readonly id: FieldRef<"Professor", 'String'>
+    readonly name: FieldRef<"Professor", 'String'>
+    readonly email: FieldRef<"Professor", 'String'>
+    readonly degree: FieldRef<"Professor", 'String'>
+    readonly department: FieldRef<"Professor", 'String'>
+    readonly createdAt: FieldRef<"Professor", 'DateTime'>
+    readonly updatedAt: FieldRef<"Professor", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Professor findUnique
+   */
+  export type ProfessorFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter, which Professor to fetch.
+     */
+    where: ProfessorWhereUniqueInput
+  }
+
+  /**
+   * Professor findUniqueOrThrow
+   */
+  export type ProfessorFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter, which Professor to fetch.
+     */
+    where: ProfessorWhereUniqueInput
+  }
+
+  /**
+   * Professor findFirst
+   */
+  export type ProfessorFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter, which Professor to fetch.
+     */
+    where?: ProfessorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Professors to fetch.
+     */
+    orderBy?: ProfessorOrderByWithRelationInput | ProfessorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Professors.
+     */
+    cursor?: ProfessorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Professors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Professors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Professors.
+     */
+    distinct?: ProfessorScalarFieldEnum | ProfessorScalarFieldEnum[]
+  }
+
+  /**
+   * Professor findFirstOrThrow
+   */
+  export type ProfessorFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter, which Professor to fetch.
+     */
+    where?: ProfessorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Professors to fetch.
+     */
+    orderBy?: ProfessorOrderByWithRelationInput | ProfessorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Professors.
+     */
+    cursor?: ProfessorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Professors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Professors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Professors.
+     */
+    distinct?: ProfessorScalarFieldEnum | ProfessorScalarFieldEnum[]
+  }
+
+  /**
+   * Professor findMany
+   */
+  export type ProfessorFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter, which Professors to fetch.
+     */
+    where?: ProfessorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Professors to fetch.
+     */
+    orderBy?: ProfessorOrderByWithRelationInput | ProfessorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Professors.
+     */
+    cursor?: ProfessorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Professors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Professors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Professors.
+     */
+    distinct?: ProfessorScalarFieldEnum | ProfessorScalarFieldEnum[]
+  }
+
+  /**
+   * Professor create
+   */
+  export type ProfessorCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Professor.
+     */
+    data: XOR<ProfessorCreateInput, ProfessorUncheckedCreateInput>
+  }
+
+  /**
+   * Professor createMany
+   */
+  export type ProfessorCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Professors.
+     */
+    data: ProfessorCreateManyInput | ProfessorCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Professor createManyAndReturn
+   */
+  export type ProfessorCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * The data used to create many Professors.
+     */
+    data: ProfessorCreateManyInput | ProfessorCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Professor update
+   */
+  export type ProfessorUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Professor.
+     */
+    data: XOR<ProfessorUpdateInput, ProfessorUncheckedUpdateInput>
+    /**
+     * Choose, which Professor to update.
+     */
+    where: ProfessorWhereUniqueInput
+  }
+
+  /**
+   * Professor updateMany
+   */
+  export type ProfessorUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Professors.
+     */
+    data: XOR<ProfessorUpdateManyMutationInput, ProfessorUncheckedUpdateManyInput>
+    /**
+     * Filter which Professors to update
+     */
+    where?: ProfessorWhereInput
+    /**
+     * Limit how many Professors to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Professor updateManyAndReturn
+   */
+  export type ProfessorUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * The data used to update Professors.
+     */
+    data: XOR<ProfessorUpdateManyMutationInput, ProfessorUncheckedUpdateManyInput>
+    /**
+     * Filter which Professors to update
+     */
+    where?: ProfessorWhereInput
+    /**
+     * Limit how many Professors to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Professor upsert
+   */
+  export type ProfessorUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Professor to update in case it exists.
+     */
+    where: ProfessorWhereUniqueInput
+    /**
+     * In case the Professor found by the `where` argument doesn't exist, create a new Professor with this data.
+     */
+    create: XOR<ProfessorCreateInput, ProfessorUncheckedCreateInput>
+    /**
+     * In case the Professor was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProfessorUpdateInput, ProfessorUncheckedUpdateInput>
+  }
+
+  /**
+   * Professor delete
+   */
+  export type ProfessorDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+    /**
+     * Filter which Professor to delete.
+     */
+    where: ProfessorWhereUniqueInput
+  }
+
+  /**
+   * Professor deleteMany
+   */
+  export type ProfessorDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Professors to delete
+     */
+    where?: ProfessorWhereInput
+    /**
+     * Limit how many Professors to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Professor without action
+   */
+  export type ProfessorDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Professor
+     */
+    select?: ProfessorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Professor
+     */
+    omit?: ProfessorOmit<ExtArgs> | null
+  }
+
 
   /**
    * Enums
@@ -792,11 +1906,471 @@ export namespace Prisma {
   export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+  export const ProfessorScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    email: 'email',
+    degree: 'degree',
+    department: 'department',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ProfessorScalarFieldEnum = (typeof ProfessorScalarFieldEnum)[keyof typeof ProfessorScalarFieldEnum]
+
+
+  export const SortOrder: {
+    asc: 'asc',
+    desc: 'desc'
+  };
+
+  export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  /**
+   * Field references
+   */
+
+
+  /**
+   * Reference to a field of type 'String'
+   */
+  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+  /**
+   * Reference to a field of type 'String[]'
+   */
+  export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
   /**
    * Deep Input Types
    */
 
-  undefined
+
+  export type ProfessorWhereInput = {
+    AND?: ProfessorWhereInput | ProfessorWhereInput[]
+    OR?: ProfessorWhereInput[]
+    NOT?: ProfessorWhereInput | ProfessorWhereInput[]
+    id?: StringFilter<"Professor"> | string
+    name?: StringFilter<"Professor"> | string
+    email?: StringFilter<"Professor"> | string
+    degree?: StringNullableFilter<"Professor"> | string | null
+    department?: StringNullableFilter<"Professor"> | string | null
+    createdAt?: DateTimeFilter<"Professor"> | Date | string
+    updatedAt?: DateTimeFilter<"Professor"> | Date | string
+  }
+
+  export type ProfessorOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    degree?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfessorWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    AND?: ProfessorWhereInput | ProfessorWhereInput[]
+    OR?: ProfessorWhereInput[]
+    NOT?: ProfessorWhereInput | ProfessorWhereInput[]
+    name?: StringFilter<"Professor"> | string
+    degree?: StringNullableFilter<"Professor"> | string | null
+    department?: StringNullableFilter<"Professor"> | string | null
+    createdAt?: DateTimeFilter<"Professor"> | Date | string
+    updatedAt?: DateTimeFilter<"Professor"> | Date | string
+  }, "id" | "email">
+
+  export type ProfessorOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    degree?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ProfessorCountOrderByAggregateInput
+    _max?: ProfessorMaxOrderByAggregateInput
+    _min?: ProfessorMinOrderByAggregateInput
+  }
+
+  export type ProfessorScalarWhereWithAggregatesInput = {
+    AND?: ProfessorScalarWhereWithAggregatesInput | ProfessorScalarWhereWithAggregatesInput[]
+    OR?: ProfessorScalarWhereWithAggregatesInput[]
+    NOT?: ProfessorScalarWhereWithAggregatesInput | ProfessorScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Professor"> | string
+    name?: StringWithAggregatesFilter<"Professor"> | string
+    email?: StringWithAggregatesFilter<"Professor"> | string
+    degree?: StringNullableWithAggregatesFilter<"Professor"> | string | null
+    department?: StringNullableWithAggregatesFilter<"Professor"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Professor"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Professor"> | Date | string
+  }
+
+  export type ProfessorCreateInput = {
+    id?: string
+    name: string
+    email: string
+    degree?: string | null
+    department?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfessorUncheckedCreateInput = {
+    id?: string
+    name: string
+    email: string
+    degree?: string | null
+    department?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfessorUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfessorUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfessorCreateManyInput = {
+    id?: string
+    name: string
+    email: string
+    degree?: string | null
+    department?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfessorUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfessorUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
+  export type ProfessorCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    degree?: SortOrder
+    department?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfessorMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    degree?: SortOrder
+    department?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfessorMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    degree?: SortOrder
+    department?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type StringFieldUpdateOperationsInput = {
+    set?: string
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
+  export type NestedStringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
 
 
 

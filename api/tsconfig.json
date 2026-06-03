@@ -23,8 +23,9 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/prisma/*": ["prisma/generated/*"],
-      "@/auth/*": ["src/auth/*"]
+      "@/prisma/generated": ["prisma/generated"],
+      "@/auth/*": ["src/auth/*"],
+      "@/prisma/*": ["src/prisma/*"]
     }
   },
   "include": ["src/**/*", "prisma/generated/**/*"]
