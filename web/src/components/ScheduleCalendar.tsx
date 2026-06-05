@@ -31,6 +31,8 @@ export interface ScheduleResponse {
   professor: { name: string };
   room: { name: string };
   classGroup: { code: string };
+  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  cancelReason?: string;
 }
 
 export interface Room {
@@ -185,6 +187,16 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
           .senac-calendar .fc-daygrid-event-harness .fc-event-main {
             padding: 1px 4px;
           }
+          .senac-calendar .fc-event-cancelled {
+            background-color: #fef2f2 !important; /* bg-red-50 */
+            border-color: #fca5a5 !important; /* border-red-300 */
+            border-width: 1px !important;
+            border-style: solid !important;
+            opacity: 0.7 !important;
+          }
+          .senac-calendar .fc-event-cancelled .fc-event-main {
+            color: #ef4444 !important; /* text-red-500 */
+          }
         `}</style>
         <FullCalendar
           ref={calendarRef}
@@ -219,6 +231,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
               const data: ScheduleResponse[] = response.data?.data || response.data || [];
 
               const calendarEvents = data.map((schedule) => {
+                const isCancelled = schedule.status === 'CANCELLED';
                 const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
                 return {
                   id: schedule.id,
@@ -228,9 +241,12 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
                   extendedProps: {
                     professor: schedule.professor?.name || 'N/D',
                     room: schedule.room?.name || 'N/D',
+                    status: schedule.status,
+                    cancelReason: schedule.cancelReason,
                   },
                   backgroundColor: color,
                   borderColor: color,
+                  className: isCancelled ? 'fc-event-cancelled' : '',
                 };
               });
 
@@ -246,16 +262,19 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
             }
           }}
           eventContent={(eventInfo) => {
+            const isCancelled = eventInfo.event.extendedProps.status === 'CANCELLED';
+            const tooltipTitle = isCancelled ? `Motivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || 'Não informado'}` : undefined;
+
             if (eventInfo.view.type === 'dayGridMonth') {
               return (
-                <div className="px-1 overflow-hidden whitespace-nowrap text-xs">
+                <div className={`px-1 overflow-hidden whitespace-nowrap text-xs ${isCancelled ? 'line-through' : ''}`} title={tooltipTitle}>
                   <b>{eventInfo.timeText}</b>
                   <span className="ml-1">{eventInfo.event.title.split(' - ')[0]}</span>
                 </div>
               )
             }
             return (
-              <div className="p-1 text-xs leading-tight overflow-hidden h-full flex flex-col">
+              <div className={`p-1 text-xs leading-tight overflow-hidden h-full flex flex-col ${isCancelled ? 'line-through' : ''}`} title={tooltipTitle}>
                 <div className="font-bold">{eventInfo.event.title}</div>
                 <div className="opacity-90 italic">{eventInfo.event.extendedProps.professor}</div>
                 <div className="opacity-90">{eventInfo.event.extendedProps.room}</div>
