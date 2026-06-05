@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, Plus, CalendarClock, Maximize, Minimize } from 'lucide-react';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { BulkGenerateModal } from '../components/BulkGenerateModal';
+import { ScheduleDetailsModal } from '../components/ScheduleDetailsModal';
 
 export const Schedule: React.FC = () => {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState<string[]>(['SCHEDULED', 'COMPLETED']);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleEventClick = (eventId: string) => {
-    // TODO: (Passo 3) Abrir modal de detalhes/reagendamento da aula clicada
-    console.log("Clicou no evento para inspecionar:", eventId);
+    setSelectedEventId(eventId);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -59,16 +63,25 @@ export const Schedule: React.FC = () => {
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
             <span>Status:</span>
-            <select 
-              className="bg-[#f8f9fc] border-none rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#004a8d] cursor-pointer"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="all">Todos os Status</option>
-              <option value="SCHEDULED">Agendado</option>
-              <option value="COMPLETED">Concluído</option>
-              <option value="CANCELLED">Cancelado</option>
-            </select>
+            <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
+              {[
+                { id: 'SCHEDULED', label: 'Agendados' },
+                { id: 'COMPLETED', label: 'Concluídos' },
+                { id: 'CANCELLED', label: 'Cancelados' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    setStatus((prev) =>
+                      prev.includes(s.id) ? prev.filter((st) => st !== s.id) : [...prev, s.id]
+                    );
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status.includes(s.id) ? 'bg-[#004a8d] text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
             <button 
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors ml-2"
@@ -81,7 +94,7 @@ export const Schedule: React.FC = () => {
 
         {/* Calendário */}
         <ScheduleCalendar 
-          filters={{ search, status }} 
+          filters={{ search, status, _refresh: refreshTrigger }} 
           onEventClick={handleEventClick}
           isFullscreen={isFullscreen}
         />
@@ -92,7 +105,19 @@ export const Schedule: React.FC = () => {
         onClose={() => setIsBulkModalOpen(false)}
         onSuccess={() => {
           setIsBulkModalOpen(false);
-          // Aqui futuramente podemos acionar a função de recarregar a view do calendário
+          setRefreshTrigger(prev => prev + 1);
+        }}
+      />
+
+      <ScheduleDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedEventId(null);
+        }}
+        eventId={selectedEventId}
+        onSuccess={() => {
+          setRefreshTrigger(prev => prev + 1);
         }}
       />
     </div>

@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ClassStatus } from '@/prisma/generated';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -31,6 +32,7 @@ export class SchedulesController {
     @Query('classGroupId') classGroupId?: string,
     @Query('professorId') professorId?: string,
     @Query('roomId') roomId?: string,
+    @Query('status') status?: string | string[],
   ) {
     const data = await this.schedulesService.findAll(
       start,
@@ -38,6 +40,7 @@ export class SchedulesController {
       classGroupId,
       professorId,
       roomId,
+      status,
     );
 
     return { data };
@@ -45,8 +48,8 @@ export class SchedulesController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const schedule = await this.schedulesService.findOne(id);
-    return { schedule };
+    const data = await this.schedulesService.findOne(id);
+    return { data };
   }
 
   @Patch(':id')
@@ -54,14 +57,14 @@ export class SchedulesController {
     @Param('id') id: string,
     @Body() updateScheduleDto: UpdateScheduleDto,
   ) {
-    const schedule = await this.schedulesService.update(id, updateScheduleDto);
-    return { schedule };
+    const data = await this.schedulesService.update(id, updateScheduleDto);
+    return { data };
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.schedulesService.remove(id);
-    return { message: 'Schedule removed successfully' };
+    return { data: { message: 'Schedule removed successfully' } };
   }
 
   @Post('generate')
@@ -71,10 +74,12 @@ export class SchedulesController {
   }
 
   @Post(':id/postpone')
-  postponeClass(
+  async postponeClass(
     @Param('id') id: string,
     @Body() postponeDto: PostponeScheduleDto,
   ) {
-    return this.schedulesService.postponeClass(id, postponeDto.reason);
+    return {
+      data: await this.schedulesService.postponeClass(id, postponeDto.reason),
+    };
   }
 }

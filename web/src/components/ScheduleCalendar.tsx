@@ -54,7 +54,8 @@ export interface ClassGroup {
 interface ScheduleCalendarProps {
   filters?: {
     search?: string;
-    status?: string;
+    status?: string | string[];
+    _refresh?: number;
   };
   onEventClick?: (eventId: string) => void;
   isFullscreen?: boolean;
@@ -216,12 +217,23 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
           
           events={async (info) => {
             try {
+              if (filters?.status && Array.isArray(filters.status) && filters.status.length === 0) {
+                return [];
+              }
+
               const params = new URLSearchParams();
               params.append('startDate', info.startStr);
               params.append('endDate', info.endStr);
               
               if (filters?.search) params.append('search', filters.search);
-              if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+              
+              if (filters?.status) {
+                if (Array.isArray(filters.status)) {
+                  filters.status.forEach((s) => params.append('status', s));
+                } else if (filters.status !== 'all') {
+                  params.append('status', filters.status);
+                }
+              }
 
               if (selectedRoom) params.append('roomId', selectedRoom);
               if (selectedProfessor) params.append('professorId', selectedProfessor);
@@ -234,7 +246,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
                 const isCancelled = schedule.status === 'CANCELLED';
                 const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
                 return {
-                  id: schedule.id,
+                id: String(schedule.id),
                   title: `${schedule.subject?.name || 'N/D'} - ${schedule.classGroup?.code || 'N/D'}`,
                   start: schedule.startTime,
                   end: schedule.endTime,
