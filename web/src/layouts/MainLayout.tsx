@@ -13,7 +13,7 @@ interface NavItemProps {
 const NAV_ITEMS: NavItemProps[] = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, activeClass: 'bg-blue-50 text-[#004a8d]', end: true },
   { to: '/turmas', label: 'Turmas', icon: Layers, activeClass: 'bg-emerald-50 text-emerald-600' },
-  { to: '/aulas', label: 'Aulas e Encontros', icon: CalendarClock, activeClass: 'bg-blue-50 text-[#004a8d]' },
+  { to: '/cronograma', label: 'Cronograma', icon: CalendarClock, activeClass: 'bg-blue-50 text-[#004a8d]' },
   { to: '/cursos', label: 'Cursos', icon: GraduationCap, activeClass: 'bg-blue-50 text-[#004a8d]' },
   { to: '/disciplinas', label: 'Unidades Curriculares', icon: BookOpen, activeClass: 'bg-indigo-50 text-indigo-500' },
   { to: '/matriz-curricular', label: 'Matriz Curricular', icon: Network, activeClass: 'bg-purple-50 text-purple-600' },

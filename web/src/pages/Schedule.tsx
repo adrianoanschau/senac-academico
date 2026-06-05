@@ -1,6 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarClock, X, Maximize, Minimize } from 'lucide-react';
+import axios from 'axios';
 import ScheduleCalendar from '../components/ScheduleCalendar';
+
+interface ClassGroup {
+  id: string;
+  name?: string;
+  code?: string;
+}
+
+interface Subject {
+  id: string;
+  name: string;
+}
+
+interface Professor {
+  id: string;
+  name: string;
+}
+
+interface Room {
+  id: string;
+  name: string;
+}
 
 export const Schedule: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -8,8 +30,84 @@ export const Schedule: React.FC = () => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
 
+  const [formData, setFormData] = useState({
+    classGroupId: '',
+    subjectId: '',
+    professorId: '',
+    roomId: '',
+    startDate: '',
+    daysOfWeek: [] as number[],
+    startTimeStr: '',
+    endTimeStr: '',
+  });
+
+  const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [professors, setProfessors] = useState<Professor[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      const fetchFormData = async () => {
+        try {
+          const [classGroupsRes, subjectsRes, professorsRes, roomsRes] = await Promise.all([
+            axios.get('/api/class-groups'),
+            axios.get('/api/subjects'),
+            axios.get('/api/professors'),
+            axios.get('/api/rooms'),
+          ]);
+          setClassGroups(classGroupsRes.data.data || classGroupsRes.data);
+          setSubjects(subjectsRes.data.data || subjectsRes.data);
+          setProfessors(professorsRes.data.data || professorsRes.data);
+          setRooms(roomsRes.data.data || roomsRes.data);
+        } catch (error) {
+          console.error('Erro ao carregar listas do formulário:', error);
+        }
+      };
+      fetchFormData();
+    }
+  }, [isModalOpen]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDaysChange = (day: number) => {
+    setFormData((prev) => {
+      const days = prev.daysOfWeek.includes(day)
+        ? prev.daysOfWeek.filter((d) => d !== day)
+        : [...prev.daysOfWeek, day];
+      return { ...prev, daysOfWeek: days };
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.daysOfWeek.length === 0) {
+      alert('Por favor, selecione ao menos um dia da semana.');
+      return;
+    }
+    const payload = {
+      ...formData,
+      startDate: new Date(formData.startDate).toISOString(),
+    };
+    try {
+      await axios.post('/api/schedules/generate', payload);
+      alert('Cronograma gerado com sucesso!');
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao conectar com a API.';
+        alert(`Erro ao gerar cronograma: ${errorMessage}`);
+      } else {
+        alert('Ocorreu um erro inesperado.');
+      }
+    }
+  };
+
   const handleEventClick = (eventId: string) => {
-    // Aqui futuramente você pode carregar o evento com o Id para editar
     setIsModalOpen(true);
   };
 
@@ -98,22 +196,24 @@ export const Schedule: React.FC = () => {
               </button>
             </div>
             
-            <form className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Class</label>
-                  <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                    <option value="">Select a class...</option>
-                    <option value="1">TIN24-1M</option>
-                    <option value="2">ENF24-1N</option>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Turma</label>
+                  <select name="classGroupId" value={formData.classGroupId} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                    <option value="">Selecione uma turma...</option>
+                    {classGroups.map((cg) => (
+                      <option key={cg.id} value={cg.id}>{cg.name || cg.code}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Subject (Course)</label>
-                  <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                    <option value="">Select a subject...</option>
-                    <option value="1">Programming Logic</option>
-                    <option value="2">Anatomy</option>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Disciplina</label>
+                  <select name="subjectId" value={formData.subjectId} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                    <option value="">Selecione uma disciplina...</option>
+                    {subjects.map((sub) => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -121,64 +221,71 @@ export const Schedule: React.FC = () => {
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-bold text-slate-700 mb-2">Professor</label>
-                  <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                    <option value="">Select a professor...</option>
-                    <option value="1">Carlos Silva</option>
-                    <option value="2">Maria Souza</option>
+                  <select name="professorId" value={formData.professorId} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                    <option value="">Selecione um professor...</option>
+                    {professors.map((prof) => (
+                      <option key={prof.id} value={prof.id}>{prof.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Room</label>
-                  <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                    <option value="">Select a room...</option>
-                    <option value="1">Lab 01</option>
-                    <option value="2">Sala 102</option>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Sala</label>
+                  <select name="roomId" value={formData.roomId} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                    <option value="">Selecione uma sala...</option>
+                    {rooms.map((room) => (
+                      <option key={room.id} value={room.id}>{room.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Date</label>
-                  <input type="date" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início</label>
+                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Start Time</label>
-                  <input type="time" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Horário de Início</label>
+                  <input type="time" name="startTimeStr" value={formData.startTimeStr} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">End Time</label>
-                  <input type="time" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Horário de Término</label>
+                  <input type="time" name="endTimeStr" value={formData.endTimeStr} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Status</label>
-                  <select className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Canceled">Canceled</option>
-                    <option value="Substituted">Substituted</option>
-                  </select>
-                </div>
-              </div>
-              
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Planned Content (Optional)</label>
-                <textarea 
-                  rows={3} 
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 resize-none placeholder-slate-400"
-                  placeholder="Briefly describe the content to be taught..."
-                ></textarea>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Dias da Semana</label>
+                <div className="flex flex-wrap gap-4 bg-[#f8f9fc] p-4 rounded-xl">
+                  {[
+                    { label: 'Dom', value: 0 },
+                    { label: 'Seg', value: 1 },
+                    { label: 'Ter', value: 2 },
+                    { label: 'Qua', value: 3 },
+                    { label: 'Qui', value: 4 },
+                    { label: 'Sex', value: 5 },
+                    { label: 'Sáb', value: 6 },
+                  ].map((day) => (
+                    <label key={day.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        value={day.value}
+                        checked={formData.daysOfWeek.includes(day.value)}
+                        onChange={() => handleDaysChange(day.value)}
+                        className="w-4 h-4 text-[#004a8d] focus:ring-[#004a8d] rounded"
+                      />
+                      <span className="text-sm font-medium text-slate-700">{day.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
                   Cancel
                 </button>
-                <button type="button" className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
-                  Save
+                <button type="submit" className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
+                  Gerar Cronograma
                 </button>
               </div>
             </form>

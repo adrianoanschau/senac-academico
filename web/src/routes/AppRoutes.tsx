@@ -6,7 +6,7 @@ import { Placeholder } from '../pages/Placeholder';
 import { Login } from '../pages/Login';
 import { Professors } from '../pages/Professors';
 import { Rooms } from '../pages/Rooms';
-import { Feriados } from '../pages/Feriados';
+import { CalendarReserves } from '../pages/CalendarReserves';
 import { Subjects } from '../pages/Subjects';
 import { ClassGroups } from '../pages/ClassGroups';
 import { Curriculums } from '../pages/Curriculums';
@@ -23,13 +23,13 @@ export const AppRoutes: React.FC = () => {
           <Route path="alunos" element={<Placeholder />} />
           <Route path="cursos" element={<Courses />} />
           <Route path="turmas" element={<ClassGroups />} />
-          <Route path="aulas" element={<Schedule />} />
+          <Route path="cronograma" element={<Schedule />} />
           <Route path="matriz-curricular" element={<Curriculums />} />
           <Route path="matriculas" element={<Placeholder />} />
           <Route path="perfil" element={<Placeholder />} />
           <Route path="professores" element={<Professors />} />
           <Route path="salas" element={<Rooms />} />
-          <Route path="feriados" element={<Feriados />} />
+          <Route path="feriados" element={<CalendarReserves />} />
           <Route path="disciplinas" element={<Subjects />} />
         </Route>
       </Routes>
