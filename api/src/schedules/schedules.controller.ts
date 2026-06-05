@@ -12,6 +12,7 @@ import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
+import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -67,5 +68,13 @@ export class SchedulesController {
   async generateBulk(@Body() generateSchedulesDto: GenerateSchedulesDto) {
     const data = await this.schedulesService.generateBulk(generateSchedulesDto);
     return { data };
+  }
+
+  @Post(':id/postpone')
+  postponeClass(
+    @Param('id') id: string,
+    @Body() postponeDto: PostponeScheduleDto,
+  ) {
+    return this.schedulesService.postponeClass(id, postponeDto.reason);
   }
 }

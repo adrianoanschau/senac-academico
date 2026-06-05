@@ -129,7 +129,7 @@ export const Schedule: React.FC = () => {
           className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]"
         >
           <Plus size={20} />
-          New Meeting
+          Novo Agendamento
         </button>
       </div>
 
@@ -149,7 +149,7 @@ export const Schedule: React.FC = () => {
             <input
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
-              placeholder="Search schedule..."
+              placeholder="Buscar cronograma..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -161,16 +161,16 @@ export const Schedule: React.FC = () => {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="all">All Statuses</option>
-              <option value="Scheduled">Scheduled</option>
-              <option value="Completed">Completed</option>
-              <option value="Canceled">Canceled</option>
-              <option value="Substituted">Substituted</option>
+              <option value="all">Todos os Status</option>
+              <option value="Scheduled">Agendado</option>
+              <option value="Completed">Concluído</option>
+              <option value="Canceled">Cancelado</option>
+              <option value="Substituted">Substituído</option>
             </select>
             <button 
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors ml-2"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              title={isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia"}
             >
               {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
@@ -190,7 +190,7 @@ export const Schedule: React.FC = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Schedule Meeting</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Agendar Aula</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
                 <X size={20} />
               </button>
@@ -282,7 +282,7 @@ export const Schedule: React.FC = () => {
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
-                  Cancel
+                  Cancelar
                 </button>
                 <button type="submit" className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
                   Gerar Cronograma

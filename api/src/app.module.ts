@@ -11,9 +11,10 @@ import { CurriculumsModule } from './curriculums/curriculums.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ScheduleOverridesModule } from './schedule-overrides/schedule-overrides.module';
+import { ScheduleRulesModule } from './schedule-rules/schedule-rules.module';
 
 @Module({
-  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule, ClassGroupsModule, SchedulesModule, ScheduleOverridesModule],
+  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule, ClassGroupsModule, SchedulesModule, ScheduleOverridesModule, ScheduleRulesModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

@@ -186,10 +186,13 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   id: 'id',
   startTime: 'startTime',
   endTime: 'endTime',
+  status: 'status',
+  cancelReason: 'cancelReason',
   classGroupId: 'classGroupId',
   subjectId: 'subjectId',
   professorId: 'professorId',
   roomId: 'roomId',
+  ruleId: 'ruleId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -200,6 +203,20 @@ exports.Prisma.ScheduleOverrideScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   type: 'type',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ScheduleRuleScalarFieldEnum = {
+  id: 'id',
+  daysOfWeek: 'daysOfWeek',
+  startTimeStr: 'startTimeStr',
+  endTimeStr: 'endTimeStr',
+  totalHours: 'totalHours',
+  classGroupId: 'classGroupId',
+  subjectId: 'subjectId',
+  professorId: 'professorId',
+  roomId: 'roomId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -218,6 +235,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.ClassStatus = exports.$Enums.ClassStatus = {
+  SCHEDULED: 'SCHEDULED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.OverrideType = exports.$Enums.OverrideType = {
   BLOCK: 'BLOCK',
   EXTRA_DAY: 'EXTRA_DAY'
@@ -232,7 +255,8 @@ exports.Prisma.ModelName = {
   CurriculumSubject: 'CurriculumSubject',
   ClassGroup: 'ClassGroup',
   Schedule: 'Schedule',
-  ScheduleOverride: 'ScheduleOverride'
+  ScheduleOverride: 'ScheduleOverride',
+  ScheduleRule: 'ScheduleRule'
 };
 
 /**

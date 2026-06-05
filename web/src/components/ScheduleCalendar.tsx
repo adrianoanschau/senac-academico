@@ -1,10 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import axios from 'axios';
+import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 
+// Google Calendar-like color palette
+const subjectColors = [
+  '#039be5', '#33b679', '#d60000', '#e67c73', '#f4511e', '#f6bf26',
+  '#3f51b5', '#7986cb', '#8e24aa', '#616161', '#0b8043', '#d50000',
+  '#e4a147', '#b39ddb', '#ad1457', '#795548', '#a79b8e', '#616161'
+];
+
+const stringToColorHash = (str: string): number => {
+  if (!str) return 0;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
 export interface ScheduleResponse {
   id: string;
   startTime: string;
@@ -104,68 +122,147 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
         </select>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 senac-calendar">
+        <style>{`
+          .senac-calendar .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #3c4043;
+          }
+          .senac-calendar .fc-button-group {
+            border-radius: var(--radius-xl) !important;
+            overflow: hidden;
+          }
+          .senac-calendar .fc-button {
+            background-color: #004a8d !important;
+            border: 1px solid #dadce0 !important;
+            color: white !important;
+            box-shadow: none !important;
+            text-transform: capitalize !important;
+            font-weight: 500 !important;
+            padding: 0.5rem 1rem;
+          }
+          .senac-calendar .fc-button:hover {
+            background-color: #00386b !important;
+          }
+          .senac-calendar .fc-button-primary:not(:disabled).fc-button-active,
+          .senac-calendar .fc-button-primary:not(:disabled):active {
+            background-color: #00386b !important;
+            color: #e8f0fe !important;
+            border-color: #e8f0fe !important;
+          }
+          .senac-calendar .fc-today-button {
+            border-radius: var(--radius-xl) !important;
+          }
+          .senac-calendar .fc-day-today {
+            background-color: #f8f9fa !important;
+          }
+          .senac-calendar .fc-day-today .fc-daygrid-day-number {
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 9999px;
+            width: 28px;
+            height: 28px;
+            line-height: 20px;
+            text-align: center;
+            display: inline-block;
+            margin-top: 2px;
+          }
+          .senac-calendar .fc-daygrid-day-number,
+          .senac-calendar .fc-col-header-cell-cushion {
+            color: #3c4043;
+            text-decoration: none;
+          }
+          .senac-calendar .fc-event {
+            border: none !important;
+            border-radius: 4px !important;
+            font-weight: 500;
+            cursor: pointer;
+          }
+          .senac-calendar .fc-event-main {
+            color: white;
+          }
+          .senac-calendar .fc-daygrid-event-harness .fc-event-main {
+            padding: 1px 4px;
+          }
+        `}</style>
         <FullCalendar
           ref={calendarRef}
           height="100%"
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        locale="en"
-        allDaySlot={false}
-        slotMinTime="08:00:00"
-        slotMaxTime="23:00:00"
-        
-        events={async (info) => {
-          try {
-            const params = new URLSearchParams();
-            params.append('startDate', info.startStr);
-            params.append('endDate', info.endStr);
-            
-            if (filters?.search) params.append('search', filters.search);
-            if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listYear'
+          }}
+          locales={[ptBrLocale]}
+          locale="pt-br"
+          allDaySlot={false}
+          slotMinTime="08:00:00"
+          slotMaxTime="23:00:00"
+          
+          events={async (info) => {
+            try {
+              const params = new URLSearchParams();
+              params.append('startDate', info.startStr);
+              params.append('endDate', info.endStr);
+              
+              if (filters?.search) params.append('search', filters.search);
+              if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
 
-            if (selectedRoom) params.append('roomId', selectedRoom);
-            if (selectedProfessor) params.append('professorId', selectedProfessor);
-            if (selectedClassGroup) params.append('classGroupId', selectedClassGroup);
+              if (selectedRoom) params.append('roomId', selectedRoom);
+              if (selectedProfessor) params.append('professorId', selectedProfessor);
+              if (selectedClassGroup) params.append('classGroupId', selectedClassGroup);
 
-            const response = await axios.get(`/api/schedules?${params.toString()}`);
-            const data: ScheduleResponse[] = response.data?.data || response.data || [];
+              const response = await axios.get(`/api/schedules?${params.toString()}`);
+              const data: ScheduleResponse[] = response.data?.data || response.data || [];
 
-            const calendarEvents = data.map((schedule) => ({
-              id: schedule.id,
-              title: `${schedule.subject?.name || 'N/A'} - ${schedule.classGroup?.code || 'N/A'}`,
-              start: schedule.startTime,
-              end: schedule.endTime,
-              extendedProps: {
-                professor: schedule.professor?.name || 'N/A',
-                room: schedule.room?.name || 'N/A',
-              },
-            }));
+              const calendarEvents = data.map((schedule) => {
+                const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
+                return {
+                  id: schedule.id,
+                  title: `${schedule.subject?.name || 'N/D'} - ${schedule.classGroup?.code || 'N/D'}`,
+                  start: schedule.startTime,
+                  end: schedule.endTime,
+                  extendedProps: {
+                    professor: schedule.professor?.name || 'N/D',
+                    room: schedule.room?.name || 'N/D',
+                  },
+                  backgroundColor: color,
+                  borderColor: color,
+                };
+              });
 
-            return calendarEvents;
-          } catch (error) {
-            console.error('Failed to load schedule:', error);
-            return [];
-          }
-        }}
-        eventClick={(info) => {
-          if (onEventClick) {
-            onEventClick(info.event.id);
-          }
-        }}
-        eventContent={(eventInfo) => (
-          <div className="p-1 text-xs leading-tight overflow-hidden cursor-pointer hover:opacity-90">
-            <div className="font-bold">{eventInfo.event.title}</div>
-            <div className="italic">{eventInfo.event.extendedProps.professor}</div>
-            <div>{eventInfo.event.extendedProps.room}</div>
-          </div>
-        )}
-      />
+              return calendarEvents;
+            } catch (error) {
+              console.error('Failed to load schedule:', error);
+              return [];
+            }
+          }}
+          eventClick={(info) => {
+            if (onEventClick) {
+              onEventClick(info.event.id);
+            }
+          }}
+          eventContent={(eventInfo) => {
+            if (eventInfo.view.type === 'dayGridMonth') {
+              return (
+                <div className="px-1 overflow-hidden whitespace-nowrap text-xs">
+                  <b>{eventInfo.timeText}</b>
+                  <span className="ml-1">{eventInfo.event.title.split(' - ')[0]}</span>
+                </div>
+              )
+            }
+            return (
+              <div className="p-1 text-xs leading-tight overflow-hidden h-full flex flex-col">
+                <div className="font-bold">{eventInfo.event.title}</div>
+                <div className="opacity-90 italic">{eventInfo.event.extendedProps.professor}</div>
+                <div className="opacity-90">{eventInfo.event.extendedProps.room}</div>
+              </div>
+            )
+          }}
+        />
       </div>
     </div>
   );

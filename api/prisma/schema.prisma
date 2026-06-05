@@ -7,6 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OverrideType {
+  BLOCK
+  EXTRA_DAY
+}
+
+enum ClassStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
 model Professor {
   id         String   @id @default(uuid())
   name       String
@@ -16,7 +27,8 @@ model Professor {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  schedules Schedule[]
+  schedules     Schedule[]
+  scheduleRules ScheduleRule[]
 
   @@map("professors")
 }
@@ -29,7 +41,8 @@ model Room {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  schedules Schedule[]
+  schedules     Schedule[]
+  scheduleRules ScheduleRule[]
 
   @@map("rooms")
 }
@@ -69,8 +82,9 @@ model Subject {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  curriculums CurriculumSubject[]
-  schedules   Schedule[]
+  curriculums   CurriculumSubject[]
+  schedules     Schedule[]
+  scheduleRules ScheduleRule[]
 
   @@map("subjects")
 }
@@ -97,36 +111,36 @@ model ClassGroup {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
-  schedules  Schedule[]
+  curriculum    Curriculum     @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  schedules     Schedule[]
+  scheduleRules ScheduleRule[]
 
   @@map("class_groups")
 }
 
 model Schedule {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   startTime DateTime
   endTime   DateTime
+  status    ClassStatus @default(SCHEDULED)
+  cancelReason String?
 
   classGroupId String
   subjectId    String
   professorId  String
   roomId       String
+  ruleId       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Restrict)
-  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
-  professor  Professor  @relation(fields: [professorId], references: [id], onDelete: Restrict)
-  room       Room       @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  classGroup ClassGroup    @relation(fields: [classGroupId], references: [id], onDelete: Restrict)
+  subject    Subject       @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  professor  Professor     @relation(fields: [professorId], references: [id], onDelete: Restrict)
+  room       Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  rule       ScheduleRule? @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
   @@map("schedules")
-}
-
-enum OverrideType {
-  BLOCK
-  EXTRA_DAY
 }
 
 model ScheduleOverride {
@@ -140,4 +154,28 @@ model ScheduleOverride {
   updatedAt DateTime @updatedAt
 
   @@map("schedule_overrides")
+}
+
+model ScheduleRule {
+  id           String @id @default(uuid())
+  daysOfWeek   Int[]
+  startTimeStr String
+  endTimeStr   String
+  totalHours   Int
+
+  classGroupId String
+  subjectId    String
+  professorId  String
+  roomId       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Restrict)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  professor  Professor  @relation(fields: [professorId], references: [id], onDelete: Restrict)
+  room       Room       @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  schedules  Schedule[]
+
+  @@map("schedule_rules")
 }
