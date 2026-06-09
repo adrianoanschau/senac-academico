@@ -12,7 +12,11 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-  app.enableCors();
+  app.enableCors({
+    origin: ['https://senac-academico.netlify.app/'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
