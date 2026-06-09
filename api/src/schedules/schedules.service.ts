@@ -335,12 +335,17 @@ export class SchedulesService {
 
         const consumedMinutes = validClasses.reduce((acc, curr) => {
           return (
-            acc + (curr.endTime.getTime() - curr.startTime.getTime()) / 60000
+            acc +
+            Math.round(
+              (curr.endTime.getTime() - curr.startTime.getTime()) / 60000,
+            )
           );
         }, 0);
 
-        const consumedHours = consumedMinutes / 60;
-        const remainingHours = originalTotalHours - consumedHours;
+        // Trabalhamos com minutos redondos para evitar problemas de precisão ponto flutuante
+        const originalTotalMinutes = Math.round(originalTotalHours * 60);
+        const remainingMinutes = originalTotalMinutes - consumedMinutes;
+        const remainingHours = remainingMinutes / 60;
 
         if (remainingHours <= 0) {
           throw new BadRequestException(

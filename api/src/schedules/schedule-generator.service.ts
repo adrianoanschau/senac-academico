@@ -19,7 +19,8 @@ export class ScheduleGeneratorService {
     totalSubjectHours: number,
   ): Promise<ProjectedSchedule[]> {
     const projections: ProjectedSchedule[] = [];
-    let remainingMinutes = totalSubjectHours * 60;
+    // Usa Math.round para evitar dízimas de ponto flutuante que causam criação de aulas fantasmas
+    let remainingMinutes = Math.round(totalSubjectHours * 60);
 
     const [startHour, startMin] = startTimeStr.split(':').map(Number);
     const [endHour, endMin] = endTimeStr.split(':').map(Number);
