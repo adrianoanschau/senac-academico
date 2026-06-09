@@ -8,7 +8,6 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ClassStatus } from '@/prisma/generated';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -32,6 +31,7 @@ export class SchedulesController {
     @Query('classGroupId') classGroupId?: string,
     @Query('professorId') professorId?: string,
     @Query('roomId') roomId?: string,
+    @Query('subjectId') subjectId?: string,
     @Query('status') status?: string | string[],
   ) {
     const data = await this.schedulesService.findAll(
@@ -40,6 +40,7 @@ export class SchedulesController {
       classGroupId,
       professorId,
       roomId,
+      subjectId,
       status,
     );
 

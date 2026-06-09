@@ -76,6 +76,7 @@ export class SchedulesService {
     classGroupId?: string,
     professorId?: string,
     roomId?: string,
+    subjectId?: string,
     status?: string | string[],
   ) {
     const whereCondition: Prisma.ScheduleWhereInput = {};
@@ -88,6 +89,7 @@ export class SchedulesService {
     if (classGroupId) whereCondition.classGroupId = classGroupId;
     if (professorId) whereCondition.professorId = professorId;
     if (roomId) whereCondition.roomId = roomId;
+    if (subjectId) whereCondition.subjectId = subjectId;
 
     if (status) {
       if (Array.isArray(status)) {

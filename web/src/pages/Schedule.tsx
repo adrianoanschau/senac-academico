@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarClock, Maximize, Minimize, Info } from 'lucide-react';
+import axios from 'axios';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { BulkGenerateModal } from '../components/BulkGenerateModal';
 import { ScheduleDetailsModal } from '../components/ScheduleDetailsModal';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { ContextPanel } from '../components/ContextPanel';
+import { Select } from '../components/Select';
+
+interface Subject {
+  id: string;
+  name: string;
+}
 
 export const Schedule: React.FC = () => {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
@@ -13,8 +20,38 @@ export const Schedule: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string[]>(['SCHEDULED', 'COMPLETED']);
+  const [subjectId, setSubjectId] = useState<string>('');
+  const [roomId, setRoomId] = useState<string>('');
+  const [professorId, setProfessorId] = useState<string>('');
+  const [classGroupId, setClassGroupId] = useState<string>('');
+
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
+  const [professors, setProfessors] = useState<{ id: string; name: string }[]>([]);
+  const [classGroups, setClassGroups] = useState<{ id: string; code?: string; name?: string }[]>([]);
+
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    const fetchFiltersData = async () => {
+      try {
+        const [subjectsRes, roomsRes, professorsRes, classGroupsRes] = await Promise.all([
+          axios.get('/api/subjects'),
+          axios.get('/api/rooms'),
+          axios.get('/api/professors'),
+          axios.get('/api/class-groups')
+        ]);
+        setSubjects(subjectsRes.data?.data || subjectsRes.data || []);
+        setRooms(roomsRes.data?.data || roomsRes.data || []);
+        setProfessors(professorsRes.data?.data || professorsRes.data || []);
+        setClassGroups(classGroupsRes.data?.data || classGroupsRes.data || []);
+      } catch (error) {
+        console.error('Erro ao buscar dados para os filtros:', error);
+      }
+    };
+    fetchFiltersData();
+  }, []);
 
   const handleEventClick = (eventId: string) => {
     setSelectedEventId(eventId);
@@ -47,23 +84,25 @@ export const Schedule: React.FC = () => {
       <div className={
         isFullscreen 
           ? "fixed inset-0 z-50 bg-white p-8 overflow-y-auto" 
-          : "bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100"
+          : "bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100"
       }>
         
         {/* Toolbar */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={18} className="text-slate-400" />
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="relative w-72">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search size={18} className="text-slate-400" />
+              </div>
+              <input
+                type="text"
+                className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+                placeholder="Buscar cronograma..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-            <input
-              type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
-              placeholder="Buscar cronograma..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+            
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
             <span>Status:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
@@ -93,11 +132,63 @@ export const Schedule: React.FC = () => {
               {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
           </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl">
+            <div className="flex-1 min-w-[200px]">
+              <Select 
+                value={classGroupId} 
+                onChange={(e) => setClassGroupId(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
+              >
+                <option value="">Todas as Turmas...</option>
+                {classGroups.map(cg => (
+                  <option key={cg.id} value={cg.id}>{cg.code || cg.name}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Select 
+                value={professorId} 
+                onChange={(e) => setProfessorId(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
+              >
+                <option value="">Todos os Professores...</option>
+                {professors.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Select 
+                value={roomId} 
+                onChange={(e) => setRoomId(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
+              >
+                <option value="">Todas as Salas...</option>
+                {rooms.map(r => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Select 
+                value={subjectId} 
+                onChange={(e) => setSubjectId(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
+              >
+                <option value="">Todas as Disciplinas...</option>
+                {subjects.map(sub => (
+                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
         </div>
 
         {/* Calendário */}
         <ScheduleCalendar 
-          filters={{ search, status, _refresh: refreshTrigger }} 
+          filters={{ search, status, subjectId, roomId, professorId, classGroupId, _refresh: refreshTrigger }} 
           onEventClick={handleEventClick}
           isFullscreen={isFullscreen}
           selectedDate={selectedDate}
