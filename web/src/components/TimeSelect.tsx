@@ -6,18 +6,25 @@ interface TimeSelectProps {
   onChange: (val: string) => void;
   placeholder: string;
   hasError?: boolean;
+  minHour?: number;
+  maxHour?: number;
 }
 
-// Gera as 48 opções de horário com intervalos de 30 minutos (00:00 até 23:30)
-const timeOptions = Array.from({ length: 48 }, (_, i) => {
-  const hour = Math.floor(i / 2);
-  const minute = i % 2 === 0 ? '00' : '30';
-  return `${String(hour).padStart(2, '0')}:${minute}`;
-});
-
-export const TimeSelect: React.FC<TimeSelectProps> = ({ value, onChange, placeholder, hasError }) => {
+export const TimeSelect: React.FC<TimeSelectProps> = ({ value, onChange, placeholder, hasError, minHour = 0, maxHour = 23 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const timeOptions = React.useMemo(() => {
+    const options: string[] = [];
+    for (let i = minHour; i <= maxHour; i++) {
+      const hourStr = i.toString().padStart(2, '0');
+      options.push(`${hourStr}:00`);
+      if (i < maxHour || maxHour === 23) {
+        options.push(`${hourStr}:30`);
+      }
+    }
+    return options;
+  }, [minHour, maxHour]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

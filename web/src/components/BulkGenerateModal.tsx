@@ -193,7 +193,14 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
                         name="startTimeStr"
                         rules={{ required: "Hora inicial é obrigatória" }}
                         render={({ field: { onChange, value } }) => (
-                          <TimeSelect value={value} onChange={onChange} placeholder="--:--" hasError={!!errors.startTimeStr} />
+                          <TimeSelect 
+                            value={value} 
+                            onChange={onChange} 
+                            placeholder="--:--" 
+                            hasError={!!errors.startTimeStr} 
+                            minHour={8}
+                            maxHour={22}
+                          />
                         )}
                       />
                     </div>
@@ -210,7 +217,14 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
                         name="endTimeStr"
                         rules={{ required: "Hora final é obrigatória" }}
                         render={({ field: { onChange, value } }) => (
-                          <TimeSelect value={value} onChange={onChange} placeholder="--:--" hasError={!!errors.endTimeStr} />
+                          <TimeSelect 
+                            value={value} 
+                            onChange={onChange} 
+                            placeholder="--:--" 
+                            hasError={!!errors.endTimeStr} 
+                            minHour={8}
+                            maxHour={22}
+                          />
                         )}
                       />
                     </div>
