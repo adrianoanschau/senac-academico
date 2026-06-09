@@ -171,7 +171,7 @@ export const Schedule: React.FC = () => {
                 ))}
               </Select>
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <Select 
                 value={subjectId} 
                 onChange={(e) => setSubjectId(e.target.value)}

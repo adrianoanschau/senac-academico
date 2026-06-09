@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
+import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 
 @Injectable()
 export class CurriculumsService {
@@ -43,6 +44,7 @@ export class CurriculumsService {
     return this.prisma.curriculum.findMany({
       include: {
         course: true,
+        subjects: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -65,5 +67,46 @@ export class CurriculumsService {
     }
 
     return curriculum;
+  }
+
+  async update(id: string, updateCurriculumDto: UpdateCurriculumDto) {
+    const { name, active, courseId, subjects } = updateCurriculumDto;
+
+    // Verifica se a matriz curricular existe
+    await this.findOne(id);
+
+    if (courseId) {
+      const courseExists = await this.prisma.course.findUnique({
+        where: { id: courseId },
+      });
+      if (!courseExists) {
+        throw new NotFoundException(`Curso com ID ${courseId} não encontrado.`);
+      }
+    }
+
+    return this.prisma.curriculum.update({
+      where: { id },
+      data: {
+        name,
+        active,
+        courseId,
+        ...(subjects && {
+          subjects: {
+            deleteMany: {}, // Limpa as disciplinas atreladas anteriores
+            create: subjects.map((sub) => ({
+              subjectId: sub.subjectId,
+              module: sub.module,
+            })),
+          },
+        }),
+      },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.curriculum.delete({
+      where: { id },
+    });
   }
 }

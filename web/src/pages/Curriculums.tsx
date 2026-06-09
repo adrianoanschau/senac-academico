@@ -83,16 +83,25 @@ export const Curriculums: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (curriculum: Curriculum) => {
-    setFormData({
-      ...curriculum,
-      // Garante que array de subjects seja mapeado de forma plana para o form
-      subjects: curriculum.subjects?.map(s => ({
-        subjectId: s.subjectId,
-        module: s.module
-      })) || []
-    });
-    setIsModalOpen(true);
+  const handleOpenEditModal = async (curriculum: Curriculum) => {
+    try {
+      // A listagem não retorna 'subjects', então buscamos a matriz completa pelo ID
+      const response = await axios.get(`/api/curriculums/${curriculum.id}`);
+      const fullCurriculum = response.data.data || response.data;
+
+      setFormData({
+        ...fullCurriculum,
+        // Garante que array de subjects seja mapeado de forma plana para o form
+        subjects: fullCurriculum.subjects?.map((s: CurriculumSubject) => ({
+          subjectId: s.subjectId,
+          module: s.module
+        })) || []
+      });
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Erro ao buscar detalhes da grade:', error);
+      alertDialog('Erro ao carregar os dados da grade.');
+    }
   };
 
   const handleDelete = async (id: string | undefined) => {
@@ -116,9 +125,13 @@ export const Curriculums: React.FC = () => {
       const isEditing = !!formData.id;
       const url = isEditing ? `/api/curriculums/${formData.id}` : '/api/curriculums';
 
-      const payload: Partial<Curriculum> = { ...formData };
-      if (!isEditing) delete payload.id;
-      delete payload.course; // Remover relacionamentos populados antes de enviar ao backend
+      // Constrói o payload de forma explícita para evitar envio de 'id' ou campos de timestamp do backend
+      const payload = {
+        name: formData.name,
+        active: formData.active,
+        courseId: formData.courseId,
+        subjects: formData.subjects,
+      };
 
       if (isEditing) {
         await axios.patch(url, payload);

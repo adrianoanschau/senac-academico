@@ -8,7 +8,7 @@ import { Select } from './Select';
 import { alertDialog } from '../utils/dialog';
 
 interface ClassGroup { id: string; name?: string; code?: string; }
-interface Subject { id: string; name: string; }
+interface Subject { id: string; name: string; code?: string; }
 interface Professor { id: string; name: string; }
 interface Room { id: string; name: string; }
 
@@ -147,7 +147,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
                   <label className="block text-sm font-bold text-slate-700 mb-2">Disciplina</label>
                   <Select {...register('subjectId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
                     <option value="">Selecione a disciplina...</option>
-                    {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
+                    {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.code}: {sub.name}</option>)}
                   </Select>
                 </div>
                 <div>
