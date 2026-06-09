@@ -7,6 +7,7 @@ import { ScheduleDetailsModal } from '../components/ScheduleDetailsModal';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { ContextPanel } from '../components/ContextPanel';
 import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Subject {
   id: string;
@@ -17,13 +18,13 @@ export const Schedule: React.FC = () => {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<string[]>(['PLANNED', 'SCHEDULED', 'COMPLETED']);
-  const [subjectId, setSubjectId] = useState<string>('');
-  const [roomId, setRoomId] = useState<string>('');
-  const [professorId, setProfessorId] = useState<string>('');
-  const [classGroupId, setClassGroupId] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = usePersistentState('schedule_fullscreen', false);
+  const [search, setSearch] = usePersistentState('schedule_search', '');
+  const [status, setStatus] = usePersistentState<string[]>('schedule_status', ['PLANNED', 'SCHEDULED', 'COMPLETED']);
+  const [subjectId, setSubjectId] = usePersistentState<string>('schedule_subjectId', '');
+  const [roomId, setRoomId] = usePersistentState<string>('schedule_roomId', '');
+  const [professorId, setProfessorId] = usePersistentState<string>('schedule_professorId', '');
+  const [classGroupId, setClassGroupId] = usePersistentState<string>('schedule_classGroupId', '');
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
@@ -31,7 +32,8 @@ export const Schedule: React.FC = () => {
   const [classGroups, setClassGroups] = useState<{ id: string; code?: string; name?: string }[]>([]);
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDateStr, setSelectedDateStr] = usePersistentState<string>('schedule_selected_date', new Date().toISOString());
+  const selectedDate = !isNaN(new Date(selectedDateStr).getTime()) ? new Date(selectedDateStr) : new Date();
 
   useEffect(() => {
     const fetchFiltersData = async () => {
@@ -136,7 +138,7 @@ export const Schedule: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <Select 
                 value={classGroupId} 
                 onChange={(e) => setClassGroupId(e.target.value)}
@@ -148,7 +150,7 @@ export const Schedule: React.FC = () => {
                 ))}
               </Select>
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <Select 
                 value={professorId} 
                 onChange={(e) => setProfessorId(e.target.value)}
@@ -160,7 +162,7 @@ export const Schedule: React.FC = () => {
                 ))}
               </Select>
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <Select 
                 value={roomId} 
                 onChange={(e) => setRoomId(e.target.value)}
@@ -193,6 +195,7 @@ export const Schedule: React.FC = () => {
           onEventClick={handleEventClick}
           isFullscreen={isFullscreen}
           selectedDate={selectedDate}
+          onDateChange={(date) => setSelectedDateStr(date.toISOString())}
         />
       </div>
 
@@ -227,7 +230,7 @@ export const Schedule: React.FC = () => {
           'O sistema respeita os Períodos Especiais (Feriados) para não agendar aulas em dias não letivos.'
         ]}
       >
-        <MiniCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+        <MiniCalendar selectedDate={selectedDate} onDateSelect={(date) => setSelectedDateStr(date.toISOString())} />
       </ContextPanel>
     </div>
   );

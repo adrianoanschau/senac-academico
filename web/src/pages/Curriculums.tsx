@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Select } from '../components/Select';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Course {
   id: string;
@@ -46,6 +47,7 @@ export const Curriculums: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Curriculum>(initialFormState);
+  const [search, setSearch] = usePersistentState('curriculums_search', '');
 
   const fetchCurriculums = async () => {
     try {
@@ -169,6 +171,11 @@ export const Curriculums: React.FC = () => {
     setFormData({ ...formData, subjects: newSubjects });
   };
 
+  const filteredCurriculums = curriculums.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    (c.course?.name && c.course.name.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -204,6 +211,8 @@ export const Curriculums: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar grade..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
@@ -225,12 +234,12 @@ export const Curriculums: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">Carregando grades...</td>
                 </tr>
-              ) : curriculums.length === 0 ? (
+              ) : filteredCurriculums.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">Nenhuma grade cadastrada.</td>
                 </tr>
               ) : (
-                curriculums.map((curriculum) => (
+                filteredCurriculums.map((curriculum) => (
                   <tr key={curriculum.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-4 font-bold text-slate-800">{curriculum.name}</td>
                     <td className="py-4 px-4 text-slate-500 font-medium">{curriculum.course?.name || '-'}</td>

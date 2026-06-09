@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2, Users, X, Info } from 'lucide-react';
 import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Professor {
   id?: string | number;
@@ -23,7 +24,8 @@ export const Professors: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Professor>(initialFormState);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = usePersistentState('professors_status', 'all');
+  const [search, setSearch] = usePersistentState('professors_search', '');
 
   const fetchProfessors = async () => {
     setIsLoading(true);
@@ -95,6 +97,11 @@ export const Professors: React.FC = () => {
     }
   };
 
+  const filteredProfessors = professors.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase()) || p.degree.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -130,6 +137,8 @@ export const Professors: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-professores outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar professor..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
@@ -168,11 +177,11 @@ export const Professors: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">Carregando professores...</td>
                 </tr>
-              ) : professors.length === 0 ? (
+              ) : filteredProfessors.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">Nenhum professor cadastrado.</td>
                 </tr>
-              ) : (professors.map((prof) => (
+              ) : (filteredProfessors.map((prof) => (
                 <tr key={prof.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">

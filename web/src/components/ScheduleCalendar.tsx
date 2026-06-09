@@ -7,6 +7,7 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import { Check } from 'lucide-react';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -65,10 +66,12 @@ interface ScheduleCalendarProps {
   onEventClick?: (eventId: string) => void;
   isFullscreen?: boolean;
   selectedDate?: Date;
+  onDateChange?: (date: Date) => void;
 }
 
-export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, selectedDate }: ScheduleCalendarProps) {
+export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, selectedDate, onDateChange }: ScheduleCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const [calendarView, setCalendarView] = usePersistentState('schedule_calendar_view', 'timeGridWeek');
 
   const filtersJson = JSON.stringify(filters);
 
@@ -80,7 +83,10 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
 
   useEffect(() => {
     if (calendarRef.current && selectedDate) {
-      calendarRef.current.getApi().gotoDate(selectedDate);
+      const calendarDate = calendarRef.current.getApi().getDate();
+      if (calendarDate.toISOString() !== selectedDate.toISOString()) {
+        calendarRef.current.getApi().gotoDate(selectedDate);
+      }
     }
   }, [selectedDate]);
 
@@ -155,7 +161,8 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           ref={calendarRef}
           height="100%"
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-          initialView="timeGridWeek"
+          initialDate={selectedDate}
+          initialView={calendarView}
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
@@ -166,6 +173,17 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           allDaySlot={false}
           slotMinTime="08:00:00"
           slotMaxTime="23:00:00"
+          datesSet={(arg) => {
+            if (calendarView !== arg.view.type) {
+              setCalendarView(arg.view.type);
+            }
+            if (onDateChange && calendarRef.current) {
+              const calendarDate = calendarRef.current.getApi().getDate();
+              if (selectedDate && calendarDate.toISOString() !== selectedDate.toISOString()) {
+                onDateChange(calendarDate);
+              }
+            }
+          }}
           
           events={async (info: { startStr: string; endStr: string }) => {
             try {

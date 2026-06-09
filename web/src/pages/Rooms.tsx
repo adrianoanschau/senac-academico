@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Select } from '../components/Select';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Room {
   id?: string | number;
@@ -24,7 +25,8 @@ export const Rooms: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Room>(initialFormState);
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = usePersistentState('rooms_type', 'all');
+  const [search, setSearch] = usePersistentState('rooms_search', '');
 
   const fetchRooms = async () => {
     setIsLoading(true);
@@ -93,6 +95,12 @@ export const Rooms: React.FC = () => {
     }
   };
 
+  const filteredRooms = rooms.filter((r) => {
+    const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
+    const matchesType = typeFilter === 'all' || (typeFilter === 'lab' && r.type.includes('Laboratório')) || (typeFilter === 'sala' && r.type === 'Sala Teórica');
+    return matchesSearch && matchesType;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -128,6 +136,8 @@ export const Rooms: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-salas outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar ambiente..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
@@ -166,12 +176,12 @@ export const Rooms: React.FC = () => {
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Carregando salas...</td>
                 </tr>
-              ) : rooms.length === 0 ? (
+              ) : filteredRooms.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Nenhuma sala cadastrada.</td>
                 </tr>
               ) : (
-                rooms.map((sala) => (
+                filteredRooms.map((sala) => (
                   <tr key={sala.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-4 font-bold text-slate-800">{sala.name}</td>
                     <td className="py-4 px-4 text-slate-500 font-medium">{sala.type}</td>

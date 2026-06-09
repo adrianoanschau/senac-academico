@@ -6,6 +6,7 @@ import { DateSelect } from '../components/DateSelect';
 import { TimeSelect } from '../components/TimeSelect';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface ScheduleOverride {
   id: string;
@@ -19,7 +20,8 @@ export const CalendarReserves: React.FC = () => {
   const [feriados, setFeriados] = useState<ScheduleOverride[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAllDay, setIsAllDay] = useState(true);
-  const [yearFilter, setYearFilter] = useState('2026');
+  const [yearFilter, setYearFilter] = usePersistentState('reserves_year', '2026');
+  const [search, setSearch] = usePersistentState('reserves_search', '');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -97,6 +99,12 @@ export const CalendarReserves: React.FC = () => {
     }
   };
 
+  const filteredFeriados = feriados.filter((f) => {
+    const matchesSearch = f.title.toLowerCase().includes(search.toLowerCase());
+    const matchesYear = yearFilter === 'all' || new Date(f.startTime).getFullYear().toString() === yearFilter;
+    return matchesSearch && matchesYear;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -136,12 +144,15 @@ export const CalendarReserves: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-especiais outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar feriado..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
             <span>Ano Base:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
+                { id: 'all', label: 'Todos' },
                 { id: '2026', label: '2026' },
                 { id: '2025', label: '2025' },
               ].map((s) => (
@@ -170,7 +181,7 @@ export const CalendarReserves: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {feriados.map((feriado) => (
+              {filteredFeriados.map((feriado) => (
                 <tr key={feriado.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-4 font-bold text-slate-800">{feriado.title}</td>
                   <td className="py-4 px-4 font-bold text-menu-especiais">{new Date(feriado.startTime).toLocaleString()}</td>

@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2, BookOpen, X, Info } from 'lucide-react';
 import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Subject {
   id?: string | number;
@@ -23,7 +24,8 @@ export const Subjects: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Subject>(initialFormState);
-  const [axisFilter, setAxisFilter] = useState('all');
+  const [axisFilter, setAxisFilter] = usePersistentState('subjects_axis', 'all');
+  const [search, setSearch] = usePersistentState('subjects_search', '');
 
   const fetchSubjects = async () => {
     setIsLoading(true);
@@ -91,6 +93,11 @@ export const Subjects: React.FC = () => {
     }
   };
 
+  const filteredSubjects = subjects.filter((s) => {
+    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.code.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -126,6 +133,8 @@ export const Subjects: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar unidade curricular..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
@@ -165,12 +174,12 @@ export const Subjects: React.FC = () => {
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Carregando disciplinas...</td>
                 </tr>
-              ) : subjects.length === 0 ? (
+              ) : filteredSubjects.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Nenhuma disciplina cadastrada.</td>
                 </tr>
               ) : (
-                subjects.map((subject) => (
+                filteredSubjects.map((subject) => (
                   <tr key={subject.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-4 font-bold text-slate-800">{subject.name}</td>
                     <td className="py-4 px-4 text-slate-500 font-medium">{subject.code}</td>

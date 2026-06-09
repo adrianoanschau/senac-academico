@@ -5,6 +5,7 @@ import { Select } from '../components/Select';
 import { DateSelect } from '../components/DateSelect';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Curriculum {
   id: string;
@@ -36,7 +37,8 @@ export const ClassGroups: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<ClassGroup>(initialFormState);
-  const [shiftFilter, setShiftFilter] = useState('all');
+  const [shiftFilter, setShiftFilter] = usePersistentState('classGroups_shift', 'all');
+  const [search, setSearch] = usePersistentState('classGroups_search', '');
 
   const fetchClassGroups = async () => {
     setIsLoading(true);
@@ -135,6 +137,13 @@ export const ClassGroups: React.FC = () => {
     return dateStr.substring(0, 10);
   };
 
+  const filteredClassGroups = classGroups.filter((c) => {
+    const matchesSearch = c.code.toLowerCase().includes(search.toLowerCase()) || 
+                          (c.curriculum?.name && c.curriculum.name.toLowerCase().includes(search.toLowerCase()));
+    const matchesShift = shiftFilter === 'all' || c.shift === shiftFilter;
+    return matchesSearch && matchesShift;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -170,6 +179,8 @@ export const ClassGroups: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-turmas outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar turma..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
@@ -211,12 +222,12 @@ export const ClassGroups: React.FC = () => {
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">Carregando turmas...</td>
                 </tr>
-              ) : classGroups.length === 0 ? (
+              ) : filteredClassGroups.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">Nenhuma turma cadastrada.</td>
                 </tr>
               ) : (
-                classGroups.map((turma) => (
+                filteredClassGroups.map((turma) => (
                 <tr key={turma.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-4 font-bold text-slate-800">
                     <div className="flex items-center gap-3">

@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2, GraduationCap, X, Info } from 'lucide-reac
 import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 interface Course {
   id?: string | number;
@@ -21,7 +22,8 @@ export const Courses: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Course>(initialFormState);
-  const [modalityFilter, setModalityFilter] = useState('all');
+  const [modalityFilter, setModalityFilter] = usePersistentState('courses_modality', 'all');
+  const [search, setSearch] = usePersistentState('courses_search', '');
 
   const fetchCourses = async () => {
     setIsLoading(true);
@@ -89,6 +91,11 @@ export const Courses: React.FC = () => {
     }
   };
 
+  const filteredCourses = courses.filter((c) => {
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
       {/* Header */}
@@ -124,6 +131,8 @@ export const Courses: React.FC = () => {
               type="text"
               className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-cursos outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar curso..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
@@ -163,12 +172,12 @@ export const Courses: React.FC = () => {
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Carregando cursos...</td>
                 </tr>
-              ) : courses.length === 0 ? (
+              ) : filteredCourses.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-500 font-medium">Nenhum curso cadastrado.</td>
                 </tr>
               ) : (
-                courses.map((course) => (
+                filteredCourses.map((course) => (
                   <tr key={course.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-4 font-bold text-slate-800">{course.name}</td>
                     <td className="py-4 px-4">
