@@ -35,18 +35,18 @@ export const Login: React.FC = () => {
   return (
     <div className="flex min-h-screen w-full bg-[#f8f9fc] font-sans">
       {/* Left side: Visual Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#004a8d] relative overflow-hidden flex-col justify-center items-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-senac-blue relative overflow-hidden flex-col justify-center items-center p-12 transition-colors">
         {/* Background Decorations */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#00386b]/60 to-transparent rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-[#f37021]/30 to-transparent rounded-full blur-3xl -ml-10 -mb-10"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#00386b]/40 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-black/20 to-transparent rounded-full blur-3xl -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-senac-orange/30 to-transparent rounded-full blur-3xl -ml-10 -mb-10"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-black/10 rounded-full blur-3xl"></div>
 
         <div className="relative z-10 max-w-lg">
           <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center mb-8 border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-             <div className="w-10 h-10 bg-[#f37021] rounded-xl transform rotate-12"></div>
+             <div className="w-10 h-10 bg-senac-orange rounded-xl transform rotate-12 transition-colors"></div>
           </div>
           <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
-            Gestão Educacional<br/>com o <span className="text-[#f37021]">Senac.</span>
+            Gestão Educacional<br/>com o <span className="text-senac-orange transition-colors">Senac.</span>
           </h1>
           <p className="text-xl text-blue-100 font-medium leading-relaxed">
             Acesse a plataforma para acompanhar turmas, alunos e potencializar a rotina acadêmica.
@@ -86,7 +86,7 @@ export const Login: React.FC = () => {
                   disabled={isLoading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
                   placeholder="usuario@senac.br"
                 />
               </div>
@@ -97,7 +97,7 @@ export const Login: React.FC = () => {
                 <label className="block text-sm font-bold text-slate-700" htmlFor="password">
                   Senha
                 </label>
-                <a href="#" className="text-sm text-[#004a8d] hover:text-[#00386b] font-semibold transition-colors">
+                <a href="#" className="text-sm text-senac-blue hover:opacity-80 font-semibold transition-colors">
                   Esqueceu a senha?
                 </a>
               </div>
@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
                   disabled={isLoading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
                   placeholder="••••••••"
                 />
               </div>
@@ -121,7 +121,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#f37021] hover:bg-[#d96017] disabled:bg-[#f37021]/70 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-[0_4px_14px_rgb(243,112,33,0.3)] hover:shadow-[0_6px_20px_rgb(243,112,33,0.4)]"
+              className="w-full bg-senac-orange hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-md shadow-senac-orange/30 hover:shadow-lg hover:shadow-senac-orange/40"
             >
               {isLoading ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -135,7 +135,7 @@ export const Login: React.FC = () => {
           </form>
           
           <div className="mt-10 text-center text-sm font-medium text-slate-400">
-            <p>Precisa de ajuda? <a href="#" className="text-[#004a8d] font-bold hover:underline">Contate o suporte</a></p>
+            <p>Precisa de ajuda? <a href="#" className="text-senac-blue font-bold hover:underline">Contate o suporte</a></p>
           </div>
         </div>
       </div>

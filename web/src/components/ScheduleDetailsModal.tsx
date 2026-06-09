@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import { alertDialog } from '../utils/dialog';
 
 interface ScheduleDetailsModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
     setError(null);
     try {
       await axios.post(`/api/schedules/${eventId}/postpone`, { reason: postponeReason });
-      alert('Aula adiada com sucesso!');
+      alertDialog('Aula adiada com sucesso!');
       onSuccess();
       onClose();
     } catch (error) {
@@ -116,7 +117,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
         ) : details ? (
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
-              <BookOpen className="text-[#004a8d] shrink-0" />
+              <BookOpen className="text-menu-uc shrink-0" />
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Disciplina</p>
                 <p className="font-bold text-slate-800">{details.subject?.name} <span className="text-slate-400 font-normal">({details.subject?.code})</span></p>
@@ -125,14 +126,14 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
-                <Layers className="text-emerald-600 shrink-0" />
+                <Layers className="text-menu-turmas shrink-0" />
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Turma</p>
                   <p className="font-bold text-slate-800">{details.classGroup?.code}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
-                <MapPin className="text-[#f37021] shrink-0" />
+                <MapPin className="text-menu-salas shrink-0" />
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sala</p>
                   <p className="font-bold text-slate-800">{details.room?.name}</p>
@@ -141,7 +142,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
             </div>
 
             <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
-              <User className="text-purple-600 shrink-0" />
+              <User className="text-menu-professores shrink-0" />
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Professor</p>
                 <p className="font-bold text-slate-800">{details.professor?.name}</p>
@@ -149,7 +150,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
             </div>
 
             <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
-              <Clock className="text-indigo-600 shrink-0" />
+              <Clock className="text-senac-blue shrink-0" />
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Horário</p>
                 <p className="font-bold text-slate-800">

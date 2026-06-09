@@ -6,6 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
+import { Select } from './Select';
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -59,9 +60,10 @@ interface ScheduleCalendarProps {
   };
   onEventClick?: (eventId: string) => void;
   isFullscreen?: boolean;
+  selectedDate?: Date;
 }
 
-export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }: ScheduleCalendarProps) {
+export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, selectedDate }: ScheduleCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
 
   const [selectedRoom, setSelectedRoom] = useState('');
@@ -90,10 +92,16 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
     }
   }, [filters, selectedRoom, selectedProfessor, selectedClassGroup]);
 
+  useEffect(() => {
+    if (calendarRef.current && selectedDate) {
+      calendarRef.current.getApi().gotoDate(selectedDate);
+    }
+  }, [selectedDate]);
+
   return (
     <div className={isFullscreen ? "h-[calc(100vh-140px)] flex flex-col" : "h-[800px] flex flex-col"}> 
       <div className="bg-gray-50 p-4 rounded-xl mb-4 flex flex-col sm:flex-row gap-4 shrink-0">
-        <select
+        <Select
           className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#004a8d] cursor-pointer text-sm font-medium text-slate-700"
           value={selectedClassGroup}
           onChange={(e) => setSelectedClassGroup(e.target.value)}
@@ -102,8 +110,8 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
           {classGroups.map((cg) => (
             <option key={cg.id} value={cg.id}>{cg.code || cg.name}</option>
           ))}
-        </select>
-        <select
+        </Select>
+        <Select
           className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#004a8d] cursor-pointer text-sm font-medium text-slate-700"
           value={selectedProfessor}
           onChange={(e) => setSelectedProfessor(e.target.value)}
@@ -112,8 +120,8 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
           {professors.map((p) => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
-        </select>
-        <select
+        </Select>
+        <Select
           className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#004a8d] cursor-pointer text-sm font-medium text-slate-700"
           value={selectedRoom}
           onChange={(e) => setSelectedRoom(e.target.value)}
@@ -122,7 +130,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen }
           {rooms.map((r) => (
             <option key={r.id} value={r.id}>{r.name}</option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex-1 min-h-0 senac-calendar">

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { X, AlertCircle, Loader2, CalendarClock } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
+import { X, AlertCircle, Loader2, CalendarClock, Calendar, Clock } from 'lucide-react';
 import axios from 'axios';
+import { DateSelect } from './DateSelect';
+import { TimeSelect } from './TimeSelect';
+import { Select } from './Select';
+import { alertDialog } from '../utils/dialog';
 
 interface ClassGroup { id: string; name?: string; code?: string; }
 interface Subject { id: string; name: string; }
@@ -34,8 +38,8 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<FormData>({
-    defaultValues: { daysOfWeek: [] }
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<FormData>({
+    defaultValues: { daysOfWeek: ['1','2','3','4','5'] }
   });
 
   useEffect(() => {
@@ -63,6 +67,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
       fetchFormData();
     } else {
       reset();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApiError(null);
     }
   }, [isOpen, reset]);
@@ -79,7 +84,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
 
     try {
       await axios.post('/api/schedules/generate', payload);
-      alert('Grade gerada com sucesso!');
+      alertDialog('Grade gerada com sucesso!');
       onSuccess();
     } catch (error) {
       console.error('Erro na geração da grade:', error);
@@ -96,21 +101,22 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-[2rem] p-8 w-full max-w-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-4xl w-full max-w-4xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col min-h-[80vh] max-h-[95vh] overflow-hidden">
         
-        <div className="flex justify-between items-center mb-6">
+        <div className="p-8 pb-6 shrink-0 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
             <div className="p-2 bg-blue-50 text-[#004a8d] rounded-xl">
               <CalendarClock size={24} />
             </div>
-            Geração em Massa
+            Geração de Cronograma
           </h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
             <X size={20} />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 px-8 pb-4 flex flex-col gap-5">
           
           {apiError && (
             <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl flex items-start gap-3">
@@ -132,77 +138,135 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Turma</label>
-                  <select {...register('classGroupId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                  <Select {...register('classGroupId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
                     <option value="">Selecione a turma...</option>
                     {classGroups.map(cg => <option key={cg.id} value={cg.id}>{cg.code || cg.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Disciplina</label>
-                  <select {...register('subjectId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                  <Select {...register('subjectId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
                     <option value="">Selecione a disciplina...</option>
                     {subjects.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Professor</label>
-                  <select {...register('professorId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                  <Select {...register('professorId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
                     <option value="">Selecione o professor...</option>
                     {professors.map(prof => <option key={prof.id} value={prof.id}>{prof.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Sala/Ambiente</label>
-                  <select {...register('roomId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
+                  <Select {...register('roomId', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer">
                     <option value="">Selecione a sala...</option>
                     {rooms.map(room => <option key={room.id} value={room.id}>{room.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início da Grade</label>
-                  <input type="date" {...register('startDate', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#004a8d] transition-colors z-10">
+                      <Calendar size={18} strokeWidth={2.5} />
+                    </div>
+                    <Controller
+                      control={control}
+                      name="startDate"
+                      rules={{ required: "Data de início é obrigatória" }}
+                      render={({ field: { onChange, value } }) => (
+                        <DateSelect value={value} onChange={onChange} placeholder="DD/MM/AAAA" hasError={!!errors.startDate} />
+                      )}
+                    />
+                  </div>
+                  {errors.startDate && <span className="text-xs text-rose-500 font-bold mt-1 block">{errors.startDate.message}</span>}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Hora Inicial</label>
-                    <input type="time" {...register('startTimeStr', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#004a8d] transition-colors z-10">
+                        <Clock size={18} strokeWidth={2.5} />
+                      </div>
+                      <Controller
+                        control={control}
+                        name="startTimeStr"
+                        rules={{ required: "Hora inicial é obrigatória" }}
+                        render={({ field: { onChange, value } }) => (
+                          <TimeSelect value={value} onChange={onChange} placeholder="--:--" hasError={!!errors.startTimeStr} />
+                        )}
+                      />
+                    </div>
+                    {errors.startTimeStr && <span className="text-xs text-rose-500 font-bold mt-1 block">{errors.startTimeStr.message}</span>}
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Hora Final</label>
-                    <input type="time" {...register('endTimeStr', { required: true })} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#004a8d] transition-colors z-10">
+                        <Clock size={18} strokeWidth={2.5} />
+                      </div>
+                      <Controller
+                        control={control}
+                        name="endTimeStr"
+                        rules={{ required: "Hora final é obrigatória" }}
+                        render={({ field: { onChange, value } }) => (
+                          <TimeSelect value={value} onChange={onChange} placeholder="--:--" hasError={!!errors.endTimeStr} />
+                        )}
+                      />
+                    </div>
+                    {errors.endTimeStr && <span className="text-xs text-rose-500 font-bold mt-1 block">{errors.endTimeStr.message}</span>}
                   </div>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Dias da Semana</label>
-                <div className="flex flex-wrap gap-4 bg-[#f8f9fc] p-4 rounded-xl">
-                  {[
-                    { label: 'Dom', value: '0' },
-                    { label: 'Seg', value: '1' },
-                    { label: 'Ter', value: '2' },
-                    { label: 'Qua', value: '3' },
-                    { label: 'Qui', value: '4' },
-                    { label: 'Sex', value: '5' },
-                    { label: 'Sáb', value: '6' },
-                  ].map((day) => (
-                    <label key={day.value} className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        value={day.value}
-                        {...register('daysOfWeek', { required: true })}
-                        className="w-5 h-5 text-[#004a8d] border-slate-300 rounded focus:ring-[#004a8d] cursor-pointer"
-                      />
-                      <span className="text-sm font-bold text-slate-700">{day.label}</span>
-                    </label>
-                  ))}
-                </div>
+                <Controller
+                  control={control}
+                  name="daysOfWeek"
+                  rules={{ required: true }}
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-wrap sm:flex-nowrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1">
+                      {[
+                        { label: 'Dom', value: '0' },
+                        { label: 'Seg', value: '1' },
+                        { label: 'Ter', value: '2' },
+                        { label: 'Qua', value: '3' },
+                        { label: 'Qui', value: '4' },
+                        { label: 'Sex', value: '5' },
+                        { label: 'Sáb', value: '6' },
+                      ].map((day) => {
+                        const isSelected = value?.includes(day.value);
+                        return (
+                          <button
+                            key={day.value}
+                            type="button"
+                            onClick={() => {
+                              const newValue = isSelected
+                                ? value.filter((v: string) => v !== day.value)
+                                : [...(value || []), day.value];
+                              onChange(newValue);
+                            }}
+                            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                              isSelected
+                                ? 'bg-[#004a8d] text-white shadow-md'
+                                : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'
+                            }`}
+                          >
+                            {day.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
                 {errors.daysOfWeek && <span className="text-xs text-rose-500 font-bold mt-2 block">Selecione pelo menos um dia letivo para a grade.</span>}
               </div>
             </>
           )}
+          </div>
 
-          <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <div className="p-8 py-6 shrink-0 bg-white border-t border-slate-100 flex justify-end gap-3 rounded-b-4xl">
             <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors disabled:opacity-50">
               Cancelar
             </button>

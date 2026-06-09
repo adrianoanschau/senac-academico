@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, MapPin, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, X, Info } from 'lucide-react';
 import axios from 'axios';
+import { Select } from '../components/Select';
+import { confirmDialog, alertDialog } from '../utils/dialog';
+import { ContextPanel } from '../components/ContextPanel';
 
 interface Room {
   id?: string | number;
@@ -21,6 +24,7 @@ export const Rooms: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Room>(initialFormState);
+  const [typeFilter, setTypeFilter] = useState('all');
 
   const fetchRooms = async () => {
     setIsLoading(true);
@@ -51,14 +55,14 @@ export const Rooms: React.FC = () => {
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return;
-    if (!window.confirm('Tem certeza que deseja excluir esta sala?')) return;
+    if (!(await confirmDialog('Tem certeza que deseja excluir esta sala?'))) return;
 
     try {
       await axios.delete(`/api/rooms/${id}`);
       fetchRooms();
     } catch (error) {
       console.error('Erro ao excluir sala:', error);
-      alert('Erro ao excluir a sala. Verifique dependências.');
+      alertDialog('Erro ao excluir a sala. Verifique dependências.');
     }
   };
 
@@ -83,7 +87,7 @@ export const Rooms: React.FC = () => {
       fetchRooms();
     } catch (error) {
       console.error('Erro ao salvar sala:', error);
-      alert('Erro ao salvar os dados da sala.');
+      alertDialog('Erro ao salvar os dados da sala.');
     } finally {
       setIsSaving(false);
     }
@@ -95,7 +99,7 @@ export const Rooms: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-orange-50 text-[#f37021] rounded-xl">
+            <div className="p-2 bg-menu-salas/10 text-menu-salas rounded-xl">
               <MapPin size={28} />
             </div>
             Salas e Ambientes
@@ -104,7 +108,7 @@ export const Rooms: React.FC = () => {
         </div>
         <button 
           onClick={handleOpenNewModal}
-          className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]"
+          className="bg-menu-salas hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-salas/30"
         >
           <Plus size={20} />
           Nova Sala
@@ -122,17 +126,27 @@ export const Rooms: React.FC = () => {
             </div>
             <input
               type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-salas outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar ambiente..."
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
              <span>Tipo:</span>
-             <select className="bg-[#f8f9fc] border-none rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#f37021] cursor-pointer">
-              <option value="all">Todos os tipos</option>
-              <option value="lab">Laboratórios</option>
-              <option value="sala">Salas Teóricas</option>
-            </select>
+             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
+              {[
+                { id: 'all', label: 'Todos' },
+                { id: 'lab', label: 'Laboratórios' },
+                { id: 'sala', label: 'Salas Teóricas' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setTypeFilter(s.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${typeFilter === s.id ? 'bg-menu-salas text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -144,7 +158,7 @@ export const Rooms: React.FC = () => {
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Nome/Número</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Tipo</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Capacidade</th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right">Ações</th>
+                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right"></th>
               </tr>
             </thead>
             <tbody>
@@ -166,7 +180,7 @@ export const Rooms: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleOpenEditModal(sala)}
-                          className="p-2 text-slate-400 hover:text-[#004a8d] hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-menu-salas hover:bg-menu-salas/10 rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit2 size={18} />
@@ -209,27 +223,27 @@ export const Rooms: React.FC = () => {
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Nome ou Número</label>
-                <input required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} type="text" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800" placeholder="Ex: Laboratório 203" />
+                <input required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} type="text" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-salas outline-none transition-all text-slate-800" placeholder="Ex: Laboratório 203" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de Ambiente</label>
-                <select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 cursor-pointer">
+                <Select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-salas outline-none transition-all text-slate-800 cursor-pointer">
                   <option value="Laboratório de TI">Laboratório de TI</option>
                   <option value="Sala Teórica">Sala Teórica</option>
                   <option value="Laboratório Prático">Laboratório Prático</option>
                   <option value="Auditório">Auditório</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Capacidade Máxima (Alunos)</label>
-                <input required value={formData.capacity} onChange={(e) => setFormData({...formData, capacity: Number(e.target.value)})} type="number" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800" placeholder="Ex: 30" />
+                <input required value={formData.capacity} onChange={(e) => setFormData({...formData, capacity: Number(e.target.value)})} type="number" className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-salas outline-none transition-all text-slate-800" placeholder="Ex: 30" />
               </div>
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" disabled={isSaving} className="bg-[#004a8d] hover:bg-[#00386b] disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
+                <button type="submit" disabled={isSaving} className="bg-menu-salas hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-salas/30">
                   {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
@@ -237,6 +251,38 @@ export const Rooms: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ContextPanel
+        title="Salas e Ambientes"
+        description="Cadastre as salas, laboratórios e auditórios. Verifique sempre a capacidade máxima para evitar conflitos com o número de alunos das turmas."
+        icon={<Info className="text-menu-salas" size={24} />}
+        tips={[
+          'Diferencie bem as Salas Teóricas dos Laboratórios Práticos.',
+          'Fique atento à capacidade do ambiente, ela deverá ser suficiente para abrigar a turma alocada lá.'
+        ]}
+      >
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
+          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <MapPin size={16} className="text-menu-salas" /> Resumo
+          </h4>
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
+            <span>Total de Ambientes:</span>
+            <span className="font-bold">{rooms.length}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
+            <span>Salas Teóricas:</span>
+            <span className="font-bold">{rooms.filter(r => r.type === 'Sala Teórica').length}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
+            <span>Laboratórios:</span>
+            <span className="font-bold">{rooms.filter(r => r.type.includes('Laboratório')).length}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-slate-600">
+            <span>Capacidade Total:</span>
+            <span className="font-bold">{rooms.reduce((acc, curr) => acc + (curr.capacity || 0), 0)} vagas</span>
+          </div>
+        </div>
+      </ContextPanel>
     </div>
   );
 };

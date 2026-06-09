@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, CalendarDays, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, CalendarDays, X, Calendar, Clock, Check, Info } from 'lucide-react';
 import axios from 'axios';
+import { Select } from '../components/Select';
+import { DateSelect } from '../components/DateSelect';
+import { TimeSelect } from '../components/TimeSelect';
+import { confirmDialog, alertDialog } from '../utils/dialog';
+import { ContextPanel } from '../components/ContextPanel';
 
 interface ScheduleOverride {
   id: string;
@@ -13,10 +18,14 @@ interface ScheduleOverride {
 export const CalendarReserves: React.FC = () => {
   const [feriados, setFeriados] = useState<ScheduleOverride[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAllDay, setIsAllDay] = useState(true);
+  const [yearFilter, setYearFilter] = useState('2026');
 
   const [formData, setFormData] = useState({
     title: '',
+    startDate: '',
     startTime: '',
+    endDate: '',
     endTime: '',
     type: 'BLOCK',
   });
@@ -42,39 +51,49 @@ export const CalendarReserves: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const finalStartTime = isAllDay ? '00:00' : formData.startTime;
+    const finalEndTime = isAllDay ? '23:59' : formData.endTime;
+
+    if (!formData.startDate || !finalStartTime || !formData.endDate || !finalEndTime) {
+      alertDialog('Preencha as datas e horários corretamente.');
+      return;
+    }
+
     const payload = {
       title: formData.title,
-      startTime: new Date(formData.startTime).toISOString(),
-      endTime: new Date(formData.endTime).toISOString(),
+      startTime: new Date(`${formData.startDate}T${finalStartTime}:00`).toISOString(),
+      endTime: new Date(`${formData.endDate}T${finalEndTime}:00`).toISOString(),
       type: formData.type,
     };
 
     try {
       await axios.post('/api/schedule-overrides', payload);
-      alert('Reserva/Bloqueio salvo com sucesso!');
-      setFormData({ title: '', startTime: '', endTime: '', type: 'BLOCK' });
+      alertDialog('Período Especial salvo com sucesso!');
+      setFormData({ title: '', startDate: '', startTime: '', endDate: '', endTime: '', type: 'BLOCK' });
+      setIsAllDay(true);
       setIsModalOpen(false);
       fetchOverrides();
     } catch (error) {
       console.error(error);
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao conectar com a API.';
-        alert(`Erro ao criar a reserva: ${errorMessage}`);
+        alertDialog(`Erro ao criar a reserva: ${errorMessage}`);
       } else {
-        alert('Ocorreu um erro inesperado ao salvar a reserva.');
+        alertDialog('Ocorreu um erro inesperado ao salvar a reserva.');
       }
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja remover esta reserva/bloqueio?')) return;
+    if (!(await confirmDialog('Tem certeza que deseja remover esta reserva/bloqueio?'))) return;
     try {
       await axios.delete(`/api/schedule-overrides/${id}`);
-      alert('Removido com sucesso!');
+      alertDialog('Removido com sucesso!');
       fetchOverrides();
     } catch (error) {
       console.error(error);
-      alert('Erro ao remover.');
+      alertDialog('Erro ao remover.');
     }
   };
 
@@ -84,19 +103,23 @@ export const CalendarReserves: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-rose-50 text-rose-500 rounded-xl">
+            <div className="p-2 bg-menu-especiais/10 text-menu-especiais rounded-xl">
               <CalendarDays size={28} />
             </div>
-            Calendário Base
+            Períodos Especiais
           </h1>
-          <p className="text-slate-500 mt-1">Gerencie reservas de calendário (sobrescrita do padrão de dias letivos e não letivos).</p>
+          <p className="text-slate-500 mt-1">Gerencie períodos especiais (sobrescrita do padrão de dias letivos e não letivos).</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-[#f37021] hover:bg-[#d96017] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-[0_4px_14px_rgb(243,112,33,0.3)]"
+          onClick={() => {
+            setFormData({ title: '', startDate: '', startTime: '', endDate: '', endTime: '', type: 'BLOCK' });
+            setIsAllDay(true);
+            setIsModalOpen(true);
+          }}
+          className="bg-menu-especiais hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-especiais/30"
         >
           <Plus size={20} />
-          Adicionar Feriado
+          Adicionar Período Especial
         </button>
       </div>
 
@@ -111,16 +134,26 @@ export const CalendarReserves: React.FC = () => {
             </div>
             <input
               type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-especiais outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar feriado..."
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
             <span>Ano Base:</span>
-            <select className="bg-[#f8f9fc] border-none rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#f37021] cursor-pointer font-bold text-slate-800">
-              <option value="2026">2026</option>
-              <option value="2025">2025</option>
-            </select>
+            <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
+              {[
+                { id: '2026', label: '2026' },
+                { id: '2025', label: '2025' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setYearFilter(s.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${yearFilter === s.id ? 'bg-menu-especiais text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -133,15 +166,15 @@ export const CalendarReserves: React.FC = () => {
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Início</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Término</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Tipo</th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right">Ações</th>
+                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right"></th>
               </tr>
             </thead>
             <tbody>
               {feriados.map((feriado) => (
                 <tr key={feriado.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-4 font-bold text-slate-800">{feriado.title}</td>
-                  <td className="py-4 px-4 font-bold text-[#004a8d]">{new Date(feriado.startTime).toLocaleString()}</td>
-                  <td className="py-4 px-4 font-bold text-[#004a8d]">{new Date(feriado.endTime).toLocaleString()}</td>
+                  <td className="py-4 px-4 font-bold text-menu-especiais">{new Date(feriado.startTime).toLocaleString()}</td>
+                  <td className="py-4 px-4 font-bold text-menu-especiais">{new Date(feriado.endTime).toLocaleString()}</td>
                   <td className="py-4 px-4">
                     <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">
                       {feriado.type}
@@ -151,7 +184,7 @@ export const CalendarReserves: React.FC = () => {
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => setIsModalOpen(true)}
-                        className="p-2 text-slate-400 hover:text-[#004a8d] hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-menu-especiais hover:bg-menu-especiais/10 rounded-lg transition-colors"
                       >
                         <Edit2 size={18} />
                       </button>
@@ -172,7 +205,7 @@ export const CalendarReserves: React.FC = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Feriado / Recesso</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Períodos Especiais</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
                 <X size={20} />
               </button>
@@ -181,31 +214,74 @@ export const CalendarReserves: React.FC = () => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Título</label>
-                <input type="text" name="title" value={formData.title} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800" placeholder="Ex: Paixão de Cristo" />
+                <input type="text" name="title" value={formData.title} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-especiais outline-none transition-all text-slate-800" placeholder="Ex: Paixão de Cristo" />
               </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início</label>
-                  <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800" />
+              
+              <label className="flex items-center gap-3 cursor-pointer select-none w-fit">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={isAllDay}
+                    onChange={(e) => setIsAllDay(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-menu-especiais peer-focus-visible:ring-offset-2 ${isAllDay ? 'bg-menu-especiais border-menu-especiais' : 'bg-[#f8f9fc] border-slate-300'}`}>
+                    {isAllDay && <Check size={14} className="text-white" strokeWidth={3} />}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Data de Término</label>
-                  <input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800" />
+                <span className="text-sm font-bold text-slate-700">
+                  Dia todo
+                </span>
+              </label>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Início</label>
+                <div className="flex gap-3">
+                  <div className="relative group flex-1">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
+                      <Calendar size={18} strokeWidth={2.5} />
+                    </div>
+                    <DateSelect value={formData.startDate} onChange={(val) => setFormData({...formData, startDate: val})} placeholder="DD/MM/AAAA" />
+                  </div>
+                  <div className={`relative group w-36 transition-opacity ${isAllDay ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
+                      <Clock size={18} strokeWidth={2.5} />
+                    </div>
+                    <TimeSelect value={isAllDay ? '00:00' : formData.startTime} onChange={(val) => setFormData({...formData, startTime: val})} placeholder="--:--" disabled={isAllDay} />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Término</label>
+                <div className="flex gap-3">
+                  <div className="relative group flex-1">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
+                      <Calendar size={18} strokeWidth={2.5} />
+                    </div>
+                    <DateSelect value={formData.endDate} onChange={(val) => setFormData({...formData, endDate: val})} placeholder="DD/MM/AAAA" />
+                  </div>
+                  <div className={`relative group w-36 transition-opacity ${isAllDay ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
+                      <Clock size={18} strokeWidth={2.5} />
+                    </div>
+                    <TimeSelect value={isAllDay ? '23:59' : formData.endTime} onChange={(val) => setFormData({...formData, endTime: val})} placeholder="--:--" disabled={isAllDay} />
+                  </div>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Tipo</label>
-                <select name="type" value={formData.type} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 cursor-pointer">
-                  <option value="BLOCK">BLOCK (Bloqueio / Feriado)</option>
-                  <option value="RESERVE">RESERVE (Reserva)</option>
-                </select>
+                <Select name="type" value={formData.type} onChange={handleInputChange} required className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-especiais outline-none transition-all text-slate-800 cursor-pointer">
+                  <option value="BLOCK">Período Não Letivo / Feriado</option>
+                  <option value="EXTRA_DAY">Período Letivo Extraordinário</option>
+                </Select>
               </div>
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" className="bg-[#f37021] hover:bg-[#d96017] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(243,112,33,0.3)]">
+                <button type="submit" className="bg-menu-especiais hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-especiais/30">
                   Salvar
                 </button>
               </div>
@@ -213,6 +289,31 @@ export const CalendarReserves: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ContextPanel
+        title="Períodos Especiais"
+        description="Configure feriados e dias não letivos. Eles influenciam a geração automática, impedindo que aulas caiam em datas bloqueadas."
+        icon={<Info className="text-menu-especiais" size={24} />}
+        tips={[
+          'Dias configurados como bloqueios evitam o agendamento automático de aulas.',
+          'Você pode configurar bloqueios de dia inteiro ou para horários muito específicos.',
+          'Mantenha o calendário escolar atualizado para maior precisão do Cronograma.'
+        ]}
+      >
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
+          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <CalendarDays size={16} className="text-menu-especiais" /> Resumo
+          </h4>
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
+            <span>Total de Períodos:</span>
+            <span className="font-bold">{feriados.length}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-slate-600">
+            <span>Feriados/Bloqueios:</span>
+            <span className="font-bold text-rose-500">{feriados.filter(f => f.type === 'BLOCK').length}</span>
+          </div>
+        </div>
+      </ContextPanel>
     </div>
   );
 };

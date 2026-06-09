@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, BookOpen, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, BookOpen, X, Info } from 'lucide-react';
 import axios from 'axios';
+import { confirmDialog, alertDialog } from '../utils/dialog';
+import { ContextPanel } from '../components/ContextPanel';
 
 interface Subject {
   id?: string | number;
@@ -21,6 +23,7 @@ export const Subjects: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Subject>(initialFormState);
+  const [axisFilter, setAxisFilter] = useState('all');
 
   const fetchSubjects = async () => {
     setIsLoading(true);
@@ -50,14 +53,14 @@ export const Subjects: React.FC = () => {
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return;
-    if (!window.confirm('Tem certeza que deseja excluir esta unidade curricular?')) return;
+    if (!(await confirmDialog('Tem certeza que deseja excluir esta unidade curricular?'))) return;
 
     try {
       await axios.delete(`/api/subjects/${id}`);
       fetchSubjects();
     } catch (error) {
       console.error('Erro ao excluir unidade curricular:', error);
-      alert('Erro ao excluir. Verifique dependências antes de remover.');
+      alertDialog('Erro ao excluir. Verifique dependências antes de remover.');
     }
   };
 
@@ -82,7 +85,7 @@ export const Subjects: React.FC = () => {
       fetchSubjects();
     } catch (error) {
       console.error('Erro ao salvar unidade curricular:', error);
-      alert('Erro ao salvar os dados.');
+      alertDialog('Erro ao salvar os dados.');
     } finally {
       setIsSaving(false);
     }
@@ -94,7 +97,7 @@ export const Subjects: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
+            <div className="p-2 bg-menu-uc/10 text-menu-uc rounded-xl">
               <BookOpen size={28} />
             </div>
             Unidades Curriculares
@@ -103,7 +106,7 @@ export const Subjects: React.FC = () => {
         </div>
         <button 
           onClick={handleOpenNewModal}
-          className="bg-[#004a8d] hover:bg-[#00386b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]"
+          className="bg-menu-uc hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-uc/30"
         >
           <Plus size={20} />
           Nova Disciplina
@@ -121,18 +124,28 @@ export const Subjects: React.FC = () => {
             </div>
             <input
               type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
               placeholder="Buscar unidade curricular..."
             />
           </div>
           <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
             <span>Eixo Tecnológico:</span>
-            <select className="bg-[#f8f9fc] border-none rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#004a8d] cursor-pointer">
-              <option value="all">Todos os Eixos</option>
-              <option value="ti">Tecnologia</option>
-              <option value="design">Design</option>
-              <option value="comum">Base Comum</option>
-            </select>
+            <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
+              {[
+                { id: 'all', label: 'Todos' },
+                { id: 'ti', label: 'Tecnologia' },
+                { id: 'design', label: 'Design' },
+                { id: 'comum', label: 'Base Comum' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setAxisFilter(s.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${axisFilter === s.id ? 'bg-menu-uc text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -144,7 +157,7 @@ export const Subjects: React.FC = () => {
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Nome da UC</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm">Código</th>
                 <th className="py-4 px-4 font-bold text-slate-400 text-sm text-center">Carga Horária Total</th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right">Ações</th>
+                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right"></th>
               </tr>
             </thead>
             <tbody>
@@ -161,12 +174,12 @@ export const Subjects: React.FC = () => {
                   <tr key={subject.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-4 font-bold text-slate-800">{subject.name}</td>
                     <td className="py-4 px-4 text-slate-500 font-medium">{subject.code}</td>
-                    <td className="py-4 px-4 text-center font-bold text-[#f37021]">{subject.hours} horas</td>
+                    <td className="py-4 px-4 text-center font-bold text-menu-uc">{subject.hours} horas</td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleOpenEditModal(subject)}
-                          className="p-2 text-slate-400 hover:text-[#004a8d] hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-menu-uc hover:bg-menu-uc/10 rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit2 size={18} />
@@ -215,22 +228,22 @@ export const Subjects: React.FC = () => {
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Nome da UC</label>
-                <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: Lógica de Programação" />
+                <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800" placeholder="Ex: Lógica de Programação" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Código da UC</label>
-                <input required type="text" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: LP" />
+                <input required type="text" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800" placeholder="Ex: LP" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Carga Horária Total</label>
-                <input required type="number" value={formData.hours} onChange={(e) => setFormData({...formData, hours: Number(e.target.value)})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800" placeholder="Ex: 60" />
+                <input required type="number" value={formData.hours} onChange={(e) => setFormData({...formData, hours: Number(e.target.value)})} className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800" placeholder="Ex: 60" />
               </div>
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" disabled={isSaving} className="bg-[#004a8d] hover:bg-[#00386b] disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-[0_4px_14px_rgb(0,74,141,0.3)]">
+                <button type="submit" disabled={isSaving} className="bg-menu-uc hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-uc/30">
                   {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
@@ -238,6 +251,30 @@ export const Subjects: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ContextPanel
+        title="Unidades Curriculares"
+        description="Cadastre as disciplinas informando a carga horária total para que o cronograma seja calculado e distribuído de maneira correta no calendário."
+        icon={<Info className="text-menu-uc" size={24} />}
+        tips={[
+          'A "Carga Horária Total" é essencial para que o sistema consiga dividir as aulas automaticamente ao gerar um cronograma.',
+          'Defina códigos fáceis para identificar rapidamente a disciplina ao montar a grade.'
+        ]}
+      >
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
+          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <BookOpen size={16} className="text-menu-uc" /> Resumo
+          </h4>
+          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
+            <span>Total de Disciplinas:</span>
+            <span className="font-bold">{subjects.length}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs text-slate-600">
+            <span>Carga Horária Média:</span>
+            <span className="font-bold">{subjects.length > 0 ? Math.round(subjects.reduce((acc, curr) => acc + (curr.hours || 0), 0) / subjects.length) : 0}h</span>
+          </div>
+        </div>
+      </ContextPanel>
     </div>
   );
 };

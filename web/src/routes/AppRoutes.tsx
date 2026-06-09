@@ -20,17 +20,17 @@ export const AppRoutes: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
-          <Route path="alunos" element={<Placeholder />} />
-          <Route path="cursos" element={<Courses />} />
-          <Route path="turmas" element={<ClassGroups />} />
-          <Route path="cronograma" element={<Schedule />} />
-          <Route path="matriz-curricular" element={<Curriculums />} />
-          <Route path="matriculas" element={<Placeholder />} />
-          <Route path="perfil" element={<Placeholder />} />
-          <Route path="professores" element={<Professors />} />
-          <Route path="salas" element={<Rooms />} />
-          <Route path="feriados" element={<CalendarReserves />} />
-          <Route path="disciplinas" element={<Subjects />} />
+          <Route path="students" element={<Placeholder />} />
+          <Route path="courses" element={<Courses />} />
+          <Route path="class-groups" element={<ClassGroups />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="curriculums" element={<Curriculums />} />
+          <Route path="enrollments" element={<Placeholder />} />
+          <Route path="profile" element={<Placeholder />} />
+          <Route path="professors" element={<Professors />} />
+          <Route path="rooms" element={<Rooms />} />
+          <Route path="calendar-reserves" element={<CalendarReserves />} />
+          <Route path="subjects" element={<Subjects />} />
         </Route>
       </Routes>
     </BrowserRouter>
