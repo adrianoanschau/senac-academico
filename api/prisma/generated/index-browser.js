@@ -236,6 +236,7 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 exports.ClassStatus = exports.$Enums.ClassStatus = {
+  PLANNED: 'PLANNED',
   SCHEDULED: 'SCHEDULED',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED'

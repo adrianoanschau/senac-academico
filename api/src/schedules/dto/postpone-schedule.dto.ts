@@ -1,4 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class PostponeScheduleDto {
   @IsString()
@@ -6,4 +11,8 @@ export class PostponeScheduleDto {
     message: 'O motivo do cancelamento/reagendamento é obrigatório.',
   })
   reason: string;
+
+  @IsOptional()
+  @IsDateString()
+  newDate?: string;
 }

@@ -268,10 +268,10 @@ export class SchedulesService {
   }
 
   // MÉTODOS PÚBLICOS
-  async postponeClass(id: string, reason: string) {
+  async postponeClass(id: string, reason: string, newDateStr?: string) {
     const result = await this.prisma.$transaction(async (tx) => {
       // Passamos o motivo para dentro da transação
-      return this.executeCascadePostpone(id, tx, reason);
+      return this.executeCascadePostpone(id, tx, reason, newDateStr);
     });
 
     return {
@@ -285,6 +285,7 @@ export class SchedulesService {
     id: string,
     tx: Prisma.TransactionClient,
     reason: string,
+    newDateStr?: string,
   ) {
     // 1. Busca a aula atual (usando o tx em vez de this.prisma)
     const classToCancel = await tx.schedule.findUnique({
@@ -298,13 +299,23 @@ export class SchedulesService {
       );
     }
 
+    if (classToCancel.status === ClassStatus.COMPLETED) {
+      throw new BadRequestException('Aulas concluídas não podem ser adiadas.');
+    }
+
     const { rule } = classToCancel;
 
     // 2. Encontra a ÚLTIMA aula agendada desta mesma regra
     const lastClass = await tx.schedule.findFirst({
       where: {
         ruleId: rule.id,
-        status: { in: [ClassStatus.SCHEDULED, ClassStatus.COMPLETED] },
+        status: {
+          in: [
+            ClassStatus.SCHEDULED,
+            ClassStatus.COMPLETED,
+            ClassStatus.PLANNED,
+          ],
+        },
       },
       orderBy: { startTime: 'desc' },
     });
@@ -323,17 +334,41 @@ export class SchedulesService {
     const [endH, endM] = rule.endTimeStr.split(':').map(Number);
     const singleClassHours = (endH * 60 + endM - (startH * 60 + startM)) / 60;
 
-    const projections = await this.generatorService.generateProjections(
-      nextDateToSearch,
-      rule.daysOfWeek,
-      rule.startTimeStr,
-      rule.endTimeStr,
-      singleClassHours,
-    );
+    let newProj: { startTime: Date; endTime: Date };
 
-    if (projections.length === 0)
-      throw new BadRequestException('Erro ao projetar nova data.');
-    const newProj = projections[0];
+    if (newDateStr) {
+      const dateString = newDateStr.includes('T')
+        ? newDateStr
+        : `${newDateStr}T12:00:00`;
+      const parsedDate = new Date(dateString);
+      const proposedStart = new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate(),
+        startH,
+        startM,
+      );
+      const proposedEnd = new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate(),
+        endH,
+        endM,
+      );
+      newProj = { startTime: proposedStart, endTime: proposedEnd };
+    } else {
+      const projections = await this.generatorService.generateProjections(
+        nextDateToSearch,
+        rule.daysOfWeek,
+        rule.startTimeStr,
+        rule.endTimeStr,
+        singleClassHours,
+      );
+
+      if (projections.length === 0)
+        throw new BadRequestException('Erro ao projetar nova data.');
+      newProj = projections[0];
+    }
 
     // ==========================================
     // 4. O EFEITO CASCATA (Análise de Conflitos)
@@ -345,11 +380,16 @@ export class SchedulesService {
         classGroupId: rule.classGroupId,
         startTime: { lt: newProj.endTime },
         endTime: { gt: newProj.startTime },
-        status: 'SCHEDULED',
+        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
       },
     });
 
     if (internalConflict) {
+      if (newDateStr) {
+        throw new ConflictException(
+          `Conflito de Turma: A turma já possui uma aula agendada para a data solicitada (${newProj.startTime.toLocaleDateString()}).`,
+        );
+      }
       // O EFEITO DOMINÓ: Se uma aula precisou ser empurrada por causa de outra,
       // injetamos um motivo automático informando a origem da cascata!
       await this.executeCascadePostpone(
@@ -367,7 +407,7 @@ export class SchedulesService {
         classGroupId: { not: rule.classGroupId }, // Ignora a própria turma
         startTime: { lt: newProj.endTime },
         endTime: { gt: newProj.startTime },
-        status: ClassStatus.SCHEDULED,
+        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
       },
       include: { classGroup: true },
     });
@@ -384,7 +424,7 @@ export class SchedulesService {
         classGroupId: { not: rule.classGroupId },
         startTime: { lt: newProj.endTime },
         endTime: { gt: newProj.startTime },
-        status: ClassStatus.SCHEDULED,
+        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
       },
       include: { classGroup: true },
     });
@@ -395,14 +435,20 @@ export class SchedulesService {
       );
     }
 
-    // 5. Efetivação: Salva o cancelamento e a sua justificação
-    await tx.schedule.update({
-      where: { id },
-      data: {
-        status: 'CANCELLED',
-        cancelReason: reason,
-      },
-    });
+    // 5. Efetivação: Salva o cancelamento, exclusão ou justificação
+    if (classToCancel.status === ClassStatus.PLANNED) {
+      await tx.schedule.delete({
+        where: { id },
+      });
+    } else {
+      await tx.schedule.update({
+        where: { id },
+        data: {
+          status: ClassStatus.CANCELLED,
+          cancelReason: reason,
+        },
+      });
+    }
 
     // Cria a aula nova no fim da fila
     return tx.schedule.create({
@@ -414,7 +460,7 @@ export class SchedulesService {
         ruleId: rule.id,
         startTime: newProj.startTime,
         endTime: newProj.endTime,
-        status: 'SCHEDULED',
+        status: ClassStatus.SCHEDULED,
       },
     });
   }

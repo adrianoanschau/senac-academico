@@ -19,7 +19,7 @@ export const Schedule: React.FC = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<string[]>(['SCHEDULED', 'COMPLETED']);
+  const [status, setStatus] = useState<string[]>(['PLANNED', 'SCHEDULED', 'COMPLETED']);
   const [subjectId, setSubjectId] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');
   const [professorId, setProfessorId] = useState<string>('');
@@ -107,6 +107,7 @@ export const Schedule: React.FC = () => {
             <span>Status:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
+                { id: 'PLANNED', label: 'Planejados' },
                 { id: 'SCHEDULED', label: 'Agendados' },
                 { id: 'COMPLETED', label: 'Concluídos' },
                 { id: 'CANCELLED', label: 'Cancelados' },

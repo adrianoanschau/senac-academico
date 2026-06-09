@@ -77,6 +77,7 @@ export type OverrideType = (typeof OverrideType)[keyof typeof OverrideType]
 
 
 export const ClassStatus: {
+  PLANNED: 'PLANNED',
   SCHEDULED: 'SCHEDULED',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED'

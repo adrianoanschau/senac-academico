@@ -31,7 +31,7 @@ export interface ScheduleResponse {
   professor: { name: string };
   room: { name: string };
   classGroup: { code: string };
-  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'PLANNED';
   cancelReason?: string;
 }
 
@@ -159,6 +159,11 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           .senac-calendar .fc-event-cancelled .fc-event-main {
             color: #ef4444 !important; /* text-red-500 */
           }
+          .senac-calendar .fc-event-planned {
+            opacity: 0.8;
+            border-style: dashed !important;
+            border-width: 1px !important;
+          }
         `}</style>
         <FullCalendar
           ref={calendarRef}
@@ -207,6 +212,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
 
               const calendarEvents = data.map((schedule) => {
                 const isCancelled = schedule.status === 'CANCELLED';
+                const isPlanned = schedule.status === 'PLANNED';
                 const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
                 return {
                 id: String(schedule.id),
@@ -221,7 +227,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
                   },
                   backgroundColor: color,
                   borderColor: color,
-                  className: isCancelled ? 'fc-event-cancelled' : '',
+                  className: isCancelled ? 'fc-event-cancelled' : (isPlanned ? 'fc-event-planned' : ''),
                 };
               });
 

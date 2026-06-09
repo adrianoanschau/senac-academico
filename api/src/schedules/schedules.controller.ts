@@ -80,7 +80,11 @@ export class SchedulesController {
     @Body() postponeDto: PostponeScheduleDto,
   ) {
     return {
-      data: await this.schedulesService.postponeClass(id, postponeDto.reason),
+      data: await this.schedulesService.postponeClass(
+        id,
+        postponeDto.reason,
+        postponeDto.newDate,
+      ),
     };
   }
 }

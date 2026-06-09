@@ -13,6 +13,7 @@ enum OverrideType {
 }
 
 enum ClassStatus {
+  PLANNED
   SCHEDULED
   COMPLETED
   CANCELLED
@@ -119,10 +120,10 @@ model ClassGroup {
 }
 
 model Schedule {
-  id        String      @id @default(uuid())
-  startTime DateTime
-  endTime   DateTime
-  status    ClassStatus @default(SCHEDULED)
+  id           String      @id @default(uuid())
+  startTime    DateTime
+  endTime      DateTime
+  status       ClassStatus @default(SCHEDULED)
   cancelReason String?
 
   classGroupId String

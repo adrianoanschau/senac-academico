@@ -13,6 +13,7 @@ enum OverrideType {
 }
 
 enum ClassStatus {
+  PLANNED
   SCHEDULED
   COMPLETED
   CANCELLED

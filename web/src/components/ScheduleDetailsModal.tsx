@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { alertDialog } from '../utils/dialog';
+import { DateSelect } from './DateSelect';
 
 interface ScheduleDetailsModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
   const [isPostponing, setIsPostponing] = useState(false);
   const [showPostponeForm, setShowPostponeForm] = useState(false);
   const [postponeReason, setPostponeReason] = useState('');
+  const [postponeNewDate, setPostponeNewDate] = useState('');
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
       setDetails(null);
       setShowPostponeForm(false);
       setPostponeReason('');
+      setPostponeNewDate('');
       setError(null);
     }
 
@@ -75,7 +79,10 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
     setIsPostponing(true);
     setError(null);
     try {
-      await axios.post(`/api/schedules/${eventId}/postpone`, { reason: postponeReason });
+      await axios.post(`/api/schedules/${eventId}/postpone`, { 
+        reason: postponeReason,
+        ...(postponeNewDate ? { newDate: postponeNewDate } : {})
+      });
       alertDialog('Aula adiada com sucesso!');
       onSuccess();
       onClose();
@@ -95,7 +102,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-[2rem] p-8 w-full max-w-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-4xl p-8 w-full max-w-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[95vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-slate-800">Detalhes da Aula</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
@@ -165,6 +172,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</p>
                 <p className="font-bold text-slate-800">
+                  {details.status === 'PLANNED' && <span className="text-purple-600">Planejada</span>}
                   {details.status === 'SCHEDULED' && <span className="text-blue-600">Agendada</span>}
                   {details.status === 'COMPLETED' && <span className="text-emerald-600">Concluída</span>}
                   {details.status === 'CANCELLED' && <span className="text-rose-600">Cancelada</span>}
@@ -175,13 +183,15 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
               </div>
             </div>
 
-            {details.status === 'SCHEDULED' && !showPostponeForm && (
-              <button 
-                onClick={() => setShowPostponeForm(true)}
-                className="mt-2 bg-orange-50 hover:bg-orange-100 text-[#f37021] font-bold py-3 px-4 rounded-xl transition-colors border border-orange-200"
-              >
-                Adiar / Reagendar Aula
-              </button>
+            {(details.status === 'SCHEDULED' || details.status === 'PLANNED') && !showPostponeForm && (
+              <div className="flex gap-3 mt-2">
+                <button 
+                  onClick={() => { setShowPostponeForm(true); setError(null); }}
+                  className="w-full bg-orange-50 hover:bg-orange-100 text-[#f37021] font-bold py-3 px-4 rounded-xl transition-colors border border-orange-200"
+                >
+                  Adiar / Reagendar Aula
+                </button>
+              </div>
             )}
 
             {showPostponeForm && (
@@ -201,8 +211,21 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
                     placeholder="Ex: Professor de atestado, emenda de feriado..."
                     className="w-full px-4 py-3 bg-white border border-orange-200 rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Nova Data (Opcional)</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#f37021] transition-colors z-10">
+                      <Calendar size={18} strokeWidth={2.5} />
+                    </div>
+                    <DateSelect 
+                      value={postponeNewDate} 
+                      onChange={setPostponeNewDate} 
+                      placeholder="DD/MM/AAAA" 
+                    />
+                  </div>
                   <p className="text-xs text-slate-500 mt-2">
-                    A aula atual será cancelada e empurrada para o final do cronograma (respeitando a regra original da turma).
+                    Se preenchida, tentará encaixar a aula nesta data. Caso vazia, a aula será empurrada para o final do cronograma (respeitando a regra original da turma).
                   </p>
                 </div>
                 <div className="flex justify-end gap-3 mt-2">
