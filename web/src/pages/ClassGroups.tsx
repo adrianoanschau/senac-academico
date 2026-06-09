@@ -295,7 +295,11 @@ export const ClassGroups: React.FC = () => {
                     </div>
                     <DateSelect 
                       value={formatDateForInput(formData.startDate)} 
-                      onChange={(val) => setFormData({...formData, startDate: val})} 
+                      onChange={(val) => setFormData(prev => ({
+                        ...prev, 
+                        startDate: val,
+                        endDate: !prev.endDate || prev.endDate < val ? val : prev.endDate
+                      }))} 
                       placeholder="DD/MM/AAAA" 
                     />
                   </div>

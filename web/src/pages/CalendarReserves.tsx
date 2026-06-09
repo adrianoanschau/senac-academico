@@ -241,7 +241,15 @@ export const CalendarReserves: React.FC = () => {
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
                       <Calendar size={18} strokeWidth={2.5} />
                     </div>
-                    <DateSelect value={formData.startDate} onChange={(val) => setFormData({...formData, startDate: val})} placeholder="DD/MM/AAAA" />
+                    <DateSelect 
+                      value={formData.startDate} 
+                      onChange={(val) => setFormData(prev => ({
+                        ...prev, 
+                        startDate: val,
+                        endDate: !prev.endDate || prev.endDate < val ? val : prev.endDate
+                      }))} 
+                      placeholder="DD/MM/AAAA" 
+                    />
                   </div>
                   <div className={`relative group w-36 transition-opacity ${isAllDay ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">

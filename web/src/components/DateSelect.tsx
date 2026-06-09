@@ -64,13 +64,36 @@ export const DateSelect: React.FC<DateSelectProps> = ({ value, onChange, placeho
       </div>
       
       {isOpen && (
-        <div className="absolute z-50 mt-2 p-5 bg-white border border-slate-100 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-[280px]">
+        <div className="absolute z-50 mt-2 p-5 bg-white border border-slate-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-[280px]">
           <div className="flex justify-between items-center mb-4">
             <button type="button" onClick={prevMonth} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">
               <ChevronLeft size={20} />
             </button>
-            <div className="font-bold text-slate-800 text-sm">
-              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            <div className="font-bold text-slate-800 text-sm flex items-center justify-center">
+              <select 
+                className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer hover:bg-slate-100 rounded p-1"
+                value={currentMonth.getMonth()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setCurrentMonth(new Date(currentMonth.getFullYear(), parseInt(e.target.value), 1));
+                }}
+              >
+                {monthNames.map((m, i) => (
+                  <option key={i} value={i}>{m}</option>
+                ))}
+              </select>
+              <select
+                className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer hover:bg-slate-100 rounded p-1"
+                value={currentMonth.getFullYear()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setCurrentMonth(new Date(parseInt(e.target.value), currentMonth.getMonth(), 1));
+                }}
+              >
+                {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
             </div>
             <button type="button" onClick={nextMonth} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">
               <ChevronRight size={20} />
