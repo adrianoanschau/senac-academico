@@ -10,6 +10,7 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
+import { MigrateRuleDto } from './dto/migrate-rule.dto';
 
 @Injectable()
 export class SchedulesService {
@@ -265,6 +266,96 @@ export class SchedulesService {
       message: `Grade gerada com sucesso! ${result.count} aulas foram alocadas e a regra foi salva no histórico.`,
       generatedCount: result.count,
     };
+  }
+
+  async migrateRulePattern(ruleId: string, dto: MigrateRuleDto) {
+    // 1. Busca a regra antiga
+    const oldRule = await this.prisma.scheduleRule.findUnique({
+      where: { id: ruleId },
+    });
+
+    if (!oldRule) {
+      throw new NotFoundException(
+        `Regra de agendamento com ID ${ruleId} não encontrada.`,
+      );
+    }
+
+    const transitionDate = new Date(dto.transitionDate);
+
+    return this.prisma.$transaction(async (tx) => {
+      // 2. Deleta todas as aulas a partir da data de corte que não foram finalizadas
+      await tx.schedule.deleteMany({
+        where: {
+          ruleId,
+          startTime: { gte: transitionDate },
+          status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+        },
+      });
+
+      // 3. Calcula a carga horária já cumprida (aulas remanescentes no banco)
+      const pastClasses = await tx.schedule.findMany({
+        where: { ruleId },
+      });
+
+      const consumedMinutes = pastClasses.reduce((acc, curr) => {
+        return (
+          acc + (curr.endTime.getTime() - curr.startTime.getTime()) / 60000
+        );
+      }, 0);
+
+      const consumedHours = consumedMinutes / 60;
+      const remainingHours = oldRule.totalHours - consumedHours;
+
+      if (remainingHours <= 0) {
+        throw new BadRequestException(
+          'A carga horária original já foi totalmente consumida.',
+        );
+      }
+
+      // 4. Cria a nova regra aplicando as substituições caso existam
+      const newRule = await tx.scheduleRule.create({
+        data: {
+          classGroupId: oldRule.classGroupId,
+          subjectId: oldRule.subjectId,
+          totalHours: oldRule.totalHours,
+          daysOfWeek: dto.newDaysOfWeek,
+          startTimeStr: dto.newStartTimeStr || oldRule.startTimeStr,
+          endTimeStr: dto.newEndTimeStr || oldRule.endTimeStr,
+          professorId: dto.newProfessorId || oldRule.professorId,
+          roomId: dto.newRoomId || oldRule.roomId,
+        },
+      });
+
+      // 5. Gera as projeções para finalizar as aulas restantes e salva em transação
+      const projections = await this.generatorService.generateProjections(
+        transitionDate,
+        newRule.daysOfWeek,
+        newRule.startTimeStr,
+        newRule.endTimeStr,
+        remainingHours,
+      );
+
+      if (projections.length > 0) {
+        await tx.schedule.createMany({
+          data: projections.map((proj) => ({
+            classGroupId: newRule.classGroupId,
+            subjectId: newRule.subjectId,
+            professorId: newRule.professorId,
+            roomId: newRule.roomId,
+            startTime: proj.startTime,
+            endTime: proj.endTime,
+            ruleId: newRule.id,
+            status: ClassStatus.SCHEDULED,
+          })),
+        });
+      }
+
+      // 6. Retorno de sucesso
+      return {
+        message: 'Padrão de aulas migrado com sucesso!',
+        newRuleId: newRule.id,
+      };
+    });
   }
 
   // MÉTODOS PÚBLICOS

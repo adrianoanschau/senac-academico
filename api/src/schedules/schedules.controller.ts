@@ -13,6 +13,7 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
+import { MigrateRuleDto } from './dto/migrate-rule.dto';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -86,5 +87,17 @@ export class SchedulesController {
         postponeDto.newDate,
       ),
     };
+  }
+
+  @Post('rules/:id/migrate-pattern')
+  async migrateRulePattern(
+    @Param('id') id: string,
+    @Body() migrateRuleDto: MigrateRuleDto,
+  ) {
+    const data = await this.schedulesService.migrateRulePattern(
+      id,
+      migrateRuleDto,
+    );
+    return { data };
   }
 }
