@@ -217,6 +217,7 @@ exports.Prisma.ScheduleRuleScalarFieldEnum = {
   subjectId: 'subjectId',
   professorId: 'professorId',
   roomId: 'roomId',
+  rootRuleId: 'rootRuleId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

@@ -192,7 +192,7 @@ export const Curriculums: React.FC = () => {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
+      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
         
         {/* Toolbar */}
         <div className="flex justify-between items-center mb-6">
@@ -270,7 +270,7 @@ export const Curriculums: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 py-10">
           {/* max-w-2xl para acomodar a lista de disciplinas adequadamente */}
-          <div className="bg-white rounded-[2rem] p-8 w-full max-w-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-full overflow-y-auto">
+          <div className="bg-white rounded-4xl p-8 w-full max-w-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-full overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Grade Curricular</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">

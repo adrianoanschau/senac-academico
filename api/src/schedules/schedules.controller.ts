@@ -100,4 +100,10 @@ export class SchedulesController {
     );
     return { data };
   }
+
+  @Patch('rules/:id/publish')
+  async publishRule(@Param('id') id: string) {
+    const data = await this.schedulesService.publishRule(id);
+    return { data };
+  }
 }

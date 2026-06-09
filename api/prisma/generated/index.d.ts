@@ -1957,10 +1957,12 @@ export namespace Prisma {
 
   export type ScheduleRuleCountOutputType = {
     schedules: number
+    childRules: number
   }
 
   export type ScheduleRuleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     schedules?: boolean | ScheduleRuleCountOutputTypeCountSchedulesArgs
+    childRules?: boolean | ScheduleRuleCountOutputTypeCountChildRulesArgs
   }
 
   // Custom InputTypes
@@ -1979,6 +1981,13 @@ export namespace Prisma {
    */
   export type ScheduleRuleCountOutputTypeCountSchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ScheduleWhereInput
+  }
+
+  /**
+   * ScheduleRuleCountOutputType without action
+   */
+  export type ScheduleRuleCountOutputTypeCountChildRulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScheduleRuleWhereInput
   }
 
 
@@ -12153,6 +12162,7 @@ export namespace Prisma {
     subjectId: string | null
     professorId: string | null
     roomId: string | null
+    rootRuleId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12166,6 +12176,7 @@ export namespace Prisma {
     subjectId: string | null
     professorId: string | null
     roomId: string | null
+    rootRuleId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12180,6 +12191,7 @@ export namespace Prisma {
     subjectId: number
     professorId: number
     roomId: number
+    rootRuleId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12205,6 +12217,7 @@ export namespace Prisma {
     subjectId?: true
     professorId?: true
     roomId?: true
+    rootRuleId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12218,6 +12231,7 @@ export namespace Prisma {
     subjectId?: true
     professorId?: true
     roomId?: true
+    rootRuleId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12232,6 +12246,7 @@ export namespace Prisma {
     subjectId?: true
     professorId?: true
     roomId?: true
+    rootRuleId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12333,6 +12348,7 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ScheduleRuleCountAggregateOutputType | null
@@ -12366,6 +12382,7 @@ export namespace Prisma {
     subjectId?: boolean
     professorId?: boolean
     roomId?: boolean
+    rootRuleId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
@@ -12373,6 +12390,8 @@ export namespace Prisma {
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     schedules?: boolean | ScheduleRule$schedulesArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
+    childRules?: boolean | ScheduleRule$childRulesArgs<ExtArgs>
     _count?: boolean | ScheduleRuleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["scheduleRule"]>
 
@@ -12386,12 +12405,14 @@ export namespace Prisma {
     subjectId?: boolean
     professorId?: boolean
     roomId?: boolean
+    rootRuleId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
   }, ExtArgs["result"]["scheduleRule"]>
 
   export type ScheduleRuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12404,12 +12425,14 @@ export namespace Prisma {
     subjectId?: boolean
     professorId?: boolean
     roomId?: boolean
+    rootRuleId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
   }, ExtArgs["result"]["scheduleRule"]>
 
   export type ScheduleRuleSelectScalar = {
@@ -12422,17 +12445,20 @@ export namespace Prisma {
     subjectId?: boolean
     professorId?: boolean
     roomId?: boolean
+    rootRuleId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ScheduleRuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "daysOfWeek" | "startTimeStr" | "endTimeStr" | "totalHours" | "classGroupId" | "subjectId" | "professorId" | "roomId" | "createdAt" | "updatedAt", ExtArgs["result"]["scheduleRule"]>
+  export type ScheduleRuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "daysOfWeek" | "startTimeStr" | "endTimeStr" | "totalHours" | "classGroupId" | "subjectId" | "professorId" | "roomId" | "rootRuleId" | "createdAt" | "updatedAt", ExtArgs["result"]["scheduleRule"]>
   export type ScheduleRuleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     schedules?: boolean | ScheduleRule$schedulesArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
+    childRules?: boolean | ScheduleRule$childRulesArgs<ExtArgs>
     _count?: boolean | ScheduleRuleCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ScheduleRuleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12440,12 +12466,14 @@ export namespace Prisma {
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
   }
   export type ScheduleRuleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
     professor?: boolean | ProfessorDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    rootRule?: boolean | ScheduleRule$rootRuleArgs<ExtArgs>
   }
 
   export type $ScheduleRulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12456,6 +12484,8 @@ export namespace Prisma {
       professor: Prisma.$ProfessorPayload<ExtArgs>
       room: Prisma.$RoomPayload<ExtArgs>
       schedules: Prisma.$SchedulePayload<ExtArgs>[]
+      rootRule: Prisma.$ScheduleRulePayload<ExtArgs> | null
+      childRules: Prisma.$ScheduleRulePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12467,6 +12497,7 @@ export namespace Prisma {
       subjectId: string
       professorId: string
       roomId: string
+      rootRuleId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["scheduleRule"]>
@@ -12868,6 +12899,8 @@ export namespace Prisma {
     professor<T extends ProfessorDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProfessorDefaultArgs<ExtArgs>>): Prisma__ProfessorClient<$Result.GetResult<Prisma.$ProfessorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     room<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     schedules<T extends ScheduleRule$schedulesArgs<ExtArgs> = {}>(args?: Subset<T, ScheduleRule$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rootRule<T extends ScheduleRule$rootRuleArgs<ExtArgs> = {}>(args?: Subset<T, ScheduleRule$rootRuleArgs<ExtArgs>>): Prisma__ScheduleRuleClient<$Result.GetResult<Prisma.$ScheduleRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    childRules<T extends ScheduleRule$childRulesArgs<ExtArgs> = {}>(args?: Subset<T, ScheduleRule$childRulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12906,6 +12939,7 @@ export namespace Prisma {
     readonly subjectId: FieldRef<"ScheduleRule", 'String'>
     readonly professorId: FieldRef<"ScheduleRule", 'String'>
     readonly roomId: FieldRef<"ScheduleRule", 'String'>
+    readonly rootRuleId: FieldRef<"ScheduleRule", 'String'>
     readonly createdAt: FieldRef<"ScheduleRule", 'DateTime'>
     readonly updatedAt: FieldRef<"ScheduleRule", 'DateTime'>
   }
@@ -13333,6 +13367,49 @@ export namespace Prisma {
   }
 
   /**
+   * ScheduleRule.rootRule
+   */
+  export type ScheduleRule$rootRuleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduleRule
+     */
+    select?: ScheduleRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduleRule
+     */
+    omit?: ScheduleRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduleRuleInclude<ExtArgs> | null
+    where?: ScheduleRuleWhereInput
+  }
+
+  /**
+   * ScheduleRule.childRules
+   */
+  export type ScheduleRule$childRulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduleRule
+     */
+    select?: ScheduleRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduleRule
+     */
+    omit?: ScheduleRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduleRuleInclude<ExtArgs> | null
+    where?: ScheduleRuleWhereInput
+    orderBy?: ScheduleRuleOrderByWithRelationInput | ScheduleRuleOrderByWithRelationInput[]
+    cursor?: ScheduleRuleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScheduleRuleScalarFieldEnum | ScheduleRuleScalarFieldEnum[]
+  }
+
+  /**
    * ScheduleRule without action
    */
   export type ScheduleRuleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13489,6 +13566,7 @@ export namespace Prisma {
     subjectId: 'subjectId',
     professorId: 'professorId',
     roomId: 'roomId',
+    rootRuleId: 'rootRuleId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -14245,6 +14323,7 @@ export namespace Prisma {
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
     roomId?: StringFilter<"ScheduleRule"> | string
+    rootRuleId?: StringNullableFilter<"ScheduleRule"> | string | null
     createdAt?: DateTimeFilter<"ScheduleRule"> | Date | string
     updatedAt?: DateTimeFilter<"ScheduleRule"> | Date | string
     classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
@@ -14252,6 +14331,8 @@ export namespace Prisma {
     professor?: XOR<ProfessorScalarRelationFilter, ProfessorWhereInput>
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     schedules?: ScheduleListRelationFilter
+    rootRule?: XOR<ScheduleRuleNullableScalarRelationFilter, ScheduleRuleWhereInput> | null
+    childRules?: ScheduleRuleListRelationFilter
   }
 
   export type ScheduleRuleOrderByWithRelationInput = {
@@ -14264,6 +14345,7 @@ export namespace Prisma {
     subjectId?: SortOrder
     professorId?: SortOrder
     roomId?: SortOrder
+    rootRuleId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     classGroup?: ClassGroupOrderByWithRelationInput
@@ -14271,6 +14353,8 @@ export namespace Prisma {
     professor?: ProfessorOrderByWithRelationInput
     room?: RoomOrderByWithRelationInput
     schedules?: ScheduleOrderByRelationAggregateInput
+    rootRule?: ScheduleRuleOrderByWithRelationInput
+    childRules?: ScheduleRuleOrderByRelationAggregateInput
   }
 
   export type ScheduleRuleWhereUniqueInput = Prisma.AtLeast<{
@@ -14286,6 +14370,7 @@ export namespace Prisma {
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
     roomId?: StringFilter<"ScheduleRule"> | string
+    rootRuleId?: StringNullableFilter<"ScheduleRule"> | string | null
     createdAt?: DateTimeFilter<"ScheduleRule"> | Date | string
     updatedAt?: DateTimeFilter<"ScheduleRule"> | Date | string
     classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
@@ -14293,6 +14378,8 @@ export namespace Prisma {
     professor?: XOR<ProfessorScalarRelationFilter, ProfessorWhereInput>
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     schedules?: ScheduleListRelationFilter
+    rootRule?: XOR<ScheduleRuleNullableScalarRelationFilter, ScheduleRuleWhereInput> | null
+    childRules?: ScheduleRuleListRelationFilter
   }, "id">
 
   export type ScheduleRuleOrderByWithAggregationInput = {
@@ -14305,6 +14392,7 @@ export namespace Prisma {
     subjectId?: SortOrder
     professorId?: SortOrder
     roomId?: SortOrder
+    rootRuleId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ScheduleRuleCountOrderByAggregateInput
@@ -14327,6 +14415,7 @@ export namespace Prisma {
     subjectId?: StringWithAggregatesFilter<"ScheduleRule"> | string
     professorId?: StringWithAggregatesFilter<"ScheduleRule"> | string
     roomId?: StringWithAggregatesFilter<"ScheduleRule"> | string
+    rootRuleId?: StringNullableWithAggregatesFilter<"ScheduleRule"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ScheduleRule"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ScheduleRule"> | Date | string
   }
@@ -14992,6 +15081,8 @@ export namespace Prisma {
     professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
     room: RoomCreateNestedOneWithoutScheduleRulesInput
     schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateInput = {
@@ -15004,9 +15095,11 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUpdateInput = {
@@ -15022,6 +15115,8 @@ export namespace Prisma {
     professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
     room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
     schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateInput = {
@@ -15034,9 +15129,11 @@ export namespace Prisma {
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleCreateManyInput = {
@@ -15049,6 +15146,7 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15073,6 +15171,7 @@ export namespace Prisma {
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15665,6 +15764,7 @@ export namespace Prisma {
     subjectId?: SortOrder
     professorId?: SortOrder
     roomId?: SortOrder
+    rootRuleId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15683,6 +15783,7 @@ export namespace Prisma {
     subjectId?: SortOrder
     professorId?: SortOrder
     roomId?: SortOrder
+    rootRuleId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15696,6 +15797,7 @@ export namespace Prisma {
     subjectId?: SortOrder
     professorId?: SortOrder
     roomId?: SortOrder
+    rootRuleId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16408,11 +16510,31 @@ export namespace Prisma {
     connect?: ScheduleWhereUniqueInput | ScheduleWhereUniqueInput[]
   }
 
+  export type ScheduleRuleCreateNestedOneWithoutChildRulesInput = {
+    create?: XOR<ScheduleRuleCreateWithoutChildRulesInput, ScheduleRuleUncheckedCreateWithoutChildRulesInput>
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutChildRulesInput
+    connect?: ScheduleRuleWhereUniqueInput
+  }
+
+  export type ScheduleRuleCreateNestedManyWithoutRootRuleInput = {
+    create?: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput> | ScheduleRuleCreateWithoutRootRuleInput[] | ScheduleRuleUncheckedCreateWithoutRootRuleInput[]
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutRootRuleInput | ScheduleRuleCreateOrConnectWithoutRootRuleInput[]
+    createMany?: ScheduleRuleCreateManyRootRuleInputEnvelope
+    connect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+  }
+
   export type ScheduleUncheckedCreateNestedManyWithoutRuleInput = {
     create?: XOR<ScheduleCreateWithoutRuleInput, ScheduleUncheckedCreateWithoutRuleInput> | ScheduleCreateWithoutRuleInput[] | ScheduleUncheckedCreateWithoutRuleInput[]
     connectOrCreate?: ScheduleCreateOrConnectWithoutRuleInput | ScheduleCreateOrConnectWithoutRuleInput[]
     createMany?: ScheduleCreateManyRuleInputEnvelope
     connect?: ScheduleWhereUniqueInput | ScheduleWhereUniqueInput[]
+  }
+
+  export type ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput = {
+    create?: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput> | ScheduleRuleCreateWithoutRootRuleInput[] | ScheduleRuleUncheckedCreateWithoutRootRuleInput[]
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutRootRuleInput | ScheduleRuleCreateOrConnectWithoutRootRuleInput[]
+    createMany?: ScheduleRuleCreateManyRootRuleInputEnvelope
+    connect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
   }
 
   export type ScheduleRuleUpdatedaysOfWeekInput = {
@@ -16466,6 +16588,30 @@ export namespace Prisma {
     deleteMany?: ScheduleScalarWhereInput | ScheduleScalarWhereInput[]
   }
 
+  export type ScheduleRuleUpdateOneWithoutChildRulesNestedInput = {
+    create?: XOR<ScheduleRuleCreateWithoutChildRulesInput, ScheduleRuleUncheckedCreateWithoutChildRulesInput>
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutChildRulesInput
+    upsert?: ScheduleRuleUpsertWithoutChildRulesInput
+    disconnect?: ScheduleRuleWhereInput | boolean
+    delete?: ScheduleRuleWhereInput | boolean
+    connect?: ScheduleRuleWhereUniqueInput
+    update?: XOR<XOR<ScheduleRuleUpdateToOneWithWhereWithoutChildRulesInput, ScheduleRuleUpdateWithoutChildRulesInput>, ScheduleRuleUncheckedUpdateWithoutChildRulesInput>
+  }
+
+  export type ScheduleRuleUpdateManyWithoutRootRuleNestedInput = {
+    create?: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput> | ScheduleRuleCreateWithoutRootRuleInput[] | ScheduleRuleUncheckedCreateWithoutRootRuleInput[]
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutRootRuleInput | ScheduleRuleCreateOrConnectWithoutRootRuleInput[]
+    upsert?: ScheduleRuleUpsertWithWhereUniqueWithoutRootRuleInput | ScheduleRuleUpsertWithWhereUniqueWithoutRootRuleInput[]
+    createMany?: ScheduleRuleCreateManyRootRuleInputEnvelope
+    set?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    disconnect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    delete?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    connect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    update?: ScheduleRuleUpdateWithWhereUniqueWithoutRootRuleInput | ScheduleRuleUpdateWithWhereUniqueWithoutRootRuleInput[]
+    updateMany?: ScheduleRuleUpdateManyWithWhereWithoutRootRuleInput | ScheduleRuleUpdateManyWithWhereWithoutRootRuleInput[]
+    deleteMany?: ScheduleRuleScalarWhereInput | ScheduleRuleScalarWhereInput[]
+  }
+
   export type ScheduleUncheckedUpdateManyWithoutRuleNestedInput = {
     create?: XOR<ScheduleCreateWithoutRuleInput, ScheduleUncheckedCreateWithoutRuleInput> | ScheduleCreateWithoutRuleInput[] | ScheduleUncheckedCreateWithoutRuleInput[]
     connectOrCreate?: ScheduleCreateOrConnectWithoutRuleInput | ScheduleCreateOrConnectWithoutRuleInput[]
@@ -16478,6 +16624,20 @@ export namespace Prisma {
     update?: ScheduleUpdateWithWhereUniqueWithoutRuleInput | ScheduleUpdateWithWhereUniqueWithoutRuleInput[]
     updateMany?: ScheduleUpdateManyWithWhereWithoutRuleInput | ScheduleUpdateManyWithWhereWithoutRuleInput[]
     deleteMany?: ScheduleScalarWhereInput | ScheduleScalarWhereInput[]
+  }
+
+  export type ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput = {
+    create?: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput> | ScheduleRuleCreateWithoutRootRuleInput[] | ScheduleRuleUncheckedCreateWithoutRootRuleInput[]
+    connectOrCreate?: ScheduleRuleCreateOrConnectWithoutRootRuleInput | ScheduleRuleCreateOrConnectWithoutRootRuleInput[]
+    upsert?: ScheduleRuleUpsertWithWhereUniqueWithoutRootRuleInput | ScheduleRuleUpsertWithWhereUniqueWithoutRootRuleInput[]
+    createMany?: ScheduleRuleCreateManyRootRuleInputEnvelope
+    set?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    disconnect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    delete?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    connect?: ScheduleRuleWhereUniqueInput | ScheduleRuleWhereUniqueInput[]
+    update?: ScheduleRuleUpdateWithWhereUniqueWithoutRootRuleInput | ScheduleRuleUpdateWithWhereUniqueWithoutRootRuleInput[]
+    updateMany?: ScheduleRuleUpdateManyWithWhereWithoutRootRuleInput | ScheduleRuleUpdateManyWithWhereWithoutRootRuleInput[]
+    deleteMany?: ScheduleRuleScalarWhereInput | ScheduleRuleScalarWhereInput[]
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -16738,6 +16898,8 @@ export namespace Prisma {
     subject: SubjectCreateNestedOneWithoutScheduleRulesInput
     room: RoomCreateNestedOneWithoutScheduleRulesInput
     schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateWithoutProfessorInput = {
@@ -16749,9 +16911,11 @@ export namespace Prisma {
     classGroupId: string
     subjectId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleCreateOrConnectWithoutProfessorInput = {
@@ -16827,6 +16991,7 @@ export namespace Prisma {
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
     roomId?: StringFilter<"ScheduleRule"> | string
+    rootRuleId?: StringNullableFilter<"ScheduleRule"> | string | null
     createdAt?: DateTimeFilter<"ScheduleRule"> | Date | string
     updatedAt?: DateTimeFilter<"ScheduleRule"> | Date | string
   }
@@ -16881,6 +17046,8 @@ export namespace Prisma {
     subject: SubjectCreateNestedOneWithoutScheduleRulesInput
     professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
     schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateWithoutRoomInput = {
@@ -16892,9 +17059,11 @@ export namespace Prisma {
     classGroupId: string
     subjectId: string
     professorId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleCreateOrConnectWithoutRoomInput = {
@@ -17224,6 +17393,8 @@ export namespace Prisma {
     professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
     room: RoomCreateNestedOneWithoutScheduleRulesInput
     schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateWithoutSubjectInput = {
@@ -17235,9 +17406,11 @@ export namespace Prisma {
     classGroupId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleCreateOrConnectWithoutSubjectInput = {
@@ -17489,6 +17662,8 @@ export namespace Prisma {
     professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
     room: RoomCreateNestedOneWithoutScheduleRulesInput
     schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateWithoutClassGroupInput = {
@@ -17500,9 +17675,11 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleCreateOrConnectWithoutClassGroupInput = {
@@ -17698,6 +17875,8 @@ export namespace Prisma {
     subject: SubjectCreateNestedOneWithoutScheduleRulesInput
     professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
     room: RoomCreateNestedOneWithoutScheduleRulesInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleUncheckedCreateWithoutSchedulesInput = {
@@ -17710,8 +17889,10 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
   }
 
   export type ScheduleRuleCreateOrConnectWithoutSchedulesInput = {
@@ -17874,6 +18055,8 @@ export namespace Prisma {
     subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
     professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
     room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateWithoutSchedulesInput = {
@@ -17886,8 +18069,10 @@ export namespace Prisma {
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ClassGroupCreateWithoutScheduleRulesInput = {
@@ -18033,6 +18218,85 @@ export namespace Prisma {
 
   export type ScheduleCreateManyRuleInputEnvelope = {
     data: ScheduleCreateManyRuleInput | ScheduleCreateManyRuleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ScheduleRuleCreateWithoutChildRulesInput = {
+    id?: string
+    daysOfWeek?: ScheduleRuleCreatedaysOfWeekInput | number[]
+    startTimeStr: string
+    endTimeStr: string
+    totalHours: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    classGroup: ClassGroupCreateNestedOneWithoutScheduleRulesInput
+    subject: SubjectCreateNestedOneWithoutScheduleRulesInput
+    professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
+    room: RoomCreateNestedOneWithoutScheduleRulesInput
+    schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    rootRule?: ScheduleRuleCreateNestedOneWithoutChildRulesInput
+  }
+
+  export type ScheduleRuleUncheckedCreateWithoutChildRulesInput = {
+    id?: string
+    daysOfWeek?: ScheduleRuleCreatedaysOfWeekInput | number[]
+    startTimeStr: string
+    endTimeStr: string
+    totalHours: number
+    classGroupId: string
+    subjectId: string
+    professorId: string
+    roomId: string
+    rootRuleId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+  }
+
+  export type ScheduleRuleCreateOrConnectWithoutChildRulesInput = {
+    where: ScheduleRuleWhereUniqueInput
+    create: XOR<ScheduleRuleCreateWithoutChildRulesInput, ScheduleRuleUncheckedCreateWithoutChildRulesInput>
+  }
+
+  export type ScheduleRuleCreateWithoutRootRuleInput = {
+    id?: string
+    daysOfWeek?: ScheduleRuleCreatedaysOfWeekInput | number[]
+    startTimeStr: string
+    endTimeStr: string
+    totalHours: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    classGroup: ClassGroupCreateNestedOneWithoutScheduleRulesInput
+    subject: SubjectCreateNestedOneWithoutScheduleRulesInput
+    professor: ProfessorCreateNestedOneWithoutScheduleRulesInput
+    room: RoomCreateNestedOneWithoutScheduleRulesInput
+    schedules?: ScheduleCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleCreateNestedManyWithoutRootRuleInput
+  }
+
+  export type ScheduleRuleUncheckedCreateWithoutRootRuleInput = {
+    id?: string
+    daysOfWeek?: ScheduleRuleCreatedaysOfWeekInput | number[]
+    startTimeStr: string
+    endTimeStr: string
+    totalHours: number
+    classGroupId: string
+    subjectId: string
+    professorId: string
+    roomId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutRuleInput
+    childRules?: ScheduleRuleUncheckedCreateNestedManyWithoutRootRuleInput
+  }
+
+  export type ScheduleRuleCreateOrConnectWithoutRootRuleInput = {
+    where: ScheduleRuleWhereUniqueInput
+    create: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput>
+  }
+
+  export type ScheduleRuleCreateManyRootRuleInputEnvelope = {
+    data: ScheduleRuleCreateManyRootRuleInput | ScheduleRuleCreateManyRootRuleInput[]
     skipDuplicates?: boolean
   }
 
@@ -18184,6 +18448,65 @@ export namespace Prisma {
     data: XOR<ScheduleUpdateManyMutationInput, ScheduleUncheckedUpdateManyWithoutRuleInput>
   }
 
+  export type ScheduleRuleUpsertWithoutChildRulesInput = {
+    update: XOR<ScheduleRuleUpdateWithoutChildRulesInput, ScheduleRuleUncheckedUpdateWithoutChildRulesInput>
+    create: XOR<ScheduleRuleCreateWithoutChildRulesInput, ScheduleRuleUncheckedCreateWithoutChildRulesInput>
+    where?: ScheduleRuleWhereInput
+  }
+
+  export type ScheduleRuleUpdateToOneWithWhereWithoutChildRulesInput = {
+    where?: ScheduleRuleWhereInput
+    data: XOR<ScheduleRuleUpdateWithoutChildRulesInput, ScheduleRuleUncheckedUpdateWithoutChildRulesInput>
+  }
+
+  export type ScheduleRuleUpdateWithoutChildRulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
+    startTimeStr?: StringFieldUpdateOperationsInput | string
+    endTimeStr?: StringFieldUpdateOperationsInput | string
+    totalHours?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
+    professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
+    room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
+    schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+  }
+
+  export type ScheduleRuleUncheckedUpdateWithoutChildRulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
+    startTimeStr?: StringFieldUpdateOperationsInput | string
+    endTimeStr?: StringFieldUpdateOperationsInput | string
+    totalHours?: IntFieldUpdateOperationsInput | number
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    professorId?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+  }
+
+  export type ScheduleRuleUpsertWithWhereUniqueWithoutRootRuleInput = {
+    where: ScheduleRuleWhereUniqueInput
+    update: XOR<ScheduleRuleUpdateWithoutRootRuleInput, ScheduleRuleUncheckedUpdateWithoutRootRuleInput>
+    create: XOR<ScheduleRuleCreateWithoutRootRuleInput, ScheduleRuleUncheckedCreateWithoutRootRuleInput>
+  }
+
+  export type ScheduleRuleUpdateWithWhereUniqueWithoutRootRuleInput = {
+    where: ScheduleRuleWhereUniqueInput
+    data: XOR<ScheduleRuleUpdateWithoutRootRuleInput, ScheduleRuleUncheckedUpdateWithoutRootRuleInput>
+  }
+
+  export type ScheduleRuleUpdateManyWithWhereWithoutRootRuleInput = {
+    where: ScheduleRuleScalarWhereInput
+    data: XOR<ScheduleRuleUpdateManyMutationInput, ScheduleRuleUncheckedUpdateManyWithoutRootRuleInput>
+  }
+
   export type ScheduleCreateManyProfessorInput = {
     id?: string
     startTime: Date | string
@@ -18207,6 +18530,7 @@ export namespace Prisma {
     classGroupId: string
     subjectId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18265,6 +18589,8 @@ export namespace Prisma {
     subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
     room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
     schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateWithoutProfessorInput = {
@@ -18276,9 +18602,11 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateManyWithoutProfessorInput = {
@@ -18290,6 +18618,7 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18317,6 +18646,7 @@ export namespace Prisma {
     classGroupId: string
     subjectId: string
     professorId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18375,6 +18705,8 @@ export namespace Prisma {
     subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
     professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
     schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateWithoutRoomInput = {
@@ -18386,9 +18718,11 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateManyWithoutRoomInput = {
@@ -18400,6 +18734,7 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18532,6 +18867,7 @@ export namespace Prisma {
     classGroupId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18605,6 +18941,8 @@ export namespace Prisma {
     professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
     room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
     schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateWithoutSubjectInput = {
@@ -18616,9 +18954,11 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateManyWithoutSubjectInput = {
@@ -18630,6 +18970,7 @@ export namespace Prisma {
     classGroupId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18657,6 +18998,7 @@ export namespace Prisma {
     subjectId: string
     professorId: string
     roomId: string
+    rootRuleId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18715,6 +19057,8 @@ export namespace Prisma {
     professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
     room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
     schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    rootRule?: ScheduleRuleUpdateOneWithoutChildRulesNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateWithoutClassGroupInput = {
@@ -18726,9 +19070,11 @@ export namespace Prisma {
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
   }
 
   export type ScheduleRuleUncheckedUpdateManyWithoutClassGroupInput = {
@@ -18740,6 +19086,7 @@ export namespace Prisma {
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
+    rootRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18750,6 +19097,20 @@ export namespace Prisma {
     endTime: Date | string
     status?: $Enums.ClassStatus
     cancelReason?: string | null
+    classGroupId: string
+    subjectId: string
+    professorId: string
+    roomId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScheduleRuleCreateManyRootRuleInput = {
+    id?: string
+    daysOfWeek?: ScheduleRuleCreatedaysOfWeekInput | number[]
+    startTimeStr: string
+    endTimeStr: string
+    totalHours: number
     classGroupId: string
     subjectId: string
     professorId: string
@@ -18792,6 +19153,52 @@ export namespace Prisma {
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumClassStatusFieldUpdateOperationsInput | $Enums.ClassStatus
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    professorId?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScheduleRuleUpdateWithoutRootRuleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
+    startTimeStr?: StringFieldUpdateOperationsInput | string
+    endTimeStr?: StringFieldUpdateOperationsInput | string
+    totalHours?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
+    professor?: ProfessorUpdateOneRequiredWithoutScheduleRulesNestedInput
+    room?: RoomUpdateOneRequiredWithoutScheduleRulesNestedInput
+    schedules?: ScheduleUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUpdateManyWithoutRootRuleNestedInput
+  }
+
+  export type ScheduleRuleUncheckedUpdateWithoutRootRuleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
+    startTimeStr?: StringFieldUpdateOperationsInput | string
+    endTimeStr?: StringFieldUpdateOperationsInput | string
+    totalHours?: IntFieldUpdateOperationsInput | number
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    professorId?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    schedules?: ScheduleUncheckedUpdateManyWithoutRuleNestedInput
+    childRules?: ScheduleRuleUncheckedUpdateManyWithoutRootRuleNestedInput
+  }
+
+  export type ScheduleRuleUncheckedUpdateManyWithoutRootRuleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
+    startTimeStr?: StringFieldUpdateOperationsInput | string
+    endTimeStr?: StringFieldUpdateOperationsInput | string
+    totalHours?: IntFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string

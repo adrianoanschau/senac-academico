@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircle, Shuffle } from 'lucide-react';
 import axios from 'axios';
 import { alertDialog } from '../utils/dialog';
 import { DateSelect } from './DateSelect';
+import { MigrateRuleModal } from './MigrateRuleModal';
 
 interface ScheduleDetailsModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface ScheduleDetails {
   endTime: string;
   status: string;
   cancelReason?: string;
+  ruleId?: string;
   subject: { name: string; code: string };
   professor: { name: string; email: string };
   room: { name: string; type: string };
@@ -27,9 +29,11 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
   const [details, setDetails] = useState<ScheduleDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPostponing, setIsPostponing] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [showPostponeForm, setShowPostponeForm] = useState(false);
   const [postponeReason, setPostponeReason] = useState('');
   const [postponeNewDate, setPostponeNewDate] = useState('');
+  const [isMigrateModalOpen, setIsMigrateModalOpen] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -65,6 +69,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
       setPostponeReason('');
       setPostponeNewDate('');
       setError(null);
+      setIsMigrateModalOpen(false);
+      setIsPublishing(false);
     }
 
     return () => {
@@ -95,6 +101,28 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
       }
     } finally {
       setIsPostponing(false);
+    }
+  };
+
+  const handlePublishRule = async () => {
+    if (!details?.ruleId) return;
+
+    setIsPublishing(true);
+    setError(null);
+    try {
+      await axios.patch(`/api/schedules/rules/${details.ruleId}/publish`);
+      alertDialog('Cronograma efetivado com sucesso!');
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error('Erro ao efetivar cronograma:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.message || 'Ocorreu um erro ao efetivar as aulas.');
+      } else {
+        setError('Ocorreu um erro inesperado.');
+      }
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -184,13 +212,37 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
             </div>
 
             {(details.status === 'SCHEDULED' || details.status === 'PLANNED') && !showPostponeForm && (
-              <div className="flex gap-3 mt-2">
+              <div className="flex flex-col gap-3 mt-2">
                 <button 
                   onClick={() => { setShowPostponeForm(true); setError(null); }}
                   className="w-full bg-orange-50 hover:bg-orange-100 text-[#f37021] font-bold py-3 px-4 rounded-xl transition-colors border border-orange-200"
                 >
                   Adiar / Reagendar Aula
                 </button>
+                
+                {details.ruleId && (
+                  <button 
+                    onClick={() => setIsMigrateModalOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl transition-colors border border-slate-300"
+                  >
+                    <Shuffle size={18} />
+                    Alterar Padrão desta Disciplina a partir desta data
+                  </button>
+                )}
+
+                {details.ruleId && details.status === 'PLANNED' && (
+                  <button 
+                    onClick={handlePublishRule}
+                    disabled={isPublishing}
+                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-70"
+                  >
+                    {isPublishing ? (
+                      <><Loader2 size={18} className="animate-spin" /> Efetivando...</>
+                    ) : (
+                      'Efetivar Cronograma'
+                    )}
+                  </button>
+                )}
               </div>
             )}
 
@@ -250,6 +302,20 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
           </div>
         ) : null}
       </div>
+
+      {details?.ruleId && (
+        <MigrateRuleModal
+          isOpen={isMigrateModalOpen}
+          onClose={() => setIsMigrateModalOpen(false)}
+          ruleId={details.ruleId}
+          initialDate={details.startTime.split('T')[0]}
+          onSuccess={() => {
+            setIsMigrateModalOpen(false);
+            onSuccess();
+            onClose();
+          }}
+        />
+      )}
     </div>
   );
 };

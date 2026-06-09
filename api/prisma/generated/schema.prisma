@@ -123,7 +123,7 @@ model Schedule {
   id           String      @id @default(uuid())
   startTime    DateTime
   endTime      DateTime
-  status       ClassStatus @default(SCHEDULED)
+  status       ClassStatus @default(PLANNED)
   cancelReason String?
 
   classGroupId String
@@ -168,6 +168,7 @@ model ScheduleRule {
   subjectId    String
   professorId  String
   roomId       String
+  rootRuleId   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,6 +178,9 @@ model ScheduleRule {
   professor  Professor  @relation(fields: [professorId], references: [id], onDelete: Restrict)
   room       Room       @relation(fields: [roomId], references: [id], onDelete: Restrict)
   schedules  Schedule[]
+
+  rootRule   ScheduleRule?  @relation("RuleLineage", fields: [rootRuleId], references: [id])
+  childRules ScheduleRule[] @relation("RuleLineage")
 
   @@map("schedule_rules")
 }

@@ -12,6 +12,11 @@ import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
 
+// Extrai o tipo 100% correto do cliente transacional, evitando o clássico erro Prisma.TransactionClient
+export type PrismaTransaction = Parameters<
+  Parameters<PrismaService['$transaction']>[0]
+>[0];
+
 @Injectable()
 export class SchedulesService {
   constructor(
@@ -22,7 +27,8 @@ export class SchedulesService {
   async create(createScheduleDto: CreateScheduleDto) {
     const { startTime, endTime, roomId, professorId } = createScheduleDto;
 
-    if (startTime >= endTime) {
+    // TS Erro fix: Comparadores lógicos em TS exigem coerção clara para Date ou números
+    if (new Date(startTime) >= new Date(endTime)) {
       throw new BadRequestException(
         'O horário de início deve ser obrigatoriamente anterior ao horário de término.',
       );
@@ -31,8 +37,8 @@ export class SchedulesService {
     const roomConflict = await this.prisma.schedule.findFirst({
       where: {
         roomId: roomId,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
+        startTime: { lt: new Date(endTime) },
+        endTime: { gt: new Date(startTime) },
         status: { not: ClassStatus.CANCELLED },
       },
       include: { classGroup: true },
@@ -47,8 +53,8 @@ export class SchedulesService {
     const professorConflict = await this.prisma.schedule.findFirst({
       where: {
         professorId: professorId,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
+        startTime: { lt: new Date(endTime) },
+        endTime: { gt: new Date(startTime) },
         status: { not: ClassStatus.CANCELLED },
       },
       include: { classGroup: true },
@@ -251,7 +257,7 @@ export class SchedulesService {
         startTime: proj.startTime,
         endTime: proj.endTime,
         ruleId: rule.id, // <-- Conecta a aula à sua regra de origem
-        status: ClassStatus.SCHEDULED, // Opcional, pois é o default, mas bom para clareza
+        status: ClassStatus.PLANNED, // Opcional, pois é o default, mas bom para clareza
       }));
 
       // C. Salva todas as aulas
@@ -280,82 +286,152 @@ export class SchedulesService {
       );
     }
 
-    const transitionDate = new Date(dto.transitionDate);
+    const startOfDay = new Date(dto.transitionDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
 
-    return this.prisma.$transaction(async (tx) => {
-      // 2. Deleta todas as aulas a partir da data de corte que não foram finalizadas
-      await tx.schedule.deleteMany({
-        where: {
-          ruleId,
-          startTime: { gte: transitionDate },
-          status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
-        },
-      });
+    const targetRootId: string = oldRule.rootRuleId ?? oldRule.id;
 
-      // 3. Calcula a carga horária já cumprida (aulas remanescentes no banco)
-      const pastClasses = await tx.schedule.findMany({
-        where: { ruleId },
-      });
+    // ETAPA 1: Limpeza e criação da regra (Dentro da Transação)
+    const { newRule, remainingHours } = await this.prisma.$transaction(
+      async (tx) => {
+        let originalTotalHours = oldRule.totalHours;
+        if (oldRule.rootRuleId) {
+          const rootRule = await tx.scheduleRule.findUnique({
+            where: { id: oldRule.rootRuleId },
+          });
+          if (rootRule) {
+            originalTotalHours = rootRule.totalHours;
+          }
+        }
 
-      const consumedMinutes = pastClasses.reduce((acc, curr) => {
-        return (
-          acc + (curr.endTime.getTime() - curr.startTime.getTime()) / 60000
-        );
-      }, 0);
-
-      const consumedHours = consumedMinutes / 60;
-      const remainingHours = oldRule.totalHours - consumedHours;
-
-      if (remainingHours <= 0) {
-        throw new BadRequestException(
-          'A carga horária original já foi totalmente consumida.',
-        );
-      }
-
-      // 4. Cria a nova regra aplicando as substituições caso existam
-      const newRule = await tx.scheduleRule.create({
-        data: {
-          classGroupId: oldRule.classGroupId,
-          subjectId: oldRule.subjectId,
-          totalHours: oldRule.totalHours,
-          daysOfWeek: dto.newDaysOfWeek,
-          startTimeStr: dto.newStartTimeStr || oldRule.startTimeStr,
-          endTimeStr: dto.newEndTimeStr || oldRule.endTimeStr,
-          professorId: dto.newProfessorId || oldRule.professorId,
-          roomId: dto.newRoomId || oldRule.roomId,
-        },
-      });
-
-      // 5. Gera as projeções para finalizar as aulas restantes e salva em transação
-      const projections = await this.generatorService.generateProjections(
-        transitionDate,
-        newRule.daysOfWeek,
-        newRule.startTimeStr,
-        newRule.endTimeStr,
-        remainingHours,
-      );
-
-      if (projections.length > 0) {
-        await tx.schedule.createMany({
-          data: projections.map((proj) => ({
-            classGroupId: newRule.classGroupId,
-            subjectId: newRule.subjectId,
-            professorId: newRule.professorId,
-            roomId: newRule.roomId,
-            startTime: proj.startTime,
-            endTime: proj.endTime,
-            ruleId: newRule.id,
-            status: ClassStatus.SCHEDULED,
-          })),
+        // 2. Deleta todas as aulas a partir da data de corte que não foram finalizadas
+        await tx.schedule.deleteMany({
+          where: {
+            OR: [
+              { ruleId: targetRootId },
+              { rule: { is: { rootRuleId: targetRootId } } },
+            ],
+            startTime: { gte: startOfDay },
+            status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+          },
         });
-      }
 
-      // 6. Retorno de sucesso
-      return {
-        message: 'Padrão de aulas migrado com sucesso!',
-        newRuleId: newRule.id,
-      };
+        // 3. Calcula a carga horária já cumprida (aulas válidas que não foram deletadas)
+        const validClasses = await tx.schedule.findMany({
+          where: {
+            OR: [
+              { ruleId: targetRootId },
+              { rule: { is: { rootRuleId: targetRootId } } },
+            ],
+            status: {
+              in: [
+                ClassStatus.COMPLETED,
+                ClassStatus.SCHEDULED,
+                ClassStatus.PLANNED,
+              ],
+            },
+          },
+        });
+
+        const consumedMinutes = validClasses.reduce((acc, curr) => {
+          return (
+            acc + (curr.endTime.getTime() - curr.startTime.getTime()) / 60000
+          );
+        }, 0);
+
+        const consumedHours = consumedMinutes / 60;
+        const remainingHours = originalTotalHours - consumedHours;
+
+        if (remainingHours <= 0) {
+          throw new BadRequestException(
+            'A carga horária original já foi totalmente consumida.',
+          );
+        }
+
+        // 4. Cria a nova regra aplicando as substituições caso existam
+        const newRule = await tx.scheduleRule.create({
+          data: {
+            classGroupId: oldRule.classGroupId,
+            subjectId: oldRule.subjectId,
+            totalHours: remainingHours,
+            daysOfWeek: dto.newDaysOfWeek || oldRule.daysOfWeek,
+            startTimeStr: dto.newStartTimeStr || oldRule.startTimeStr,
+            endTimeStr: dto.newEndTimeStr || oldRule.endTimeStr,
+            professorId: dto.newProfessorId || oldRule.professorId,
+            roomId: dto.newRoomId || oldRule.roomId,
+            rootRuleId: targetRootId,
+          },
+        });
+
+        return { newRule, remainingHours };
+      },
+    );
+
+    // ETAPA 2: Geração e salvamento das novas aulas (Fora da Transação)
+    // 5. Agora que a exclusão foi comitada, geramos as projeções para as aulas restantes
+    const projections = await this.generatorService.generateProjections(
+      startOfDay,
+      newRule.daysOfWeek,
+      newRule.startTimeStr,
+      newRule.endTimeStr,
+      remainingHours,
+    );
+
+    if (projections.length > 0) {
+      // Salvamos usando a conexão principal (this.prisma)
+      await this.prisma.schedule.createMany({
+        data: projections.map((proj) => ({
+          classGroupId: newRule.classGroupId,
+          subjectId: newRule.subjectId,
+          professorId: newRule.professorId,
+          roomId: newRule.roomId,
+          startTime: proj.startTime,
+          endTime: proj.endTime,
+          ruleId: newRule.id,
+          status: ClassStatus.PLANNED,
+        })),
+      });
+    }
+
+    // 6. Retorno de sucesso
+    return {
+      message: 'Padrão de aulas migrado com sucesso!',
+      newRuleId: newRule.id,
+    };
+  }
+
+  async publishRule(
+    ruleId: string,
+  ): Promise<{ message: string; count: number }> {
+    const rule = await this.prisma.scheduleRule.findUnique({
+      where: { id: ruleId },
     });
+
+    if (!rule) {
+      throw new NotFoundException(
+        `Regra de agendamento com ID ${ruleId} não encontrada.`,
+      );
+    }
+
+    const targetRootId = rule.rootRuleId || rule.id;
+
+    const result = await this.prisma.schedule.updateMany({
+      where: {
+        OR: [
+          { ruleId: targetRootId },
+          { rule: { is: { rootRuleId: targetRootId } } },
+        ],
+        status: ClassStatus.PLANNED,
+      },
+      data: {
+        status: ClassStatus.SCHEDULED,
+      },
+    });
+
+    return {
+      message: 'Aulas efetivadas com sucesso!',
+      count: result.count,
+    };
   }
 
   // MÉTODOS PÚBLICOS
@@ -374,7 +450,7 @@ export class SchedulesService {
   // MÉTODO PRIVADO (A Magia da Cascata)
   private async executeCascadePostpone(
     id: string,
-    tx: Prisma.TransactionClient,
+    tx: PrismaTransaction,
     reason: string,
     newDateStr?: string,
   ) {
@@ -396,10 +472,12 @@ export class SchedulesService {
 
     const { rule } = classToCancel;
 
+    const targetRootId = rule.rootRuleId || rule.id;
+
     // 2. Encontra a ÚLTIMA aula agendada desta mesma regra
     const lastClass = await tx.schedule.findFirst({
       where: {
-        ruleId: rule.id,
+        OR: [{ ruleId: targetRootId }, { rule: { rootRuleId: targetRootId } }],
         status: {
           in: [
             ClassStatus.SCHEDULED,

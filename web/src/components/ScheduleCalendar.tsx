@@ -6,6 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
+import { Check } from 'lucide-react';
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -149,21 +150,6 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           .senac-calendar .fc-daygrid-event-harness .fc-event-main {
             padding: 1px 4px;
           }
-          .senac-calendar .fc-event-cancelled {
-            background-color: #fef2f2 !important; /* bg-red-50 */
-            border-color: #fca5a5 !important; /* border-red-300 */
-            border-width: 1px !important;
-            border-style: solid !important;
-            opacity: 0.7 !important;
-          }
-          .senac-calendar .fc-event-cancelled .fc-event-main {
-            color: #ef4444 !important; /* text-red-500 */
-          }
-          .senac-calendar .fc-event-planned {
-            opacity: 0.8;
-            border-style: dashed !important;
-            border-width: 1px !important;
-          }
         `}</style>
         <FullCalendar
           ref={calendarRef}
@@ -211,9 +197,27 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
               const data: ScheduleResponse[] = response.data?.data || response.data || [];
 
               const calendarEvents = data.map((schedule) => {
-                const isCancelled = schedule.status === 'CANCELLED';
-                const isPlanned = schedule.status === 'PLANNED';
+                const status = schedule.status || 'SCHEDULED';
                 const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
+                
+                let bgColor = color;
+                let borderColor = color;
+                let textColor = '#ffffff';
+                const classNames: string[] = [];
+
+                if (status === 'PLANNED') {
+                  bgColor = `${color}20`; // Cor clara (com 20% de opacidade no formato hex)
+                  textColor = '#334155'; // text-slate-700
+                  classNames.push('!border-dashed', '!border-2', 'opacity-80');
+                } else if (status === 'CANCELLED') {
+                  bgColor = '#fef2f2'; // bg-rose-50
+                  borderColor = '#fca5a5'; // border-rose-300
+                  textColor = '#e11d48'; // text-rose-600
+                  classNames.push('opacity-70');
+                } else if (status === 'COMPLETED') {
+                  classNames.push('opacity-80', 'saturate-50');
+                }
+
                 return {
                 id: String(schedule.id),
                   title: `${schedule.subject?.name || 'N/D'} - ${schedule.classGroup?.code || 'N/D'}`,
@@ -225,9 +229,10 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
                     status: schedule.status,
                     cancelReason: schedule.cancelReason,
                   },
-                  backgroundColor: color,
-                  borderColor: color,
-                  className: isCancelled ? 'fc-event-cancelled' : (isPlanned ? 'fc-event-planned' : ''),
+                  backgroundColor: bgColor,
+                  borderColor: borderColor,
+                  textColor: textColor,
+                  className: classNames.join(' '),
                 };
               });
 
@@ -243,22 +248,31 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
             }
           }}
           eventContent={(eventInfo) => {
-            const isCancelled = eventInfo.event.extendedProps.status === 'CANCELLED';
+            const status = eventInfo.event.extendedProps.status;
+            const isCancelled = status === 'CANCELLED';
+            const isCompleted = status === 'COMPLETED';
+            
             const tooltipTitle = isCancelled ? `Motivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || 'Não informado'}` : undefined;
+
+            const baseClasses = isCancelled ? 'line-through' : '';
 
             if (eventInfo.view.type === 'dayGridMonth') {
               return (
-                <div className={`px-1 overflow-hidden whitespace-nowrap text-xs ${isCancelled ? 'line-through' : ''}`} title={tooltipTitle}>
+                <div className={`px-1 overflow-hidden whitespace-nowrap text-xs ${baseClasses}`} title={tooltipTitle}>
                   <b>{eventInfo.timeText}</b>
                   <span className="ml-1">{eventInfo.event.title.split(' - ')[0]}</span>
+                  {isCompleted && <Check size={12} className="inline ml-1 opacity-80" />}
                 </div>
               )
             }
             return (
-              <div className={`p-1 text-xs leading-tight overflow-hidden h-full flex flex-col ${isCancelled ? 'line-through' : ''}`} title={tooltipTitle}>
-                <div className="font-bold">{eventInfo.event.title}</div>
-                <div className="opacity-90 italic">{eventInfo.event.extendedProps.professor}</div>
-                <div className="opacity-90">{eventInfo.event.extendedProps.room}</div>
+              <div className={`p-1 text-xs leading-tight overflow-hidden h-full flex flex-col ${baseClasses}`} title={tooltipTitle}>
+                <div className="font-bold flex items-start justify-between gap-1">
+                  <span className="truncate">{eventInfo.event.title}</span>
+                  {isCompleted && <Check size={14} className="shrink-0 opacity-80" />}
+                </div>
+                <div className="opacity-90 italic truncate mt-auto">{eventInfo.event.extendedProps.professor}</div>
+                <div className="opacity-90 truncate">{eventInfo.event.extendedProps.room}</div>
               </div>
             )
           }}
