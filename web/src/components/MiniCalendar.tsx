@@ -12,6 +12,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({ selectedDate = new D
   const today = new Date();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
   }, [selectedDate]);
 

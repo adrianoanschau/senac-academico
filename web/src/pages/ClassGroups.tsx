@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Layers, X, Calendar, Info } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Layers, X, Calendar } from 'lucide-react';
 import axios from 'axios';
 import { Select } from '../components/Select';
 import { DateSelect } from '../components/DateSelect';

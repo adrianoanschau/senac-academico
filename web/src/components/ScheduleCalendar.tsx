@@ -223,7 +223,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           slotMinTime="08:00:00"
           slotMaxTime="23:00:00"
           
-          events={async (info) => {
+          events={async (info: { startStr: string; endStr: string }) => {
             try {
               if (filters?.status && Array.isArray(filters.status) && filters.status.length === 0) {
                 return [];

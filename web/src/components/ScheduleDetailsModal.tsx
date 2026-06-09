@@ -56,6 +56,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
     if (isOpen && eventId) {
       loadDetails();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDetails(null);
       setShowPostponeForm(false);
       setPostponeReason('');

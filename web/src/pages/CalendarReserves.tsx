@@ -247,7 +247,7 @@ export const CalendarReserves: React.FC = () => {
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
                       <Clock size={18} strokeWidth={2.5} />
                     </div>
-                    <TimeSelect value={isAllDay ? '00:00' : formData.startTime} onChange={(val) => setFormData({...formData, startTime: val})} placeholder="--:--" disabled={isAllDay} />
+                    <TimeSelect value={isAllDay ? '00:00' : formData.startTime} onChange={(val) => setFormData({...formData, startTime: val})} placeholder="--:--" />
                   </div>
                 </div>
               </div>
@@ -265,7 +265,7 @@ export const CalendarReserves: React.FC = () => {
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
                       <Clock size={18} strokeWidth={2.5} />
                     </div>
-                    <TimeSelect value={isAllDay ? '23:59' : formData.endTime} onChange={(val) => setFormData({...formData, endTime: val})} placeholder="--:--" disabled={isAllDay} />
+                    <TimeSelect value={isAllDay ? '23:59' : formData.endTime} onChange={(val) => setFormData({...formData, endTime: val})} placeholder="--:--" />
                   </div>
                 </div>
               </div>

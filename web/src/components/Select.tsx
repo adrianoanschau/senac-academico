@@ -1,4 +1,4 @@
-import React, { SelectHTMLAttributes, forwardRef, useState, useRef, useEffect } from 'react';
+import React, { type SelectHTMLAttributes, forwardRef, useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -49,9 +49,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const options: { value: string; label: React.ReactNode }[] = [];
     React.Children.forEach(children, (child) => {
       if (React.isValidElement(child) && child.type === 'option') {
+        const optProps = child.props as React.OptionHTMLAttributes<HTMLOptionElement> & { children?: React.ReactNode };
         options.push({
-          value: child.props.value !== undefined ? String(child.props.value) : String(child.props.children),
-          label: child.props.children
+          value: optProps.value !== undefined ? String(optProps.value) : String(optProps.children ?? ''),
+          label: optProps.children ?? ''
         });
       }
     });
