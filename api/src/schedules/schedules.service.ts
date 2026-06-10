@@ -352,13 +352,33 @@ export class SchedulesService {
     );
 
     // ETAPA 2: Geração e salvamento das novas aulas (Fora da Transação)
-    // 5. Agora que a exclusão foi comitada, geramos as projeções para as aulas restantes
+    // 5. Busca aulas existentes para evitar conflito na nova geração
+    const searchLimitDate = new Date(startOfDay);
+    searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
+
+    const orConditions = [];
+    if (newRule.classGroupId) orConditions.push({ classGroupId: newRule.classGroupId });
+    if (newRule.professorId) orConditions.push({ professorId: newRule.professorId });
+    if (newRule.roomId) orConditions.push({ roomId: newRule.roomId });
+
+    const existingSchedules = await this.prisma.schedule.findMany({
+      where: {
+        ...(orConditions.length > 0 && { OR: orConditions }),
+        startTime: { gte: startOfDay },
+        endTime: { lte: searchLimitDate },
+        status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+      },
+      select: { startTime: true, endTime: true },
+    });
+
+    // 6. Agora que a exclusão foi comitada, geramos as projeções resilientes a conflitos
     const projections = await this.generatorService.generateProjections(
       startOfDay,
       newRule.daysOfWeek,
       newRule.startTimeStr,
       newRule.endTimeStr,
       remainingHours,
+      existingSchedules,
     );
 
     if (projections.length > 0) {

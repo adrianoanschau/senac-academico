@@ -101,7 +101,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-4xl w-full max-w-4xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col min-h-[80vh] max-h-[95vh] overflow-hidden">
+      <div className="bg-white rounded-4xl w-full max-w-4xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col max-h-[95vh] overflow-hidden">
         
         <div className="p-8 pb-6 shrink-0 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
