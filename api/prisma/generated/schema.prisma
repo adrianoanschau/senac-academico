@@ -164,11 +164,12 @@ model ScheduleRule {
   endTimeStr   String
   totalHours   Int
 
-  classGroupId String
-  subjectId    String
-  professorId  String
-  roomId       String
-  rootRuleId   String?
+  classGroupId    String
+  subjectId       String
+  professorId     String
+  roomId          String
+  rootRuleId      String?
+  dependsOnRuleId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -181,6 +182,9 @@ model ScheduleRule {
 
   rootRule   ScheduleRule?  @relation("RuleLineage", fields: [rootRuleId], references: [id])
   childRules ScheduleRule[] @relation("RuleLineage")
+
+  dependsOn      ScheduleRule?  @relation("RuleDependency", fields: [dependsOnRuleId], references: [id])
+  dependentRules ScheduleRule[] @relation("RuleDependency")
 
   @@map("schedule_rules")
 }
