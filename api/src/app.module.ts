@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -14,7 +15,19 @@ import { ScheduleOverridesModule } from './schedule-overrides/schedule-overrides
 import { ScheduleRulesModule } from './schedule-rules/schedule-rules.module';
 
 @Module({
-  imports: [AuthModule, ProfessorsModule, RoomsModule, SubjectsModule, CoursesModule, CurriculumsModule, ClassGroupsModule, SchedulesModule, ScheduleOverridesModule, ScheduleRulesModule],
+  imports: [
+    EventEmitterModule.forRoot(),
+    AuthModule,
+    ProfessorsModule,
+    RoomsModule,
+    SubjectsModule,
+    CoursesModule,
+    CurriculumsModule,
+    ClassGroupsModule,
+    SchedulesModule,
+    ScheduleOverridesModule,
+    ScheduleRulesModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
