@@ -38,7 +38,8 @@ export class ModuleOrchestratorService {
           dependsOnRuleId: previousRuleId || undefined,
         };
 
-        const result = await this.schedulesService.generateBulk(generatePayload);
+        const result =
+          await this.schedulesService.generateBulk(generatePayload);
 
         const { ruleId } = result;
 

@@ -11,17 +11,18 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
-
-// Extrai o tipo 100% correto do cliente transacional, evitando o clássico erro Prisma.TransactionClient
-export type PrismaTransaction = Parameters<
-  Parameters<PrismaService['$transaction']>[0]
->[0];
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  RULE_EVENTS,
+  RuleEndDateChangedEvent,
+} from './events/rule-end-date-changed.event';
 
 @Injectable()
 export class SchedulesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly generatorService: ScheduleGeneratorService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(createScheduleDto: CreateScheduleDto) {
@@ -472,200 +473,173 @@ export class SchedulesService {
   // MÉTODOS PÚBLICOS
   async postponeClass(id: string, reason: string, newDateStr?: string) {
     const result = await this.prisma.$transaction(async (tx) => {
-      // Passamos o motivo para dentro da transação
-      return this.executeCascadePostpone(id, tx, reason, newDateStr);
+      const classToCancel = await tx.schedule.findUnique({
+        where: { id },
+        include: { rule: true },
+      });
+
+      if (!classToCancel || !classToCancel.rule) {
+        throw new BadRequestException(
+          `Aula com ID ${id} não possui regra atrelada para recálculo.`,
+        );
+      }
+
+      if (classToCancel.status === ClassStatus.COMPLETED) {
+        throw new BadRequestException(
+          'Aulas concluídas não podem ser adiadas.',
+        );
+      }
+
+      const { rule } = classToCancel;
+      const targetRootId = rule.rootRuleId || rule.id;
+
+      // Efetivação: Salva o cancelamento ou deleção da aula original
+      if (classToCancel.status === ClassStatus.PLANNED) {
+        await tx.schedule.delete({ where: { id } });
+      } else {
+        await tx.schedule.update({
+          where: { id },
+          data: { status: ClassStatus.CANCELLED, cancelReason: reason },
+        });
+      }
+
+      // Encontra a ÚLTIMA aula agendada desta mesma regra
+      const lastClass = await tx.schedule.findFirst({
+        where: {
+          OR: [
+            { ruleId: targetRootId },
+            { rule: { rootRuleId: targetRootId } },
+          ],
+          status: {
+            in: [
+              ClassStatus.SCHEDULED,
+              ClassStatus.PLANNED,
+              ClassStatus.COMPLETED,
+            ],
+          },
+        },
+        orderBy: { startTime: 'desc' },
+      });
+
+      if (!lastClass) {
+        throw new BadRequestException(
+          'Nenhuma aula anterior encontrada para recalcular a data.',
+        );
+      }
+
+      const nextDateToSearch = new Date(lastClass.startTime);
+      nextDateToSearch.setDate(nextDateToSearch.getDate() + 1);
+      nextDateToSearch.setHours(0, 0, 0, 0);
+
+      const [startH, startM] = rule.startTimeStr.split(':').map(Number);
+      const [endH, endM] = rule.endTimeStr.split(':').map(Number);
+      const singleClassHours = (endH * 60 + endM - (startH * 60 + startM)) / 60;
+
+      let newProj: { startTime: Date; endTime: Date };
+
+      if (newDateStr) {
+        const dateString = newDateStr.includes('T')
+          ? newDateStr
+          : `${newDateStr}T12:00:00`;
+        const parsedDate = new Date(dateString);
+        const proposedStart = new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate(),
+          startH,
+          startM,
+        );
+        const proposedEnd = new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate(),
+          endH,
+          endM,
+        );
+
+        const conflict = await tx.schedule.findFirst({
+          where: {
+            OR: [
+              { classGroupId: rule.classGroupId },
+              { professorId: rule.professorId },
+              { roomId: rule.roomId },
+            ],
+            startTime: { lt: proposedEnd },
+            endTime: { gt: proposedStart },
+            status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
+          },
+        });
+
+        if (conflict) {
+          throw new ConflictException(
+            'A data solicitada já possui um conflito de sala, professor ou turma.',
+          );
+        }
+        newProj = { startTime: proposedStart, endTime: proposedEnd };
+      } else {
+        const searchLimitDate = new Date(nextDateToSearch);
+        searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
+
+        const existingSchedules = await tx.schedule.findMany({
+          where: {
+            OR: [
+              { classGroupId: rule.classGroupId },
+              { professorId: rule.professorId },
+              { roomId: rule.roomId },
+            ],
+            startTime: { gte: nextDateToSearch },
+            endTime: { lte: searchLimitDate },
+            status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+          },
+          select: { startTime: true, endTime: true },
+        });
+
+        const projections = await this.generatorService.generateProjections(
+          nextDateToSearch,
+          rule.daysOfWeek,
+          rule.startTimeStr,
+          rule.endTimeStr,
+          singleClassHours,
+          existingSchedules,
+        );
+
+        if (projections.length === 0) {
+          throw new BadRequestException(
+            'Erro ao projetar nova data: não há horários livres no próximo ano.',
+          );
+        }
+        newProj = projections[0];
+      }
+
+      // Cria a aula nova no fim da fila
+      return tx.schedule.create({
+        data: {
+          classGroupId: rule.classGroupId,
+          subjectId: rule.subjectId,
+          professorId: rule.professorId,
+          roomId: rule.roomId,
+          ruleId: rule.id,
+          startTime: newProj.startTime,
+          endTime: newProj.endTime,
+          status: ClassStatus.SCHEDULED,
+        },
+      });
     });
+
+    if (result.ruleId) {
+      this.eventEmitter.emit(
+        RULE_EVENTS.END_DATE_CHANGED,
+        new RuleEndDateChangedEvent(
+          result.ruleId,
+          result.startTime, // Esta é a data da nova última aula empurrada pro final
+          result.classGroupId,
+        ),
+      );
+    }
 
     return {
       message: `Reagendamento concluído com sucesso!`,
       newSchedule: result,
     };
-  }
-
-  // MÉTODO PRIVADO (A Magia da Cascata)
-  private async executeCascadePostpone(
-    id: string,
-    tx: PrismaTransaction,
-    reason: string,
-    newDateStr?: string,
-  ) {
-    // 1. Busca a aula atual (usando o tx em vez de this.prisma)
-    const classToCancel = await tx.schedule.findUnique({
-      where: { id },
-      include: { rule: true },
-    });
-
-    if (!classToCancel || !classToCancel.rule) {
-      throw new BadRequestException(
-        `Aula com ID ${id} não possui regra atrelada para recálculo.`,
-      );
-    }
-
-    if (classToCancel.status === ClassStatus.COMPLETED) {
-      throw new BadRequestException('Aulas concluídas não podem ser adiadas.');
-    }
-
-    const { rule } = classToCancel;
-
-    const targetRootId = rule.rootRuleId || rule.id;
-
-    // 2. Encontra a ÚLTIMA aula agendada desta mesma regra
-    const lastClass = await tx.schedule.findFirst({
-      where: {
-        OR: [{ ruleId: targetRootId }, { rule: { rootRuleId: targetRootId } }],
-        status: {
-          in: [
-            ClassStatus.SCHEDULED,
-            ClassStatus.COMPLETED,
-            ClassStatus.PLANNED,
-          ],
-        },
-      },
-      orderBy: { startTime: 'desc' },
-    });
-
-    if (!lastClass) {
-      throw new BadRequestException(
-        'Nenhuma aula anterior encontrada para recalcular a data.',
-      );
-    }
-
-    const nextDateToSearch = new Date(lastClass.startTime);
-    nextDateToSearch.setDate(nextDateToSearch.getDate() + 1);
-
-    // 3. Pede ao motor para projetar 1 nova data
-    const [startH, startM] = rule.startTimeStr.split(':').map(Number);
-    const [endH, endM] = rule.endTimeStr.split(':').map(Number);
-    const singleClassHours = (endH * 60 + endM - (startH * 60 + startM)) / 60;
-
-    let newProj: { startTime: Date; endTime: Date };
-
-    if (newDateStr) {
-      const dateString = newDateStr.includes('T')
-        ? newDateStr
-        : `${newDateStr}T12:00:00`;
-      const parsedDate = new Date(dateString);
-      const proposedStart = new Date(
-        parsedDate.getFullYear(),
-        parsedDate.getMonth(),
-        parsedDate.getDate(),
-        startH,
-        startM,
-      );
-      const proposedEnd = new Date(
-        parsedDate.getFullYear(),
-        parsedDate.getMonth(),
-        parsedDate.getDate(),
-        endH,
-        endM,
-      );
-      newProj = { startTime: proposedStart, endTime: proposedEnd };
-    } else {
-      const projections = await this.generatorService.generateProjections(
-        nextDateToSearch,
-        rule.daysOfWeek,
-        rule.startTimeStr,
-        rule.endTimeStr,
-        singleClassHours,
-      );
-
-      if (projections.length === 0)
-        throw new BadRequestException('Erro ao projetar nova data.');
-      newProj = projections[0];
-    }
-
-    // ==========================================
-    // 4. O EFEITO CASCATA (Análise de Conflitos)
-    // ==========================================
-
-    // A. Conflito Interno: A nova data bate com outra disciplina da MESMA turma?
-    const internalConflict = await tx.schedule.findFirst({
-      where: {
-        classGroupId: rule.classGroupId,
-        startTime: { lt: newProj.endTime },
-        endTime: { gt: newProj.startTime },
-        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
-      },
-    });
-
-    if (internalConflict) {
-      if (newDateStr) {
-        throw new ConflictException(
-          `Conflito de Turma: A turma já possui uma aula agendada para a data solicitada (${newProj.startTime.toLocaleDateString()}).`,
-        );
-      }
-      // O EFEITO DOMINÓ: Se uma aula precisou ser empurrada por causa de outra,
-      // injetamos um motivo automático informando a origem da cascata!
-      await this.executeCascadePostpone(
-        internalConflict.id,
-        tx,
-        `Empurrada automaticamente em cascata (Motivo original: ${reason})`,
-      );
-    }
-
-    // B. Conflitos Externos: Após resolver a turma, a sala/professor estão livres?
-    // Se a sala estiver ocupada por OUTRA turma, aí sim damos erro fatal.
-    const externalRoomConflict = await tx.schedule.findFirst({
-      where: {
-        roomId: rule.roomId,
-        classGroupId: { not: rule.classGroupId }, // Ignora a própria turma
-        startTime: { lt: newProj.endTime },
-        endTime: { gt: newProj.startTime },
-        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
-      },
-      include: { classGroup: true },
-    });
-
-    if (externalRoomConflict) {
-      throw new ConflictException(
-        `Fim da Linha: A cascata parou porque a sala precisa ser usada pela turma ${externalRoomConflict.classGroup.code} no dia ${newProj.startTime.toLocaleDateString()}.`,
-      );
-    }
-
-    const externalProfConflict = await tx.schedule.findFirst({
-      where: {
-        professorId: rule.professorId,
-        classGroupId: { not: rule.classGroupId },
-        startTime: { lt: newProj.endTime },
-        endTime: { gt: newProj.startTime },
-        status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
-      },
-      include: { classGroup: true },
-    });
-
-    if (externalProfConflict) {
-      throw new ConflictException(
-        `Fim da Linha: O professor esbarrou na aula da turma ${externalProfConflict.classGroup.code}.`,
-      );
-    }
-
-    // 5. Efetivação: Salva o cancelamento, exclusão ou justificação
-    if (classToCancel.status === ClassStatus.PLANNED) {
-      await tx.schedule.delete({
-        where: { id },
-      });
-    } else {
-      await tx.schedule.update({
-        where: { id },
-        data: {
-          status: ClassStatus.CANCELLED,
-          cancelReason: reason,
-        },
-      });
-    }
-
-    // Cria a aula nova no fim da fila
-    return tx.schedule.create({
-      data: {
-        classGroupId: rule.classGroupId,
-        subjectId: rule.subjectId,
-        professorId: rule.professorId,
-        roomId: rule.roomId,
-        ruleId: rule.id,
-        startTime: newProj.startTime,
-        endTime: newProj.endTime,
-        status: ClassStatus.SCHEDULED,
-      },
-    });
   }
 }

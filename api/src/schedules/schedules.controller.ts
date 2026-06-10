@@ -14,10 +14,15 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
+import { ModuleOrchestratorService } from './module-orchestrator.service';
+import { PlanModuleDto } from './dto/plan-module.dto';
 
 @Controller('schedules')
 export class SchedulesController {
-  constructor(private readonly schedulesService: SchedulesService) {}
+  constructor(
+    private readonly schedulesService: SchedulesService,
+    private readonly moduleOrchestratorService: ModuleOrchestratorService,
+  ) {}
 
   @Post()
   async create(@Body() createScheduleDto: CreateScheduleDto) {
@@ -72,6 +77,13 @@ export class SchedulesController {
   @Post('generate')
   async generateBulk(@Body() generateSchedulesDto: GenerateSchedulesDto) {
     const data = await this.schedulesService.generateBulk(generateSchedulesDto);
+    return { data };
+  }
+
+  @Post('plan-module')
+  async planModule(@Body() planModuleDto: PlanModuleDto) {
+    const data =
+      await this.moduleOrchestratorService.planModuleTracks(planModuleDto);
     return { data };
   }
 
