@@ -4,6 +4,7 @@ import {
   IsDate,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUUID,
   Max,
@@ -45,4 +46,8 @@ export class GenerateSchedulesDto {
   @IsString()
   @IsNotEmpty()
   endTimeStr: string;
+
+  @IsOptional()
+  @IsUUID()
+  dependsOnRuleId?: string;
 }

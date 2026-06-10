@@ -168,6 +168,7 @@ export class SchedulesService {
       daysOfWeek,
       startTimeStr,
       endTimeStr,
+      dependsOnRuleId,
     } = dto;
 
     // 1. Busca a disciplina
@@ -179,24 +180,49 @@ export class SchedulesService {
       throw new NotFoundException(`Disciplina não encontrada.`);
     }
 
-    // 1. Define um limite seguro de busca (ex: data de início + 1 ano)
-    const searchLimitDate = new Date(startDate);
+    // 2. Resolução Dinâmica de Data (A Magia da Lista Encadeada)
+    let actualStartDate = new Date(startDate);
+
+    if (dependsOnRuleId) {
+      // Busca a última aula projetada da regra da qual dependemos
+      const dependencyLastClass = await this.prisma.schedule.findFirst({
+        where: {
+          ruleId: dependsOnRuleId,
+          status: { not: ClassStatus.CANCELLED },
+        },
+        orderBy: { startTime: 'desc' },
+      });
+
+      if (!dependencyLastClass) {
+        throw new BadRequestException(
+          `Falha no encadeamento: A disciplina anterior (Regra ID: ${dependsOnRuleId}) não possui aulas válidas futuras.`,
+        );
+      }
+
+      // Sobrescreve a data inicial para garantir que a nova regra comece após o término da dependência
+      actualStartDate = new Date(dependencyLastClass.startTime);
+      actualStartDate.setDate(actualStartDate.getDate() + 1);
+      actualStartDate.setHours(0, 0, 0, 0);
+    }
+
+    // 3. Define um limite seguro de busca (ex: data de início + 1 ano)
+    const searchLimitDate = new Date(actualStartDate);
     searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
 
-    // 2. UMA única query no Prisma buscando schedules existentes nesse período para validar conflitos
+    // 4. UMA única query no Prisma buscando schedules existentes nesse período para validar conflitos
     const existingSchedules = await this.prisma.schedule.findMany({
       where: {
         OR: [{ classGroupId }, { professorId }, { roomId }],
-        startTime: { gte: new Date(startDate) },
+        startTime: { gte: actualStartDate },
         endTime: { lte: searchLimitDate },
         status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
       },
       select: { startTime: true, endTime: true },
     });
 
-    // 3. Chama o Motor para projetar as datas (agora resiliente a conflitos)
+    // 5. Chama o Motor para projetar as datas (agora resiliente a conflitos)
     const projections = await this.generatorService.generateProjections(
-      startDate,
+      actualStartDate,
       daysOfWeek,
       startTimeStr,
       endTimeStr,
@@ -224,6 +250,7 @@ export class SchedulesService {
           subjectId,
           professorId,
           roomId,
+          dependsOnRuleId,
         },
       });
 
@@ -244,12 +271,14 @@ export class SchedulesService {
         data: schedulesToCreate,
       });
 
-      return createdSchedules;
+      return { count: createdSchedules.count, ruleId: rule.id };
     });
 
     return {
       message: `Grade gerada com sucesso! ${result.count} aulas foram alocadas e a regra foi salva no histórico.`,
       generatedCount: result.count,
+      ruleId: result.ruleId,
+      lastClassDate: projections[projections.length - 1].startTime,
     };
   }
 
