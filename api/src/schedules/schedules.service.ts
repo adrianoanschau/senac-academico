@@ -356,9 +356,11 @@ export class SchedulesService {
     const searchLimitDate = new Date(startOfDay);
     searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
 
-    const orConditions = [];
-    if (newRule.classGroupId) orConditions.push({ classGroupId: newRule.classGroupId });
-    if (newRule.professorId) orConditions.push({ professorId: newRule.professorId });
+    const orConditions: Prisma.ScheduleWhereInput[] = [];
+    if (newRule.classGroupId)
+      orConditions.push({ classGroupId: newRule.classGroupId });
+    if (newRule.professorId)
+      orConditions.push({ professorId: newRule.professorId });
     if (newRule.roomId) orConditions.push({ roomId: newRule.roomId });
 
     const existingSchedules = await this.prisma.schedule.findMany({

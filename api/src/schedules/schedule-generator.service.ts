@@ -46,7 +46,9 @@ export class ScheduleGeneratorService {
       targetEndTime: Date,
       schedules: { startTime: Date; endTime: Date }[],
     ) => {
-      return schedules.some((s) => s.startTime < targetEndTime && s.endTime > targetStartTime);
+      return schedules.some(
+        (s) => s.startTime < targetEndTime && s.endTime > targetStartTime,
+      );
     };
 
     while (remainingMinutes > 0 && safetyCounter < MAX_DAYS_PROJECTION) {
