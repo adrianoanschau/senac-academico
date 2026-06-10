@@ -179,13 +179,29 @@ export class SchedulesService {
       throw new NotFoundException(`Disciplina não encontrada.`);
     }
 
-    // 2. Chama o Motor para projetar as datas
+    // 1. Define um limite seguro de busca (ex: data de início + 1 ano)
+    const searchLimitDate = new Date(startDate);
+    searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
+
+    // 2. UMA única query no Prisma buscando schedules existentes nesse período para validar conflitos
+    const existingSchedules = await this.prisma.schedule.findMany({
+      where: {
+        OR: [{ classGroupId }, { professorId }, { roomId }],
+        startTime: { gte: new Date(startDate) },
+        endTime: { lte: searchLimitDate },
+        status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+      },
+      select: { startTime: true, endTime: true },
+    });
+
+    // 3. Chama o Motor para projetar as datas (agora resiliente a conflitos)
     const projections = await this.generatorService.generateProjections(
       startDate,
       daysOfWeek,
       startTimeStr,
       endTimeStr,
       subject.hours,
+      existingSchedules,
     );
 
     if (projections.length === 0) {
@@ -194,44 +210,7 @@ export class SchedulesService {
       );
     }
 
-    // 3. Validação Anti-Choque
-    for (const proj of projections) {
-      const roomConflict = await this.prisma.schedule.findFirst({
-        where: {
-          roomId,
-          startTime: { lt: proj.endTime },
-          endTime: { gt: proj.startTime },
-          status: { not: ClassStatus.CANCELLED },
-        },
-        include: { classGroup: true },
-      });
-
-      if (roomConflict) {
-        const dateFormatted = proj.startTime.toLocaleDateString('pt-BR');
-        throw new ConflictException(
-          `Geração abortada: A sala está ocupada no dia ${dateFormatted} pela turma ${roomConflict.classGroup.code}.`,
-        );
-      }
-
-      const professorConflict = await this.prisma.schedule.findFirst({
-        where: {
-          professorId,
-          startTime: { lt: proj.endTime },
-          endTime: { gt: proj.startTime },
-          status: { not: ClassStatus.CANCELLED },
-        },
-        include: { classGroup: true },
-      });
-
-      if (professorConflict) {
-        const dateFormatted = proj.startTime.toLocaleDateString('pt-BR');
-        throw new ConflictException(
-          `Geração abortada: O professor está dando aula no dia ${dateFormatted} para a turma ${professorConflict.classGroup.code}.`,
-        );
-      }
-    }
-
-    // 4. Salva a Regra e as Aulas numa Transação Segura
+    // 6. Salva a Regra e as Aulas numa Transação Segura (via createMany)
     // O $transaction garante que ou tudo é salvo perfeitamente, ou nada é salvo.
     const result = await this.prisma.$transaction(async (prisma) => {
       // A. Cria a "Memória" (ScheduleRule)

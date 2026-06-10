@@ -17,6 +17,7 @@ export class ScheduleGeneratorService {
     startTimeStr: string,
     endTimeStr: string,
     totalSubjectHours: number,
+    existingSchedules: { startTime: Date; endTime: Date }[] = [],
   ): Promise<ProjectedSchedule[]> {
     const projections: ProjectedSchedule[] = [];
     // Usa Math.round para evitar dízimas de ponto flutuante que causam criação de aulas fantasmas
@@ -38,6 +39,15 @@ export class ScheduleGeneratorService {
 
     let safetyCounter = 0;
     const MAX_DAYS_PROJECTION = 730;
+
+    // 3. Função auxiliar rápida em memória para verificar conflitos
+    const hasConflict = (
+      targetStartTime: Date,
+      targetEndTime: Date,
+      schedules: { startTime: Date; endTime: Date }[],
+    ) => {
+      return schedules.some((s) => s.startTime < targetEndTime && s.endTime > targetStartTime);
+    };
 
     while (remainingMinutes > 0 && safetyCounter < MAX_DAYS_PROJECTION) {
       safetyCounter++;
@@ -77,6 +87,12 @@ export class ScheduleGeneratorService {
       const isAllowedDay = daysOfWeek.includes(dayOfWeek);
 
       if (isExtraDay || (!isWeekend && isAllowedDay)) {
+        // 5. Avalia se o horário alvo possui conflito com agendas existentes. Se sim, apenas avança o dia.
+        if (hasConflict(proposedStart, proposedEnd, existingSchedules)) {
+          cursorDate.setDate(cursorDate.getDate() + 1);
+          continue;
+        }
+
         projections.push({
           startTime: proposedStart,
           endTime: proposedEnd,
