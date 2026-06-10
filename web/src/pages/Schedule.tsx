@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, CalendarClock, Maximize, Minimize, Info } from 'lucide-react';
+import { Search, Plus, CalendarClock, Maximize, Minimize, Info, Route } from 'lucide-react';
 import axios from 'axios';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { BulkGenerateModal } from '../components/BulkGenerateModal';
+import { ModulePlanningModal } from '../components/ModulePlanning/ModulePlanningModal';
 import { ScheduleDetailsModal } from '../components/ScheduleDetailsModal';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { ContextPanel } from '../components/ContextPanel';
@@ -12,11 +13,13 @@ import { usePersistentState } from '../hooks/usePersistentState';
 interface Subject {
   id: string;
   name: string;
+  code?: string;
 }
 
 export const Schedule: React.FC = () => {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isModulePlannerOpen, setIsModulePlannerOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = usePersistentState('schedule_fullscreen', false);
   const [search, setSearch] = usePersistentState('schedule_search', '');
@@ -73,13 +76,22 @@ export const Schedule: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Visualizar o cronograma de aulas de cada turma.</p>
         </div>
-        <button 
-          onClick={() => setIsBulkModalOpen(true)}
-          className="bg-senac-blue hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-senac-blue/30"
-        >
-          <Plus size={20} />
-          Novo Agendamento
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsModulePlannerOpen(true)}
+            className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Route size={20} />
+            Planejar Módulo
+          </button>
+          <button 
+            onClick={() => setIsBulkModalOpen(true)}
+            className="bg-senac-blue hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-senac-blue/30"
+          >
+            <Plus size={20} />
+            Novo Agendamento
+          </button>
+        </div>
       </div>
 
       {/* Main Card */}
@@ -182,7 +194,7 @@ export const Schedule: React.FC = () => {
               >
                 <option value="">Todas as Disciplinas...</option>
                 {subjects.map(sub => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  <option key={sub.id} value={sub.id}>{sub.code ? `${sub.code}: ${sub.name}` : sub.name}</option>
                 ))}
               </Select>
             </div>
@@ -204,6 +216,24 @@ export const Schedule: React.FC = () => {
         onClose={() => setIsBulkModalOpen(false)}
         onSuccess={() => {
           setIsBulkModalOpen(false);
+          setRefreshTrigger(prev => prev + 1);
+        }}
+      />
+
+      <ModulePlanningModal
+        isOpen={isModulePlannerOpen}
+        onClose={() => setIsModulePlannerOpen(false)}
+        onSuccess={(startDate) => {
+          setIsModulePlannerOpen(false);
+          if (startDate) {
+            // Força o calendário a pular para o mês de início do novo módulo gerado
+            const parsedDate = new Date(startDate.includes('T') ? startDate : `${startDate}T12:00:00`);
+            setSelectedDateStr(parsedDate.toISOString());
+          }
+          // Garante que o status 'PLANNED' está marcado para visualizarmos as aulas geradas!
+          if (!status.includes('PLANNED')) {
+            setStatus([...status, 'PLANNED']);
+          }
           setRefreshTrigger(prev => prev + 1);
         }}
       />

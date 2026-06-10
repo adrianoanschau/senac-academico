@@ -91,7 +91,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
   }, [selectedDate]);
 
   return (
-    <div className={isFullscreen ? "h-[calc(100vh-140px)] flex flex-col" : "h-[800px] flex flex-col"}> 
+    <div className={isFullscreen ? "h-[calc(100vh-140px)] flex flex-col" : "h-200 flex flex-col"}> 
 
       <div className="flex-1 min-h-0 senac-calendar">
         <style>{`

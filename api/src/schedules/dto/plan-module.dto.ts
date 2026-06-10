@@ -6,7 +6,9 @@ import {
   IsInt,
   IsNotEmpty,
   IsOptional,
+  IsString,
   IsUUID,
+  Matches,
   Max,
   Min,
   ValidateNested,
@@ -27,6 +29,20 @@ export class TrackSequenceDto {
 }
 
 export class TrackDto {
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'O horário de início deve estar no formato HH:MM',
+  })
+  startTimeStr: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'O horário de término deve estar no formato HH:MM',
+  })
+  endTimeStr: string;
+
   @IsArray()
   @ArrayNotEmpty()
   @IsInt({ each: true })
@@ -47,8 +63,8 @@ export class PlanModuleDto {
   classGroupId: string;
 
   @IsOptional()
-  @IsUUID()
-  moduleId?: string;
+  @IsString()
+  module?: string;
 
   @Type(() => Date)
   @IsDate()

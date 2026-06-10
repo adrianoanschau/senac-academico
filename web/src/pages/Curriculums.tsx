@@ -15,6 +15,7 @@ interface Subject {
   id: string;
   name: string;
   hours: number;
+  code?: string;
 }
 
 interface CurriculumSubject {
@@ -328,7 +329,7 @@ export const Curriculums: React.FC = () => {
                       <Select required value={sub.subjectId} onChange={(e) => updateSubject(index, 'subjectId', e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-menu-matriz outline-none text-slate-800 text-sm cursor-pointer">
                         <option value="">Selecione a disciplina...</option>
                         {subjects.map(s => (
-                          <option key={s.id} value={s.id}>{s.name} ({s.hours}h)</option>
+                          <option key={s.id} value={s.id}>{s.code ? `${s.code}: ${s.name}` : s.name} ({s.hours}h)</option>
                         ))}
                       </Select>
                     </div>
