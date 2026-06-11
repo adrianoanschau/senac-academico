@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { PrismaService } from '@/prisma/prisma.service';
+import { ClassStatus } from '@/prisma/generated';
 import {
   RULE_EVENTS,
   RuleEndDateChangedEvent,
 } from '../events/rule-end-date-changed.event';
-import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulesService } from '../schedules.service';
-import { ClassStatus } from '@/prisma/generated';
 
 @Injectable()
 export class RuleDependencyListener {
@@ -19,7 +19,7 @@ export class RuleDependencyListener {
 
   @OnEvent(RULE_EVENTS.END_DATE_CHANGED)
   async handleRuleEndDateChanged(event: RuleEndDateChangedEvent) {
-    console.log('[EVENT LISTENER] Evento recebido! Payload:', event);
+    this.logger.log('[EVENT LISTENER] Evento recebido! Payload:', event);
     this.logger.log(
       `[Efeito Dominó] Evento recebido! A regra ${event.ruleId} (Turma: ${event.classGroupId}) teve sua data final alterada para ${event.newEndDate.toISOString()}.`,
     );
@@ -30,7 +30,7 @@ export class RuleDependencyListener {
         where: { dependsOnRuleId: event.ruleId },
       });
 
-      console.log(
+      this.logger.log(
         '[EVENT LISTENER] Busca por dependentes da ruleId',
         event.ruleId,
         'retornou:',

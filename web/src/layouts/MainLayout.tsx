@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutGrid, Folder, Settings, MessageSquare, LogOut, Bell, GraduationCap, Users, MapPin, CalendarDays, BookOpen, Layers, Library, CalendarClock } from 'lucide-react';
+import { UserProfileCard } from '../components/UserProfileCard';
 
 interface NavItemProps {
   to: string;
@@ -96,26 +97,7 @@ export const MainLayout: React.FC = () => {
             <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">Avisos</span>
           </div>
 
-          <div className="flex items-center justify-between mb-8">
-            <div className="relative cursor-pointer">
-              <Bell size={24} className="text-slate-400" />
-              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-menu-especiais rounded-full border-2 border-white transition-colors"></div>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-senac-orange to-senac-orange mb-3 transition-colors">
-                <div className="w-full h-full rounded-full border-2 border-white overflow-hidden bg-senac-blue text-white flex items-center justify-center font-bold text-xl transition-colors">
-                  AD
-                </div>
-              </div>
-              <h2 className="text-lg font-bold text-slate-800">Administrador</h2>
-              <p className="text-sm text-slate-400 font-medium">Gestão Acadêmica</p>
-            </div>
-
-            <div className="cursor-pointer">
-              <MessageSquare size={24} className="text-slate-400" />
-            </div>
-          </div>
+          <UserProfileCard />
 
           <hr className="border-slate-100 mb-8" />
 
