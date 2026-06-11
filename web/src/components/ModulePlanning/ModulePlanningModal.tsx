@@ -55,6 +55,8 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
         {
           startTimeStr: '',
           endTimeStr: '',
+          isPriority: false,
+          startDate: '',
           daysOfWeek: [],
           sequence: [{ subjectId: '', professorId: '', roomId: '' }],
         },
@@ -235,7 +237,7 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
                 <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
                 <button
                   type="button"
-                  onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
+                  onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', isPriority: false, startDate: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
                   className="text-sm bg-senac-blue/10 text-senac-blue px-4 py-2 rounded-xl font-bold hover:bg-senac-blue/20 transition-colors flex items-center gap-2"
                 >
                   <Plus size={18} /> Adicionar Trilha Simultânea
@@ -436,6 +438,42 @@ const TrackCard = ({
             />
             {trackError?.endTimeStr && <span className="text-rose-500 text-[10px] font-bold mt-1 block">{trackError.endTimeStr.message}</span>}
           </div>
+        </div>
+      </div>
+      
+      {/* Novas Configurações: Prioridade e Data Específica */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <div className="flex flex-col justify-center">
+          <label className="flex items-center gap-3 cursor-pointer group/priority">
+            <input
+              type="checkbox"
+              {...register(`tracks.${trackIndex}.isPriority`)}
+              className="w-5 h-5 text-senac-blue border-slate-300 rounded focus:ring-senac-blue transition-all cursor-pointer"
+            />
+            <div>
+              <span className="block text-sm font-bold text-slate-700 group-hover/priority:text-senac-blue transition-colors">Prioridade Alta</span>
+              <span className="block text-xs text-slate-500 mt-0.5">Esta trilha será alocada primeiro, sobrepondo outras.</span>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início Específica (Opcional)</label>
+          <Controller
+            name={`tracks.${trackIndex}.startDate`}
+            control={control}
+            render={({ field }) => (
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-senac-blue transition-colors z-10">
+                  <Calendar size={18} strokeWidth={2.5} />
+                </div>
+                <DateSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder="Acompanha a Turma Base"
+                />
+              </div>
+            )}
+          />
         </div>
       </div>
 
