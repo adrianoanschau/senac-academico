@@ -36,7 +36,9 @@ export class ModuleOrchestratorService {
           subjectId: seq.subjectId,
           professorId: seq.professorId,
           roomId: seq.roomId!, // Opcional na Track, mas obrigatório no Generate
-          startDate: track.startDate || dto.startDate, // Usa a data da trilha (se houver) ou a data base do módulo
+          startDate: track.startDate
+            ? new Date(track.startDate)
+            : new Date(dto.startDate),
           daysOfWeek: track.daysOfWeek,
           startTimeStr: track.startTimeStr, // Substituindo os placeholders pelos dados reais vindos da UI
           endTimeStr: track.endTimeStr,

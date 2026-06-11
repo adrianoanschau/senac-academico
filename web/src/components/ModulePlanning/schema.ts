@@ -10,7 +10,7 @@ export const trackSchema = z.object({
   startTimeStr: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Início inválido.'),
   endTimeStr: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Término inválido.'),
   isPriority: z.boolean(),
-  startDate: z.string().optional(),
+  startDate: z.string().optional().transform((val) => (val === '' ? undefined : val)),
   daysOfWeek: z
     .array(z.number().min(0).max(6))
     .min(1, 'Selecione pelo menos um dia da semana para esta trilha.'),
