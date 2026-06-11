@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import type { Control, UseFormRegister, FieldErrors, ArrayPath, Path } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
@@ -71,21 +71,21 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const selectedClassGroupId = useWatch({ control, name: 'classGroupId' });
+  const selectedModuleNumber = useWatch({ control, name: 'moduleNumber' as Path<PlanModuleFormInput> });
+
   useEffect(() => {
     if (!isOpen) return;
     
     const fetchOptions = async () => {
       setIsLoadingOptions(true);
       try {
-        // Promise.all executa as requisições de forma simultânea, otimizando o carregamento
-        const [cgRes, subRes, profRes, roomRes] = await Promise.all([
+        const [cgRes, profRes, roomRes] = await Promise.all([
           axios.get('/api/class-groups').catch(() => ({ data: [] })),
-          axios.get('/api/subjects').catch(() => ({ data: [] })),
           axios.get('/api/professors').catch(() => ({ data: [] })),
           axios.get('/api/rooms').catch(() => ({ data: [] })),
         ]);
         setClassGroups(cgRes.data?.data || cgRes.data || []);
-        setSubjects(subRes.data?.data || subRes.data || []);
         setProfessors(profRes.data?.data || profRes.data || []);
         setRooms(roomRes.data?.data || roomRes.data || []);
       } catch (error) {
@@ -96,6 +96,44 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
     };
     fetchOptions();
   }, [isOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!isOpen || !selectedModuleNumber) {
+      setTimeout(() => {
+        if (isMounted) setSubjects([]);
+      }, 0);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const fetchSubjects = async () => {
+      try {
+        const response = await axios.get('/api/subjects', {
+          params: { 
+            moduleNumber: selectedModuleNumber,
+            ...(selectedClassGroupId ? { classGroupId: selectedClassGroupId } : {})
+          }
+        });
+        if (isMounted) {
+          setSubjects(response.data?.data || response.data || []);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar disciplinas do módulo:', error);
+        if (isMounted) {
+          setSubjects([]);
+        }
+      }
+    };
+
+    fetchSubjects();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, selectedModuleNumber, selectedClassGroupId]);
 
   // Gerencia o array principal: Trilhas (Tracks)
   const {
@@ -197,14 +235,17 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Módulo (Opcional)</label>
-                <input
-                  type="text"
-                  {...register('module')}
-                  disabled={isLoadingOptions}
-                  placeholder="Ex: Módulo I"
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium disabled:opacity-50 placeholder-slate-400"
-                />
+                <label className="block text-sm font-bold text-slate-700 mb-2">Módulo</label>
+                <Select
+                  {...register('moduleNumber' as Path<PlanModuleFormInput>)}
+                  disabled={isLoadingOptions || !selectedClassGroupId}
+                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium disabled:opacity-50 cursor-pointer"
+                >
+                  <option value="">Selecione o módulo...</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((m) => (
+                    <option key={m} value={m}>Módulo {m}</option>
+                  ))}
+                </Select>
               </div>
               
               <div>
@@ -232,41 +273,47 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
             <hr className="border-slate-100" />
 
             {/* Sessão: Trilhas (Tracks) */}
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
-                <button
-                  type="button"
-                  onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', isPriority: false, startDate: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
-                  className="text-sm bg-senac-blue/10 text-senac-blue px-4 py-2 rounded-xl font-bold hover:bg-senac-blue/20 transition-colors flex items-center gap-2"
-                >
-                  <Plus size={18} /> Adicionar Trilha Simultânea
-                </button>
-              </div>
-
-              {errors.tracks?.message && (
-                <div className="p-3 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold mb-4">
-                  {errors.tracks.message}
+            {selectedModuleNumber ? (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
+                  <button
+                    type="button"
+                    onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', isPriority: false, startDate: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
+                    className="text-sm bg-senac-blue/10 text-senac-blue px-4 py-2 rounded-xl font-bold hover:bg-senac-blue/20 transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={18} /> Adicionar Trilha Simultânea
+                  </button>
                 </div>
-              )}
 
-              <div className="space-y-6">
-                {trackFields.map((field, index) => (
-                  <TrackCard
-                    key={field.id}
-                    trackIndex={index}
-                    control={control}
-                    register={register}
-                    errors={errors}
-                    removeTrack={() => removeTrack(index)}
-                    subjects={subjects}
-                    professors={professors}
-                    rooms={rooms}
-                    isOnlyTrack={trackFields.length === 1}
-                  />
-                ))}
+                {errors.tracks?.message && (
+                  <div className="p-3 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold mb-4">
+                    {errors.tracks.message}
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  {trackFields.map((field, index) => (
+                    <TrackCard
+                      key={field.id}
+                      trackIndex={index}
+                      control={control}
+                      register={register}
+                      errors={errors}
+                      removeTrack={() => removeTrack(index)}
+                      subjects={subjects}
+                      professors={professors}
+                      rooms={rooms}
+                      isOnlyTrack={trackFields.length === 1}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="text-slate-500 font-medium">Selecione uma turma e um módulo para carregar as disciplinas e configurar as trilhas.</p>
+              </div>
+            )}
 
           </form>
         </div>
