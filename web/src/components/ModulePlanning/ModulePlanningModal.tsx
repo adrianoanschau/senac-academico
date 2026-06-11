@@ -45,11 +45,12 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
+    resetField,
   } = useForm<PlanModuleFormInput, unknown, PlanModuleFormData>({
     resolver: zodResolver(planModuleSchema),
     defaultValues: {
       classGroupId: '',
-      module: '',
+      moduleNumber: '' as unknown as string,
       startDate: '',
       tracks: [
         {
@@ -68,11 +69,13 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [availableModules, setAvailableModules] = useState<number[]>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+  const [isLoadingModules, setIsLoadingModules] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedClassGroupId = useWatch({ control, name: 'classGroupId' });
-  const selectedModuleNumber = useWatch({ control, name: 'moduleNumber' as Path<PlanModuleFormInput> });
+  const selectedModuleNumber = useWatch({ control, name: 'moduleNumber' });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -89,13 +92,49 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
         setProfessors(profRes.data?.data || profRes.data || []);
         setRooms(roomRes.data?.data || roomRes.data || []);
       } catch (error) {
-        console.error('Erro ao buscar opções para o planejamento:', error);
+        console.error('Erro ao buscar opções base para o planejamento:', error);
       } finally {
         setIsLoadingOptions(false);
       }
     };
     fetchOptions();
   }, [isOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!isOpen || !selectedClassGroupId) {
+      setTimeout(() => {
+        if (isMounted) setAvailableModules([]);
+      }, 0);
+      resetField('moduleNumber');
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const fetchModules = async () => {
+      setTimeout(() => {
+        if (isMounted) setIsLoadingModules(true);
+      }, 0);
+      try {
+        const response = await axios.get(`/api/class-groups/${selectedClassGroupId}/modules`);
+        if (isMounted) setAvailableModules(response.data?.data || []);
+      } catch (error) {
+        console.error('Erro ao buscar módulos da turma:', error);
+        if (isMounted) setAvailableModules([]);
+      } finally {
+        if (isMounted) setIsLoadingModules(false);
+      }
+    };
+
+    resetField('moduleNumber');
+    fetchModules();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, selectedClassGroupId, resetField]);
 
   useEffect(() => {
     let isMounted = true;
@@ -237,15 +276,18 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Módulo</label>
                 <Select
-                  {...register('moduleNumber' as Path<PlanModuleFormInput>)}
-                  disabled={isLoadingOptions || !selectedClassGroupId}
+                  {...register('moduleNumber')}
+                  disabled={isLoadingOptions || !selectedClassGroupId || isLoadingModules}
                   className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium disabled:opacity-50 cursor-pointer"
                 >
-                  <option value="">Selecione o módulo...</option>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((m) => (
+                  <option value="">
+                    {isLoadingModules ? 'Carregando...' : 'Selecione o módulo...'}
+                  </option>
+                  {availableModules.map((m) => (
                     <option key={m} value={m}>Módulo {m}</option>
                   ))}
                 </Select>
+                {errors.moduleNumber && <span className="text-rose-500 text-xs font-bold mt-1 block">{errors.moduleNumber.message}</span>}
               </div>
               
               <div>
@@ -273,45 +315,47 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
             <hr className="border-slate-100" />
 
             {/* Sessão: Trilhas (Tracks) */}
-            {selectedModuleNumber ? (
+            {selectedModuleNumber && subjects.length > 0 ? (
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
-                  <button
-                    type="button"
-                    onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', isPriority: false, startDate: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
-                    className="text-sm bg-senac-blue/10 text-senac-blue px-4 py-2 rounded-xl font-bold hover:bg-senac-blue/20 transition-colors flex items-center gap-2"
-                  >
-                    <Plus size={18} /> Adicionar Trilha Simultânea
-                  </button>
-                </div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
+                <button
+                  type="button"
+                  onClick={() => appendTrack({ startTimeStr: '', endTimeStr: '', isPriority: false, startDate: '', daysOfWeek: [], sequence: [{ subjectId: '', professorId: '', roomId: '' }] })}
+                  className="text-sm bg-senac-blue/10 text-senac-blue px-4 py-2 rounded-xl font-bold hover:bg-senac-blue/20 transition-colors flex items-center gap-2"
+                >
+                  <Plus size={18} /> Adicionar Trilha Simultânea
+                </button>
+              </div>
 
-                {errors.tracks?.message && (
-                  <div className="p-3 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold mb-4">
-                    {errors.tracks.message}
-                  </div>
-                )}
-
-                <div className="space-y-6">
-                  {trackFields.map((field, index) => (
-                    <TrackCard
-                      key={field.id}
-                      trackIndex={index}
-                      control={control}
-                      register={register}
-                      errors={errors}
-                      removeTrack={() => removeTrack(index)}
-                      subjects={subjects}
-                      professors={professors}
-                      rooms={rooms}
-                      isOnlyTrack={trackFields.length === 1}
-                    />
-                  ))}
+              {errors.tracks?.message && (
+                <div className="p-3 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold mb-4">
+                  {errors.tracks.message}
                 </div>
+              )}
+
+              <div className="space-y-6">
+                {trackFields.map((field, index) => (
+                  <TrackCard
+                    key={field.id}
+                    trackIndex={index}
+                    control={control}
+                    register={register}
+                    errors={errors}
+                    removeTrack={() => removeTrack(index)}
+                    subjects={subjects}
+                    professors={professors}
+                    rooms={rooms}
+                    isOnlyTrack={trackFields.length === 1}
+                  />
+                ))}
+              </div>
               </div>
             ) : (
               <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-slate-500 font-medium">Selecione uma turma e um módulo para carregar as disciplinas e configurar as trilhas.</p>
+                <p className="text-slate-500 font-medium">
+                  {selectedClassGroupId && !selectedModuleNumber ? 'Selecione um módulo para carregar as disciplinas.' : 'Selecione uma turma e um módulo para configurar as trilhas.'}
+                </p>
               </div>
             )}
 
@@ -558,7 +602,7 @@ const TrackCard = ({
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Disciplina...</option>
-                  {subjects.map((s) => (
+                    {subjects.map((s) => (
                       <option key={s.id} value={s.id}>{s.code ? `${s.code}: ${s.name}` : s.name}</option>
                     ))}
                   </Select>

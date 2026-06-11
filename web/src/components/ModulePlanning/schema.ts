@@ -21,7 +21,10 @@ export const trackSchema = z.object({
 
 export const planModuleSchema = z.object({
   classGroupId: z.string().min(1, 'A turma é obrigatória.'),
-  module: z.string().optional(),
+  moduleNumber: z.coerce
+    .number()
+    .int('Selecione um módulo.')
+    .positive('Selecione um módulo.'),
   startDate: z.string().min(1, 'A data de início é obrigatória.'),
   tracks: z
     .array(trackSchema)
