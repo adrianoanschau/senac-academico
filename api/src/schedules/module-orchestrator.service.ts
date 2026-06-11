@@ -16,25 +16,30 @@ export class ModuleOrchestratorService {
     let totalTracks = 0;
     let totalRulesGenerated = 0;
 
-    // Itera sobre as trilhas enviadas no payload
-    for (const track of dto.tracks) {
+    // Ordena as trilhas: as prioritárias (isPriority === true) são processadas primeiro
+    const sortedTracks = [...dto.tracks].sort((a, b) => {
+      if (a.isPriority && !b.isPriority) return -1;
+      if (!a.isPriority && b.isPriority) return 1;
+      return 0;
+    });
+
+    // Itera sobre as trilhas processando a fila ordenada
+    for (const track of sortedTracks) {
       totalTracks++;
 
       let previousRuleId: string | null = null;
 
       // Itera sobre a sequência de UCs (Disciplinas) dentro desta trilha
       for (const seq of track.sequence) {
-        // TODO: startTimeStr e endTimeStr precisarão ser definidos de acordo com o Turno (Shift) da Turma.
-        // Aqui usamos placeholders até conectarmos a busca de horários da ClassGroup.
         const generatePayload = {
           classGroupId: dto.classGroupId,
           subjectId: seq.subjectId,
           professorId: seq.professorId,
           roomId: seq.roomId!, // Opcional na Track, mas obrigatório no Generate
-          startDate: dto.startDate, // O Motor vai ignorar isso e usar a dependência, se existir
+          startDate: track.startDate || dto.startDate, // Usa a data da trilha (se houver) ou a data base do módulo
           daysOfWeek: track.daysOfWeek,
-          startTimeStr: '19:00', // Exemplo
-          endTimeStr: '22:00', // Exemplo
+          startTimeStr: track.startTimeStr, // Substituindo os placeholders pelos dados reais vindos da UI
+          endTimeStr: track.endTimeStr,
           dependsOnRuleId: previousRuleId || undefined,
         };
 

@@ -4,6 +4,7 @@ import {
   IsArray,
   IsDate,
   IsInt,
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -42,6 +43,15 @@ export class TrackDto {
     message: 'O horário de término deve estar no formato HH:MM',
   })
   endTimeStr: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPriority?: boolean;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  startDate?: Date;
 
   @IsArray()
   @ArrayNotEmpty()
