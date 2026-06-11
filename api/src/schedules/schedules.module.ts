@@ -4,6 +4,7 @@ import { SchedulesService } from './schedules.service';
 import { SchedulesController } from './schedules.controller';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
+import { RuleDependencyListener } from './listeners/rule-dependency.listener';
 
 @Module({
   controllers: [SchedulesController],
@@ -12,6 +13,7 @@ import { ModuleOrchestratorService } from './module-orchestrator.service';
     PrismaService,
     ScheduleGeneratorService,
     ModuleOrchestratorService,
+    RuleDependencyListener,
   ],
 })
 export class SchedulesModule {}

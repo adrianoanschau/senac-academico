@@ -170,6 +170,8 @@ export class SchedulesService {
       startTimeStr,
       endTimeStr,
       dependsOnRuleId,
+      remainingHours,
+      existingRuleId,
     } = dto;
 
     // 1. Busca a disciplina
@@ -227,7 +229,7 @@ export class SchedulesService {
       daysOfWeek,
       startTimeStr,
       endTimeStr,
-      subject.hours,
+      remainingHours !== undefined ? remainingHours : subject.hours,
       existingSchedules,
     );
 
@@ -240,20 +242,37 @@ export class SchedulesService {
     // 6. Salva a Regra e as Aulas numa Transação Segura (via createMany)
     // O $transaction garante que ou tudo é salvo perfeitamente, ou nada é salvo.
     const result = await this.prisma.$transaction(async (prisma) => {
-      // A. Cria a "Memória" (ScheduleRule)
-      const rule = await prisma.scheduleRule.create({
-        data: {
-          daysOfWeek,
-          startTimeStr,
-          endTimeStr,
-          totalHours: subject.hours,
-          classGroupId,
-          subjectId,
-          professorId,
-          roomId,
-          dependsOnRuleId,
-        },
-      });
+      // A. Atualiza a Regra Existente ou Cria uma Nova (ScheduleRule)
+      let ruleId = existingRuleId;
+
+      if (existingRuleId) {
+        await prisma.scheduleRule.update({
+          where: { id: existingRuleId },
+          data: {
+            daysOfWeek,
+            startTimeStr,
+            endTimeStr,
+            professorId,
+            roomId,
+            dependsOnRuleId,
+          },
+        });
+      } else {
+        const rule = await prisma.scheduleRule.create({
+          data: {
+            daysOfWeek,
+            startTimeStr,
+            endTimeStr,
+            totalHours: subject.hours,
+            classGroupId,
+            subjectId,
+            professorId,
+            roomId,
+            dependsOnRuleId,
+          },
+        });
+        ruleId = rule.id;
+      }
 
       // B. Prepara o array de aulas, agora injetando o ruleId
       const schedulesToCreate = projections.map((proj) => ({
@@ -263,7 +282,7 @@ export class SchedulesService {
         roomId,
         startTime: proj.startTime,
         endTime: proj.endTime,
-        ruleId: rule.id, // <-- Conecta a aula à sua regra de origem
+        ruleId: ruleId as string, // <-- Conecta a aula à sua regra de origem
         status: ClassStatus.PLANNED, // Opcional, pois é o default, mas bom para clareza
       }));
 
@@ -272,7 +291,7 @@ export class SchedulesService {
         data: schedulesToCreate,
       });
 
-      return { count: createdSchedules.count, ruleId: rule.id };
+      return { count: createdSchedules.count, ruleId: ruleId as string };
     });
 
     return {
@@ -490,8 +509,25 @@ export class SchedulesService {
         );
       }
 
+      const originalStatus = classToCancel.status;
+
       const { rule } = classToCancel;
       const targetRootId = rule.rootRuleId || rule.id;
+
+      // Identifica todas as regras descendentes (filhas, netas) para ignorar os conflitos com elas
+      const descendantRuleIds: string[] = [];
+      let currentIdsToSearch = [rule.id];
+
+      while (currentIdsToSearch.length > 0) {
+        const children = await tx.scheduleRule.findMany({
+          where: { dependsOnRuleId: { in: currentIdsToSearch } },
+          select: { id: true },
+        });
+        currentIdsToSearch = children.map((c) => c.id);
+        if (currentIdsToSearch.length > 0) {
+          descendantRuleIds.push(...currentIdsToSearch);
+        }
+      }
 
       // Efetivação: Salva o cancelamento ou deleção da aula original
       if (classToCancel.status === ClassStatus.PLANNED) {
@@ -521,13 +557,19 @@ export class SchedulesService {
         orderBy: { startTime: 'desc' },
       });
 
-      if (!lastClass) {
-        throw new BadRequestException(
-          'Nenhuma aula anterior encontrada para recalcular a data.',
-        );
-      }
+      // A data base para procurar a próxima alocação é a data da aula sendo adiada,
+      // ou a última aula ativa existente (caso a aula adiada fosse no meio do cronograma).
+      const baseDateForSearch = lastClass
+        ? new Date(
+            Math.max(
+              lastClass.startTime.getTime(),
+              classToCancel.startTime.getTime(),
+            ),
+          )
+        : classToCancel.startTime;
 
-      const nextDateToSearch = new Date(lastClass.startTime);
+      const nextDateToSearch = new Date(baseDateForSearch);
+      // FORÇA O SALTO INICIAL: Garante que a busca avançará para o próximo dia letivo livre
       nextDateToSearch.setDate(nextDateToSearch.getDate() + 1);
       nextDateToSearch.setHours(0, 0, 0, 0);
 
@@ -567,6 +609,9 @@ export class SchedulesService {
             startTime: { lt: proposedEnd },
             endTime: { gt: proposedStart },
             status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
+            ...(descendantRuleIds.length > 0 && {
+              ruleId: { notIn: descendantRuleIds },
+            }),
           },
         });
 
@@ -590,6 +635,9 @@ export class SchedulesService {
             startTime: { gte: nextDateToSearch },
             endTime: { lte: searchLimitDate },
             status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+            ...(descendantRuleIds.length > 0 && {
+              ruleId: { notIn: descendantRuleIds },
+            }),
           },
           select: { startTime: true, endTime: true },
         });
@@ -621,12 +669,18 @@ export class SchedulesService {
           ruleId: rule.id,
           startTime: newProj.startTime,
           endTime: newProj.endTime,
-          status: ClassStatus.SCHEDULED,
+          status: originalStatus,
         },
       });
     });
 
     if (result.ruleId) {
+      console.log(
+        '[EVENT EMIT] Disparando RULE_EVENTS.END_DATE_CHANGED para a ruleId:',
+        result.ruleId,
+        'com nova data:',
+        result.startTime,
+      );
       this.eventEmitter.emit(
         RULE_EVENTS.END_DATE_CHANGED,
         new RuleEndDateChangedEvent(

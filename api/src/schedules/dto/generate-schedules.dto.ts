@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  IsNumber,
   Max,
   Min,
 } from 'class-validator';
@@ -50,4 +51,12 @@ export class GenerateSchedulesDto {
   @IsOptional()
   @IsUUID()
   dependsOnRuleId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  remainingHours?: number;
+
+  @IsOptional()
+  @IsUUID()
+  existingRuleId?: string;
 }

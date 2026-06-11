@@ -401,7 +401,13 @@ const TrackCard = ({
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-senac-blue transition-colors z-10">
                     <Clock size={18} strokeWidth={2.5} />
                   </div>
-                  <TimeSelect value={field.value} onChange={field.onChange} placeholder="--:--" />
+                  <TimeSelect 
+                    value={field.value} 
+                    onChange={field.onChange} 
+                    placeholder="--:--" 
+                    minHour={8}
+                    maxHour={22}
+                  />
                 </div>
               )}
             />
@@ -418,7 +424,13 @@ const TrackCard = ({
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-senac-blue transition-colors z-10">
                     <Clock size={18} strokeWidth={2.5} />
                   </div>
-                  <TimeSelect value={field.value} onChange={field.onChange} placeholder="--:--" />
+                  <TimeSelect 
+                    value={field.value} 
+                    onChange={field.onChange} 
+                    placeholder="--:--"
+                    minHour={8}
+                    maxHour={22}
+                  />
                 </div>
               )}
             />
