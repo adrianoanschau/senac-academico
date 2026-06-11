@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import type { Control, UseFormRegister, FieldErrors } from 'react-hook-form';
+import type { Control, UseFormRegister, FieldErrors, ArrayPath, Path } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   X, Plus, Trash2, Calendar, BookOpen, Users,
   MapPin, Route, ArrowRight, Clock
 } from 'lucide-react';
-import { planModuleSchema, type PlanModuleFormData } from './schema';
+import { planModuleSchema, type PlanModuleFormData, type PlanModuleFormInput } from './schema';
 import { alertDialog } from '../../utils/dialog';
 import { Select } from '../Select';
 import { DateSelect } from '../DateSelect';
@@ -45,7 +45,7 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<PlanModuleFormData>({
+  } = useForm<PlanModuleFormInput, unknown, PlanModuleFormData>({
     resolver: zodResolver(planModuleSchema),
     defaultValues: {
       classGroupId: '',
@@ -299,9 +299,9 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
 // =========================================================================
 interface TrackCardProps {
   trackIndex: number;
-  control: Control<PlanModuleFormData>;
-  register: UseFormRegister<PlanModuleFormData>;
-  errors: FieldErrors<PlanModuleFormData>;
+  control: Control<PlanModuleFormInput>;
+  register: UseFormRegister<PlanModuleFormInput>;
+  errors: FieldErrors<PlanModuleFormInput>;
   removeTrack: () => void;
   subjects: Subject[];
   professors: Professor[];
@@ -320,7 +320,7 @@ const TrackCard = ({
     remove: removeSequence,
   } = useFieldArray({
     control,
-    name: `tracks.${trackIndex}.sequence`,
+    name: `tracks.${trackIndex}.sequence` as ArrayPath<PlanModuleFormInput>,
   });
 
   const trackError = errors.tracks?.[trackIndex];
@@ -359,20 +359,21 @@ const TrackCard = ({
         <div>
           <label className="block text-sm font-bold text-slate-700 mb-2">Dias da Semana</label>
           <Controller
-            name={`tracks.${trackIndex}.daysOfWeek`}
+            name={`tracks.${trackIndex}.daysOfWeek` as Path<PlanModuleFormInput>}
             control={control}
             render={({ field }) => (
               <div className="flex flex-wrap gap-2">
                 {DAYS_OF_WEEK.map((day) => {
-                  const isSelected = field.value?.includes(day.value);
+                  const currentValues = (Array.isArray(field.value) ? field.value : []) as number[];
+                  const isSelected = currentValues.includes(day.value);
                   return (
                     <button
                       type="button"
                       key={day.value}
                       onClick={() => {
                         const newValue = isSelected
-                          ? field.value.filter((v: number) => v !== day.value)
-                          : [...(field.value || []), day.value];
+                          ? currentValues.filter((v) => v !== day.value)
+                          : [...currentValues, day.value];
                         field.onChange(newValue);
                       }}
                       className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${
@@ -396,7 +397,7 @@ const TrackCard = ({
           <div className="flex-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Início</label>
             <Controller
-              name={`tracks.${trackIndex}.startTimeStr`}
+              name={`tracks.${trackIndex}.startTimeStr` as Path<PlanModuleFormInput>}
               control={control}
               render={({ field }) => (
                 <div className="relative group">
@@ -404,7 +405,7 @@ const TrackCard = ({
                     <Clock size={18} strokeWidth={2.5} />
                   </div>
                   <TimeSelect 
-                    value={field.value} 
+                    value={field.value as string} 
                     onChange={field.onChange} 
                     placeholder="--:--" 
                     minHour={8}
@@ -419,7 +420,7 @@ const TrackCard = ({
           <div className="flex-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Término</label>
             <Controller
-              name={`tracks.${trackIndex}.endTimeStr`}
+              name={`tracks.${trackIndex}.endTimeStr` as Path<PlanModuleFormInput>}
               control={control}
               render={({ field }) => (
                 <div className="relative group">
@@ -427,7 +428,7 @@ const TrackCard = ({
                     <Clock size={18} strokeWidth={2.5} />
                   </div>
                   <TimeSelect 
-                    value={field.value} 
+                    value={field.value as string} 
                     onChange={field.onChange} 
                     placeholder="--:--"
                     minHour={8}
@@ -447,7 +448,7 @@ const TrackCard = ({
           <label className="flex items-center gap-3 cursor-pointer group/priority">
             <input
               type="checkbox"
-              {...register(`tracks.${trackIndex}.isPriority`)}
+              {...register(`tracks.${trackIndex}.isPriority` as Path<PlanModuleFormInput>)}
               className="w-5 h-5 text-senac-blue border-slate-300 rounded focus:ring-senac-blue transition-all cursor-pointer"
             />
             <div>
@@ -459,7 +460,7 @@ const TrackCard = ({
         <div>
           <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início Específica (Opcional)</label>
           <Controller
-            name={`tracks.${trackIndex}.startDate`}
+            name={`tracks.${trackIndex}.startDate` as Path<PlanModuleFormInput>}
             control={control}
             render={({ field }) => (
               <div className="relative group">
@@ -467,7 +468,7 @@ const TrackCard = ({
                   <Calendar size={18} strokeWidth={2.5} />
                 </div>
                 <DateSelect
-                  value={field.value || ''}
+                  value={(field.value as string) || ''}
                   onChange={field.onChange}
                   placeholder="Acompanha a Turma Base"
                 />
@@ -506,7 +507,7 @@ const TrackCard = ({
                 <div className="relative">
                   <BookOpen size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.subjectId`)}
+                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.subjectId` as Path<PlanModuleFormInput>)}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Disciplina...</option>
@@ -521,7 +522,7 @@ const TrackCard = ({
                 <div className="relative">
                   <Users size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.professorId`)}
+                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.professorId` as Path<PlanModuleFormInput>)}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Professor...</option>
@@ -536,7 +537,7 @@ const TrackCard = ({
                 <div className="relative">
                   <MapPin size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.roomId`)}
+                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.roomId` as Path<PlanModuleFormInput>)}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Sala (Opcional)...</option>

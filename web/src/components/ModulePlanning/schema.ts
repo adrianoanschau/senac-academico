@@ -29,3 +29,4 @@ export const planModuleSchema = z.object({
 });
 
 export type PlanModuleFormData = z.infer<typeof planModuleSchema>;
+export type PlanModuleFormInput = z.input<typeof planModuleSchema>;

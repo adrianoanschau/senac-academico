@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircle, Shuffle } from 'lucide-react';
 import axios from 'axios';
-import { alertDialog } from '../utils/dialog';
+import { alertDialog, confirmDialog } from '../utils/dialog';
 import { DateSelect } from './DateSelect';
 import { MigrateRuleModal } from './MigrateRuleModal';
 
@@ -84,18 +84,47 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
 
     setIsPostponing(true);
     setError(null);
+
+    const payload = {
+      reason: postponeReason,
+      ...(postponeNewDate ? { newDate: postponeNewDate } : {}),
+      force: false,
+    };
+
     try {
-      await axios.post(`/api/schedules/${eventId}/postpone`, { 
-        reason: postponeReason,
-        ...(postponeNewDate ? { newDate: postponeNewDate } : {})
-      });
+      await axios.post(`/api/schedules/${eventId}/postpone`, payload);
       alertDialog('Aula adiada com sucesso!');
       onSuccess();
       onClose();
     } catch (error) {
       console.error('Erro ao adiar:', error);
       if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.message || 'Ocorreu um erro ao adiar a aula.');
+        const { status, data } = error.response;
+
+        if (status === 409 && data?.action === 'CONFIRM_REQUIRED') {
+          const conflictingSubject = data.conflictingSubject || 'Desconhecida';
+          
+          const isConfirmed = await confirmDialog(
+            `Atenção: A data já está ocupada pela disciplina de ${conflictingSubject}.\n\nDeseja sobrepor este horário? A disciplina afetada será automaticamente reagendada para a frente.`
+          );
+
+          if (isConfirmed) {
+            try {
+              await axios.post(`/api/schedules/${eventId}/postpone`, { ...payload, force: true });
+              alertDialog('Aula sobreposta com sucesso! As agendas dependentes foram recalculadas.');
+              onSuccess();
+              onClose();
+            } catch (forceError) {
+              if (axios.isAxiosError(forceError) && forceError.response) {
+                setError(forceError.response.data.message || 'Ocorreu um erro ao sobrepor a aula.');
+              } else {
+                setError('Ocorreu um erro inesperado.');
+              }
+            }
+          }
+        } else {
+          setError(data.message || 'Ocorreu um erro ao adiar a aula.');
+        }
       } else {
         setError('Ocorreu um erro inesperado.');
       }
