@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, BookOpen, X, Info } from 'lucide-react';
-import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Subject {
   id?: string | number;
@@ -30,7 +30,7 @@ export const Subjects: React.FC = () => {
   const fetchSubjects = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/subjects');
+      const response = await api.get('/subjects');
       setSubjects(response.data.data || []);
     } catch (error) {
       console.error('Erro ao buscar unidades curriculares:', error);
@@ -58,7 +58,7 @@ export const Subjects: React.FC = () => {
     if (!(await confirmDialog('Tem certeza que deseja excluir esta unidade curricular?'))) return;
 
     try {
-      await axios.delete(`/api/subjects/${id}`);
+      await api.delete(`/subjects/${id}`);
       fetchSubjects();
     } catch (error) {
       console.error('Erro ao excluir unidade curricular:', error);
@@ -78,9 +78,9 @@ export const Subjects: React.FC = () => {
       if (!isEditing) delete payload.id;
 
       if (isEditing) {
-        await axios.patch(url, payload);
+        await api.patch(url, payload);
       } else {
-        await axios.post(url, payload);
+        await api.post(url, payload);
       }
 
       setIsModalOpen(false);
@@ -121,7 +121,7 @@ export const Subjects: React.FC = () => {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
+      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
         
         {/* Toolbar */}
         <div className="flex justify-between items-center mb-6">
@@ -226,7 +226,7 @@ export const Subjects: React.FC = () => {
       {/* Modal de Cadastro/Edição */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Unidade Curricular</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">

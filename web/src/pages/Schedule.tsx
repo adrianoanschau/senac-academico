@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarClock, Maximize, Minimize, Info, Route } from 'lucide-react';
-import axios from 'axios';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { BulkGenerateModal } from '../components/BulkGenerateModal';
 import { ModulePlanningModal } from '../components/ModulePlanning/ModulePlanningModal';
@@ -9,6 +8,7 @@ import { MiniCalendar } from '../components/MiniCalendar';
 import { ContextPanel } from '../components/ContextPanel';
 import { Select } from '../components/Select';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Subject {
   id: string;
@@ -42,10 +42,10 @@ export const Schedule: React.FC = () => {
     const fetchFiltersData = async () => {
       try {
         const [subjectsRes, roomsRes, professorsRes, classGroupsRes] = await Promise.all([
-          axios.get('/api/subjects'),
-          axios.get('/api/rooms'),
-          axios.get('/api/professors'),
-          axios.get('/api/class-groups')
+          api.get('/subjects'),
+          api.get('/rooms'),
+          api.get('/professors'),
+          api.get('/class-groups')
         ]);
         setSubjects(subjectsRes.data?.data || subjectsRes.data || []);
         setRooms(roomsRes.data?.data || roomsRes.data || []);

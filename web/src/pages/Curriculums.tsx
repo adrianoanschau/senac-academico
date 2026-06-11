@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Library, X, Info } from 'lucide-react';
-import axios from 'axios';
 import { Select } from '../components/Select';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Course {
   id: string;
@@ -52,7 +52,7 @@ export const Curriculums: React.FC = () => {
 
   const fetchCurriculums = async () => {
     try {
-      const response = await axios.get('/api/curriculums');
+      const response = await api.get('/curriculums');
       setCurriculums(response.data.data || response.data || []);
     } catch (error) {
       console.error('Erro ao buscar grades curriculares:', error);
@@ -62,8 +62,8 @@ export const Curriculums: React.FC = () => {
   const fetchDependencies = async () => {
     try {
       const [coursesRes, subjectsRes] = await Promise.all([
-        axios.get('/api/courses'),
-        axios.get('/api/subjects')
+        api.get('/courses'),
+        api.get('/subjects')
       ]);
       setCourses(coursesRes.data.data || coursesRes.data || []);
       setSubjects(subjectsRes.data.data || subjectsRes.data || []);
@@ -89,7 +89,7 @@ export const Curriculums: React.FC = () => {
   const handleOpenEditModal = async (curriculum: Curriculum) => {
     try {
       // A listagem não retorna 'subjects', então buscamos a matriz completa pelo ID
-      const response = await axios.get(`/api/curriculums/${curriculum.id}`);
+      const response = await api.get(`/curriculums/${curriculum.id}`);
       const fullCurriculum = response.data.data || response.data;
 
       setFormData({
@@ -112,7 +112,7 @@ export const Curriculums: React.FC = () => {
     if (!(await confirmDialog('Tem certeza que deseja excluir esta grade curricular?'))) return;
 
     try {
-      await axios.delete(`/api/curriculums/${id}`);
+      await api.delete(`/curriculums/${id}`);
       fetchCurriculums();
     } catch (error) {
       console.error('Erro ao excluir grade curricular:', error);
@@ -137,9 +137,9 @@ export const Curriculums: React.FC = () => {
       };
 
       if (isEditing) {
-        await axios.patch(url, payload);
+        await api.patch(url, payload);
       } else {
-        await axios.post(url, payload);
+        await api.post(url, payload);
       }
 
       setIsModalOpen(false);

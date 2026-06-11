@@ -31,6 +31,8 @@ model UserProfile {
   id    String  @id
   email String  @unique
   role  AppRole @default(MEMBER)
+
+  @@map("users_profiles")
 }
 
 model Professor {

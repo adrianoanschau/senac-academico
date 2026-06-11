@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, MapPin, X, Info } from 'lucide-react';
-import axios from 'axios';
 import { Select } from '../components/Select';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Room {
   id?: string | number;
@@ -31,7 +31,7 @@ export const Rooms: React.FC = () => {
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/rooms');
+      const response = await api.get('/rooms');
       setRooms(response.data.data || []);
     } catch (error) {
       console.error('Erro ao buscar salas:', error);
@@ -60,7 +60,7 @@ export const Rooms: React.FC = () => {
     if (!(await confirmDialog('Tem certeza que deseja excluir esta sala?'))) return;
 
     try {
-      await axios.delete(`/api/rooms/${id}`);
+      await api.delete(`/rooms/${id}`);
       fetchRooms();
     } catch (error) {
       console.error('Erro ao excluir sala:', error);
@@ -80,9 +80,9 @@ export const Rooms: React.FC = () => {
       if (!isEditing) delete payload.id;
 
       if (isEditing) {
-        await axios.patch(url, payload);
+        await api.patch(url, payload);
       } else {
-        await axios.post(url, payload);
+        await api.post(url, payload);
       }
 
       setIsModalOpen(false);

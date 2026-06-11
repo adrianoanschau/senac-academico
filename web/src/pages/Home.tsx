@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, GraduationCap, Layers, Users, MapPin, Clock, Lightbulb, LayoutGrid } from 'lucide-react';
-import axios from 'axios';
 import { ContextPanel } from '../components/ContextPanel';
+import api from '../services/api';
 
 interface Course {
   id: string | number;
@@ -47,11 +47,11 @@ export const Home: React.FC = () => {
     const fetchData = async () => {
       try {
         const [coursesRes, classGroupsRes, professorsRes, roomsRes, curriculumsRes] = await Promise.all([
-          axios.get('/api/courses').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/class-groups').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/professors').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/rooms').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/curriculums').catch(() => ({ data: { data: [] } })),
+          api.get('/courses').catch(() => ({ data: { data: [] } })),
+          api.get('/class-groups').catch(() => ({ data: { data: [] } })),
+          api.get('/professors').catch(() => ({ data: { data: [] } })),
+          api.get('/rooms').catch(() => ({ data: { data: [] } })),
+          api.get('/curriculums').catch(() => ({ data: { data: [] } })),
         ]);
         
         const coursesList = coursesRes.data.data || coursesRes.data || [];
@@ -129,7 +129,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Hero Banner Dinâmico */}
-      <div className="bg-slate-800 rounded-[2rem] p-10 flex items-center justify-between mb-8 shadow-lg shadow-slate-800/20 relative overflow-hidden transition-colors">
+      <div className="bg-slate-800 rounded-4xl p-10 flex items-center justify-between mb-8 shadow-lg shadow-slate-800/20 relative overflow-hidden transition-colors">
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-3xl font-bold text-white mb-4">Bem-vindo(a) ao Painel Geral!</h2>
           <p className="text-blue-100 leading-relaxed text-lg">
@@ -144,8 +144,8 @@ export const Home: React.FC = () => {
         </div>
         
         {/* Background Decorations */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-slate-600/30 to-transparent rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-40 w-40 h-40 bg-gradient-to-tr from-senac-orange/20 to-transparent rounded-full blur-2xl -mb-10"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-bl from-slate-600/30 to-transparent rounded-full blur-3xl -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-40 w-40 h-40 bg-linear-to-tr from-senac-orange/20 to-transparent rounded-full blur-2xl -mb-10"></div>
       </div>
 
       {/* Stats Grid */}
@@ -189,7 +189,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Main Chart (Line Chart Placeholder) */}
-      <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] mb-8">
+      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] mb-8">
         <div className="flex justify-between items-start mb-10">
           <div>
             <h3 className="text-xl font-bold text-slate-800">Evolução de Agendamentos (Estimativa)</h3>
@@ -267,7 +267,7 @@ export const Home: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
         
         {/* Donut Chart - Shift Distribution */}
-        <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col">
+        <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-bold text-slate-800">Turmas por Turno</h3>
             <Clock size={18} className="text-slate-400" />
@@ -334,7 +334,7 @@ export const Home: React.FC = () => {
         </div>
 
         {/* Bar Chart - Top Courses */}
-        <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col">
+        <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-bold text-slate-800">Turmas por Curso</h3>
             <GraduationCap size={18} className="text-slate-400" />

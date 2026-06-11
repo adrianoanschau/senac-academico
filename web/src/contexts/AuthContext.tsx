@@ -5,9 +5,9 @@ import React, {
   useEffect,
   type ReactNode,
 } from 'react';
-import type { User } from '@supabase/supabase-js';
-import axios from 'axios';
+import { type User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
+import api from '../services/api';
 
 // 1. Definição das interfaces estritas
 export type AppRole =
@@ -51,15 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (session) {
         setUser(session.user);
         try {
-          // Se existir uma sessão, buscar o perfil do utilizador na nossa API
-          const { data: userProfile } = await axios.get<UserProfile>(
-            '/api/users/me',
-            {
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-              },
-            },
-          );
+          // O interceptor do 'api' irá adicionar o token automaticamente.
+          const { data: userProfile } = await api.get<UserProfile>('/users/me');
           setProfile(userProfile);
         } catch (error) {
           console.error('Erro ao buscar o perfil do utilizador:', error);

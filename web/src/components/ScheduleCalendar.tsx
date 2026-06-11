@@ -8,6 +8,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import { Check } from 'lucide-react';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -211,7 +212,7 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
               if (filters?.professorId) params.append('professorId', filters.professorId);
               if (filters?.classGroupId) params.append('classGroupId', filters.classGroupId);
 
-              const response = await axios.get(`/api/schedules?${params.toString()}`);
+              const response = await api.get(`/schedules?${params.toString()}`);
               const data: ScheduleResponse[] = response.data?.data || response.data || [];
 
               const calendarEvents = data.map((schedule) => {

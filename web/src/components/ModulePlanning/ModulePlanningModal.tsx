@@ -12,6 +12,7 @@ import { alertDialog } from '../../utils/dialog';
 import { Select } from '../Select';
 import { DateSelect } from '../DateSelect';
 import { TimeSelect } from '../TimeSelect';
+import api from '../../services/api';
 
 const DAYS_OF_WEEK = [
   { label: 'Dom', value: 0 },
@@ -84,9 +85,9 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
       setIsLoadingOptions(true);
       try {
         const [cgRes, profRes, roomRes] = await Promise.all([
-          axios.get('/api/class-groups').catch(() => ({ data: [] })),
-          axios.get('/api/professors').catch(() => ({ data: [] })),
-          axios.get('/api/rooms').catch(() => ({ data: [] })),
+          api.get('/class-groups').catch(() => ({ data: [] })),
+          api.get('/professors').catch(() => ({ data: [] })),
+          api.get('/rooms').catch(() => ({ data: [] })),
         ]);
         setClassGroups(cgRes.data?.data || cgRes.data || []);
         setProfessors(profRes.data?.data || profRes.data || []);
@@ -118,7 +119,7 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
         if (isMounted) setIsLoadingModules(true);
       }, 0);
       try {
-        const response = await axios.get(`/api/class-groups/${selectedClassGroupId}/modules`);
+        const response = await api.get(`/class-groups/${selectedClassGroupId}/modules`);
         if (isMounted) setAvailableModules(response.data?.data || []);
       } catch (error) {
         console.error('Erro ao buscar módulos da turma:', error);
@@ -150,7 +151,7 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
 
     const fetchSubjects = async () => {
       try {
-        const response = await axios.get('/api/subjects', {
+        const response = await api.get('/subjects', {
           params: { 
             moduleNumber: selectedModuleNumber,
             ...(selectedClassGroupId ? { classGroupId: selectedClassGroupId } : {})
@@ -199,7 +200,7 @@ export const ModulePlanningModal: React.FC<ModulePlanningModalProps> = ({
         })),
       };
 
-      await axios.post('/api/schedules/plan-module', payload);
+      await api.post('/schedules/plan-module', payload);
       alertDialog('Módulo planejado com sucesso!');
       reset();
       if (onSuccess) onSuccess(data.startDate);

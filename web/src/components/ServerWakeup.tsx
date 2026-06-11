@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Loader2, Server } from 'lucide-react';
+import api from '../services/api';
 
 export const ServerWakeup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAwake, setIsAwake] = useState(false);
@@ -12,7 +12,7 @@ export const ServerWakeup: React.FC<{ children: React.ReactNode }> = ({ children
     const pingServer = async () => {
       try {
         // Fazemos uma requisição para garantir que a API saia da hibernação.
-        await axios.get('/api/');
+        await api.get('/');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         // Falhas como 401 (Não autorizado) também significam que o servidor já acordou

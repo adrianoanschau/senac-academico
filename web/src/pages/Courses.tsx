@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, GraduationCap, X, Info } from 'lucide-react';
-import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Course {
   id?: string | number;
@@ -28,7 +28,7 @@ export const Courses: React.FC = () => {
   const fetchCourses = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/courses');
+      const response = await api.get('/courses');
       setCourses(response.data.data || []);
     } catch (error) {
       console.error('Erro ao buscar cursos:', error);
@@ -56,7 +56,7 @@ export const Courses: React.FC = () => {
     if (!(await confirmDialog('Tem certeza que deseja excluir este curso?'))) return;
 
     try {
-      await axios.delete(`/api/courses/${id}`);
+      await api.delete(`/courses/${id}`);
       fetchCourses();
     } catch (error) {
       console.error('Erro ao excluir curso:', error);
@@ -76,9 +76,9 @@ export const Courses: React.FC = () => {
       if (!isEditing) delete payload.id;
 
       if (isEditing) {
-        await axios.patch(url, payload);
+        await api.patch(url, payload);
       } else {
-        await axios.post(url, payload);
+        await api.post(url, payload);
       }
 
       setIsModalOpen(false);
@@ -119,7 +119,7 @@ export const Courses: React.FC = () => {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
+      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
         
         {/* Toolbar */}
         <div className="flex justify-between items-center mb-6">
@@ -225,7 +225,7 @@ export const Courses: React.FC = () => {
       {/* Modal de Cadastro/Edição */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Curso</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">

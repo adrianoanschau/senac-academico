@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Users, X, Info } from 'lucide-react';
-import axios from 'axios';
 import { confirmDialog, alertDialog } from '../utils/dialog';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
 
 interface Professor {
   id?: string | number;
@@ -30,7 +30,7 @@ export const Professors: React.FC = () => {
   const fetchProfessors = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/professors');
+      const response = await api.get('/professors');
       setProfessors(response.data.data || []);
     } catch (error) {
       console.error('Erro ao buscar professores:', error);
@@ -59,7 +59,7 @@ export const Professors: React.FC = () => {
     if (!(await confirmDialog('Tem certeza que deseja excluir este professor?'))) return;
     
     try {
-      await axios.delete(`/api/professors/${id}`);
+      await api.delete(`/professors/${id}`);
       
       fetchProfessors();
     } catch (error) {
@@ -82,9 +82,9 @@ export const Professors: React.FC = () => {
       if (!isEditing) delete payload.id;
 
       if (isEditing) {
-        await axios.patch(url, payload);
+        await api.patch(url, payload);
       } else {
-        await axios.post(url, payload);
+        await api.post(url, payload);
       }
       
       setIsModalOpen(false);

@@ -6,6 +6,7 @@ import { DateSelect } from './DateSelect';
 import { TimeSelect } from './TimeSelect';
 import { Select } from './Select';
 import { alertDialog } from '../utils/dialog';
+import api from '../services/api';
 
 interface ClassGroup { id: string; name?: string; code?: string; }
 interface Subject { id: string; name: string; code?: string; }
@@ -48,10 +49,10 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
         setIsLoadingData(true);
         try {
           const [classGroupsRes, subjectsRes, professorsRes, roomsRes] = await Promise.all([
-            axios.get('/api/class-groups'),
-            axios.get('/api/subjects'),
-            axios.get('/api/professors'),
-            axios.get('/api/rooms'),
+            api.get('/class-groups'),
+            api.get('/subjects'),
+            api.get('/professors'),
+            api.get('/rooms'),
           ]);
           setClassGroups(classGroupsRes.data.data || classGroupsRes.data);
           setSubjects(subjectsRes.data.data || subjectsRes.data);
@@ -83,7 +84,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({ isOpen, on
     };
 
     try {
-      await axios.post('/api/schedules/generate', payload);
+      await api.post('/schedules/generate', payload);
       alertDialog('Grade gerada com sucesso!');
       onSuccess();
     } catch (error) {

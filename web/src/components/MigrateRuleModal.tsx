@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { X, AlertTriangle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { alertDialog } from '../utils/dialog';
+import api from '../services/api';
 
 interface Professor { id: string; name: string; }
 interface Room { id: string; name: string; }
@@ -52,8 +53,8 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({ isOpen, onCl
         setIsLoadingData(true);
         try {
           const [professorsRes, roomsRes] = await Promise.all([
-            axios.get('/api/professors'),
-            axios.get('/api/rooms'),
+            api.get('/professors'),
+            api.get('/rooms'),
           ]);
           setProfessors(professorsRes.data?.data || professorsRes.data || []);
           setRooms(roomsRes.data?.data || roomsRes.data || []);
@@ -82,7 +83,7 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({ isOpen, onCl
         newRoomId: data.newRoomId || undefined,
       };
 
-      await axios.post(`/api/schedules/rules/${ruleId}/migrate-pattern`, payload);
+      await api.post(`/schedules/rules/${ruleId}/migrate-pattern`, payload);
       alertDialog('Padrão de aulas alterado com sucesso!');
       onSuccess();
       onClose();

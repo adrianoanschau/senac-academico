@@ -4,6 +4,7 @@ import axios from 'axios';
 import { alertDialog, confirmDialog } from '../utils/dialog';
 import { DateSelect } from './DateSelect';
 import { MigrateRuleModal } from './MigrateRuleModal';
+import api from '../services/api';
 
 interface ScheduleDetailsModalProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
       setIsLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/schedules/${eventId}`);
+        const response = await api.get(`/schedules/${eventId}`);
         if (isMounted) {
           setDetails(response.data.data);
         }
@@ -92,7 +93,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
     };
 
     try {
-      await axios.post(`/api/schedules/${eventId}/postpone`, payload);
+      await api.post(`/schedules/${eventId}/postpone`, payload);
       alertDialog('Aula adiada com sucesso!');
       onSuccess();
       onClose();
@@ -110,7 +111,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
 
           if (isConfirmed) {
             try {
-              await axios.post(`/api/schedules/${eventId}/postpone`, { ...payload, force: true });
+              await api.post(`/schedules/${eventId}/postpone`, { ...payload, force: true });
               alertDialog('Aula sobreposta com sucesso! As agendas dependentes foram recalculadas.');
               onSuccess();
               onClose();
@@ -139,7 +140,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
     setIsPublishing(true);
     setError(null);
     try {
-      await axios.patch(`/api/schedules/rules/${details.ruleId}/publish`);
+      await api.patch(`/schedules/rules/${details.ruleId}/publish`);
       alertDialog('Cronograma efetivado com sucesso!');
       onSuccess();
       onClose();
