@@ -32,6 +32,12 @@ export class ClassGroupsController {
     return { data };
   }
 
+  @Get(':id/modules')
+  async findModules(@Param('id') id: string) {
+    const data = await this.classGroupsService.findModules(id);
+    return { data };
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: string,

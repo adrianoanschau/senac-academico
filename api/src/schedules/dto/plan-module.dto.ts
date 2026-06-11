@@ -73,8 +73,10 @@ export class PlanModuleDto {
   classGroupId: string;
 
   @IsOptional()
-  @IsString()
-  module?: string;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  moduleNumber?: number;
 
   @Type(() => Date)
   @IsDate()

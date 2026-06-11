@@ -82,4 +82,30 @@ export class ClassGroupsService {
       where: { id },
     });
   }
+
+  async findModules(classGroupId: string): Promise<number[]> {
+    const classGroup = await this.prisma.classGroup.findUnique({
+      where: { id: classGroupId },
+      select: { curriculumId: true },
+    });
+
+    if (!classGroup || !classGroup.curriculumId) {
+      return [];
+    }
+
+    const distinctModules = await this.prisma.curriculumSubject.findMany({
+      where: {
+        curriculumId: classGroup.curriculumId,
+      },
+      distinct: ['module'],
+      select: {
+        module: true,
+      },
+      orderBy: {
+        module: 'asc',
+      },
+    });
+
+    return distinctModules.map((item) => item.module);
+  }
 }
