@@ -5,6 +5,7 @@ import { SchedulesController } from './schedules.controller';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { RuleDependencyListener } from './listeners/rule-dependency.listener';
+import { ClassCompletionCronService } from './class-completion-cron.service';
 
 @Module({
   controllers: [SchedulesController],
@@ -14,6 +15,7 @@ import { RuleDependencyListener } from './listeners/rule-dependency.listener';
     ScheduleGeneratorService,
     ModuleOrchestratorService,
     RuleDependencyListener,
+    ClassCompletionCronService,
   ],
 })
 export class SchedulesModule {}
