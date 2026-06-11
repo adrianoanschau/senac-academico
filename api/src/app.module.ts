@@ -14,6 +14,9 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ScheduleOverridesModule } from './schedule-overrides/schedule-overrides.module';
 import { ScheduleRulesModule } from './schedule-rules/schedule-rules.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/guards/roles.guard';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -31,6 +34,17 @@ import { ScheduleRulesModule } from './schedule-rules/schedule-rules.module';
     ScheduleRulesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

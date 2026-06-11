@@ -19,6 +19,20 @@ enum ClassStatus {
   CANCELLED
 }
 
+enum AppRole {
+  ADMIN
+  COORDINATOR
+  INSTRUCTOR
+  SECRETARY
+  MEMBER
+}
+
+model UserProfile {
+  id    String  @id
+  email String  @unique
+  role  AppRole @default(MEMBER)
+}
+
 model Professor {
   id         String   @id @default(uuid())
   name       String

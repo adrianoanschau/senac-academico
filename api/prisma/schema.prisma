@@ -19,6 +19,20 @@ enum ClassStatus {
   CANCELLED
 }
 
+enum AppRole {
+  ADMIN
+  COORDINATOR
+  INSTRUCTOR
+  SECRETARY
+  MEMBER
+}
+
+model UserProfile {
+  id    String  @id
+  email String  @unique
+  role  AppRole @default(MEMBER)
+}
+
 model Professor {
   id         String   @id @default(uuid())
   name       String
@@ -164,11 +178,11 @@ model ScheduleRule {
   endTimeStr   String
   totalHours   Int
 
-  classGroupId String
-  subjectId    String
-  professorId  String
-  roomId       String
-  rootRuleId   String?
+  classGroupId    String
+  subjectId       String
+  professorId     String
+  roomId          String
+  rootRuleId      String?
   dependsOnRuleId String?
 
   createdAt DateTime @default(now())

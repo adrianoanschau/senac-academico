@@ -120,6 +120,12 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserProfileScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  role: 'role'
+};
+
 exports.Prisma.ProfessorScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -237,6 +243,14 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.AppRole = exports.$Enums.AppRole = {
+  ADMIN: 'ADMIN',
+  COORDINATOR: 'COORDINATOR',
+  INSTRUCTOR: 'INSTRUCTOR',
+  SECRETARY: 'SECRETARY',
+  MEMBER: 'MEMBER'
+};
+
 exports.ClassStatus = exports.$Enums.ClassStatus = {
   PLANNED: 'PLANNED',
   SCHEDULED: 'SCHEDULED',
@@ -250,6 +264,7 @@ exports.OverrideType = exports.$Enums.OverrideType = {
 };
 
 exports.Prisma.ModelName = {
+  UserProfile: 'UserProfile',
   Professor: 'Professor',
   Room: 'Room',
   Course: 'Course',
