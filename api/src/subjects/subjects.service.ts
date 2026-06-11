@@ -4,8 +4,10 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { Prisma } from '@/prisma/generated';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
 
 @Injectable()
 export class SubjectsService {
@@ -27,9 +29,18 @@ export class SubjectsService {
     });
   }
 
-  async findAll() {
+  async findAll(query?: FindSubjectsQueryDto) {
+    const where: Prisma.SubjectWhereInput = {};
+
+    if (query?.moduleNumber !== undefined) {
+      where.curriculums = {
+        some: { module: query.moduleNumber },
+      };
+    }
+
     return this.prisma.subject.findMany({
-      orderBy: { name: 'asc' },
+      where,
+      orderBy: [{ code: 'asc' }, { name: 'asc' }],
     });
   }
 

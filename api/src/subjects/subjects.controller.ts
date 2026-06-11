@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
 
 @Controller('subjects')
 export class SubjectsController {
@@ -22,8 +24,8 @@ export class SubjectsController {
   }
 
   @Get()
-  async findAll() {
-    const data = await this.subjectsService.findAll();
+  async findAll(@Query() query: FindSubjectsQueryDto) {
+    const data = await this.subjectsService.findAll(query);
     return { data };
   }
 
