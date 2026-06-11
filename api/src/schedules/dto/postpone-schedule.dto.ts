@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsOptional,
@@ -15,4 +16,8 @@ export class PostponeScheduleDto {
   @IsOptional()
   @IsDateString()
   newDate?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
 }

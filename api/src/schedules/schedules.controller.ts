@@ -97,6 +97,7 @@ export class SchedulesController {
         id,
         postponeDto.reason,
         postponeDto.newDate,
+        postponeDto.force,
       ),
     };
   }
