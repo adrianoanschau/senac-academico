@@ -3,7 +3,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ProfessorsModule } from './professors/professors.module';
@@ -37,7 +36,6 @@ import { UsersModule } from './users/users.module';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     PrismaService,
     {
       provide: APP_GUARD,

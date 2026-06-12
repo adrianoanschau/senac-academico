@@ -29,5 +29,5 @@
       "@/prisma/*": ["src/prisma/*"]
     }
   },
-  "include": ["src/**/*", "prisma/generated/**/*"]
+  "include": ["src/**/*", "prisma/generated/**/*", "vitest.config.ts"]
 }
