@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   Search,
   Plus,
@@ -8,10 +8,6 @@ import {
   Info,
   Route,
 } from "lucide-react";
-import ScheduleCalendar from "../components/ScheduleCalendar";
-import { BulkGenerateModal } from "../components/BulkGenerateModal";
-import { ModulePlanningModal } from "../components/ModulePlanning/ModulePlanningModal";
-import { ScheduleDetailsModal } from "../components/ScheduleDetailsModal";
 import { MiniCalendar } from "../components/MiniCalendar";
 import { ContextPanel } from "../components/ContextPanel";
 import { CanAccess } from "../components/CanAccess";
@@ -20,6 +16,23 @@ import { ExportButtons } from "../components/ExportButtons";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
 import type { ScheduleItem } from "../utils/exportUtils";
+
+const ScheduleCalendar = lazy(() => import("../components/ScheduleCalendar"));
+const BulkGenerateModal = lazy(() =>
+  import("../components/BulkGenerateModal").then((m) => ({
+    default: m.BulkGenerateModal,
+  })),
+);
+const ModulePlanningModal = lazy(() =>
+  import("../components/ModulePlanning/ModulePlanningModal").then((m) => ({
+    default: m.ModulePlanningModal,
+  })),
+);
+const ScheduleDetailsModal = lazy(() =>
+  import("../components/ScheduleDetailsModal").then((m) => ({
+    default: m.ScheduleDetailsModal,
+  })),
+);
 
 interface Subject {
   id: string;
@@ -268,63 +281,77 @@ export const Schedule: React.FC = () => {
         </div>
 
         {/* Calendário */}
-        <ScheduleCalendar
-          filters={{
-            search,
-            status,
-            subjectId,
-            roomId,
-            professorId,
-            classGroupId,
-            _refresh: refreshTrigger,
-          }}
-          onEventClick={handleEventClick}
-          isFullscreen={isFullscreen}
-          selectedDate={selectedDate}
-          onDateChange={(date) => setSelectedDateStr(date.toISOString())}
-        />
+        <Suspense
+          fallback={
+            <div className="h-200 flex items-center justify-center text-slate-500 font-medium">
+              Carregando calendário...
+            </div>
+          }
+        >
+          <ScheduleCalendar
+            filters={{
+              search,
+              status,
+              subjectId,
+              roomId,
+              professorId,
+              classGroupId,
+              _refresh: refreshTrigger,
+            }}
+            onEventClick={handleEventClick}
+            isFullscreen={isFullscreen}
+            selectedDate={selectedDate}
+            onDateChange={(date) => setSelectedDateStr(date.toISOString())}
+          />
+        </Suspense>
       </div>
 
-      <BulkGenerateModal
-        isOpen={isBulkModalOpen}
-        onClose={() => setIsBulkModalOpen(false)}
-        onSuccess={() => {
-          setIsBulkModalOpen(false);
-          setRefreshTrigger((prev) => prev + 1);
-        }}
-      />
+      <Suspense fallback={null}>
+        {isBulkModalOpen && (
+          <BulkGenerateModal
+            isOpen={isBulkModalOpen}
+            onClose={() => setIsBulkModalOpen(false)}
+            onSuccess={() => {
+              setIsBulkModalOpen(false);
+              setRefreshTrigger((prev) => prev + 1);
+            }}
+          />
+        )}
 
-      <ModulePlanningModal
-        isOpen={isModulePlannerOpen}
-        onClose={() => setIsModulePlannerOpen(false)}
-        onSuccess={(startDate) => {
-          setIsModulePlannerOpen(false);
-          if (startDate) {
-            // Força o calendário a pular para o mês de início do novo módulo gerado
-            const parsedDate = new Date(
-              startDate.includes("T") ? startDate : `${startDate}T12:00:00`,
-            );
-            setSelectedDateStr(parsedDate.toISOString());
-          }
-          // Garante que o status 'PLANNED' está marcado para visualizarmos as aulas geradas!
-          if (!status.includes("PLANNED")) {
-            setStatus([...status, "PLANNED"]);
-          }
-          setRefreshTrigger((prev) => prev + 1);
-        }}
-      />
+        {isModulePlannerOpen && (
+          <ModulePlanningModal
+            isOpen={isModulePlannerOpen}
+            onClose={() => setIsModulePlannerOpen(false)}
+            onSuccess={(startDate) => {
+              setIsModulePlannerOpen(false);
+              if (startDate) {
+                const parsedDate = new Date(
+                  startDate.includes("T") ? startDate : `${startDate}T12:00:00`,
+                );
+                setSelectedDateStr(parsedDate.toISOString());
+              }
+              if (!status.includes("PLANNED")) {
+                setStatus([...status, "PLANNED"]);
+              }
+              setRefreshTrigger((prev) => prev + 1);
+            }}
+          />
+        )}
 
-      <ScheduleDetailsModal
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedEventId(null);
-        }}
-        eventId={selectedEventId}
-        onSuccess={() => {
-          setRefreshTrigger((prev) => prev + 1);
-        }}
-      />
+        {isDetailsModalOpen && (
+          <ScheduleDetailsModal
+            isOpen={isDetailsModalOpen}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setSelectedEventId(null);
+            }}
+            eventId={selectedEventId}
+            onSuccess={() => {
+              setRefreshTrigger((prev) => prev + 1);
+            }}
+          />
+        )}
+      </Suspense>
 
       <ContextPanel
         title="Cronograma"

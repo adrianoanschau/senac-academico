@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import { FileText, FileSpreadsheet, Loader2 } from "lucide-react";
 import { CanAccess } from "./CanAccess";
 import { alertDialog } from "../utils/dialog";
-import {
-  exportScheduleToExcel,
-  exportScheduleToPDF,
-  type ScheduleItem,
-} from "../utils/exportUtils";
+import { type ScheduleItem } from "../utils/exportUtils";
 
 interface ExportButtonsProps {
   fetchData: () => Promise<ScheduleItem[]>;
@@ -26,6 +22,8 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
         );
         return;
       }
+
+      const { exportScheduleToPDF } = await import("../utils/exportUtils");
       await exportScheduleToPDF(data);
     } catch (error) {
       console.error(error);
@@ -45,6 +43,8 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
         );
         return;
       }
+
+      const { exportScheduleToExcel } = await import("../utils/exportUtils");
       await exportScheduleToExcel(data);
     } catch (error) {
       console.error(error);
