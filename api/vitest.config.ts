@@ -8,9 +8,20 @@ export default defineConfig({
     environment: 'node',
     root: './',
     include: ['**/*.spec.ts'],
+    exclude: [
+      '**/prisma/generated/**',
+      '**/__tests__/**',
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/coverage/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress}.config.*',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      exclude: ['prisma/generated/**'],
     },
   },
   resolve: {
