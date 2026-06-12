@@ -28,9 +28,11 @@ enum AppRole {
 }
 
 model UserProfile {
-  id    String  @id @db.Uuid
-  email String  @unique
-  role  AppRole @default(MEMBER)
+  id          String    @id @db.Uuid
+  email       String    @unique
+  displayName String?
+  phoneNumber String?
+  roles       AppRole[] @default([MEMBER])
 
   @@map("users_profiles")
 }
