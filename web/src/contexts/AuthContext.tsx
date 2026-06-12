@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { type User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
+import api from '../services/api';
 
 // 1. Definição das interfaces estritas
 export type AppRole =
@@ -19,7 +20,9 @@ export type AppRole =
 export interface UserProfile {
   id: string;
   email: string;
-  role: AppRole;
+  roles: AppRole[];
+  displayName?: string;
+  phoneNumber?: string;
 }
 
 interface AuthContextType {
@@ -27,6 +30,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +45,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchAndSetProfile = async () => {
+    try {
+      const response = await api.get('/users/profile');
+      const userData = response.data;
+      
+      setProfile({
+        id: userData.id,
+        email: userData.email,
+        roles: userData.user_metadata?.roles || [],
+        displayName: userData.user_metadata?.displayName,
+        phoneNumber: userData.user_metadata?.phoneNumber,
+      });
+    } catch (error) {
+      console.error('Erro ao buscar o perfil do usuário:', error);
+      setProfile(null); // Limpa o perfil em caso de erro para evitar estado inconsistente
+    }
+  };
+
   // 3. useEffect para escutar as mudanças de autenticação
   useEffect(() => {
     const {
@@ -49,24 +71,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       if (session) {
         setUser(session.user);
-        try {
-          // Busca o perfil do utilizador na tabela 'users_profiles' do Supabase.
-          // Esta é uma abordagem mais segura e comum do que um endpoint customizado.
-          const { data: userProfile, error } = await supabase
-            .from('users_profiles')
-            .select('id, email, role')
-            .eq('id', session.user.id)
-            .single();
-
-          if (error) throw error;
-
-          setProfile(userProfile);
-        } catch (error) {
-          console.error('Erro ao buscar o perfil do utilizador:', error);
-          setProfile(null); // Limpa o perfil em caso de erro para evitar estado inconsistente
-        }
+        await fetchAndSetProfile();
       } else {
-        // Se o utilizador fizer logout, limpar o user e o profile
+        // Se o usuário fizer logout, limpar o user e o profile
         setUser(null);
         setProfile(null);
       }
@@ -82,6 +89,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     profile,
     loading,
+    refreshProfile: async () => {
+      await fetchAndSetProfile();
+    },
     signOut: async () => {
       const { error } = await supabase.auth.signOut();
       if (error) {

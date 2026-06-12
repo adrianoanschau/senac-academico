@@ -1,15 +1,18 @@
 import React from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { UserPlus, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import { CanAccess } from './CanAccess';
 import { type AppRole } from '../contexts/AuthContext';
 import { alertDialog } from '../utils/dialog';
-import { createClient } from '@supabase/supabase-js';
+import api from '../services/api';
 
 interface CreateUserFormData {
   email: string;
   password: string;
-  role: Extract<AppRole, 'INSTRUCTOR' | 'COORDINATOR' | 'ADMIN' | 'SECRETARY'>;
+  displayName?: string;
+  phoneNumber?: string;
+  roles: Extract<AppRole, 'INSTRUCTOR' | 'COORDINATOR' | 'ADMIN' | 'SECRETARY' | 'MEMBER'>[];
 }
 
 export const CreateUserForm: React.FC = () => {
@@ -17,45 +20,32 @@ export const CreateUserForm: React.FC = () => {
     register,
     handleSubmit,
     reset,
+    control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateUserFormData>({
     defaultValues: {
-      role: 'INSTRUCTOR',
+      roles: ['MEMBER'],
     },
   });
 
   const onSubmit: SubmitHandler<CreateUserFormData> = async (data) => {
     try {
-      // Cria um client temporário do Supabase para não sobrescrever a sessão atual (Admin)
-      // IMPORTANTE: Ajuste as variáveis (VITE_...) de acordo com as utilizadas no seu projeto.
-      // Se usar Create React App, substitua import.meta.env por process.env.REACT_APP_...
-      const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
-      const supabaseKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
+      const payload = {
+        ...data,
+        phoneNumber: data.phoneNumber ? data.phoneNumber.replace(/\D/g, '') : undefined,
+      };
 
-      const tempClient = createClient(supabaseUrl, supabaseKey, {
-        auth: {
-          persistSession: false, // <-- É isto que impede o auto-login
-          autoRefreshToken: false,
-        },
-      });
-
-      const { error } = await tempClient.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            role: data.role,
-          },
-        },
-      });
-
-      if (error) throw error;
-      
-      alertDialog('Utilizador criado com sucesso!');
+      await api.post('/users', payload);
+      alertDialog('Usuário criado com sucesso!');
       reset();
     } catch (error) {
-      console.error('Erro ao criar utilizador:', error);
-      alertDialog('Ocorreu um erro ao tentar criar o utilizador. Verifique os dados e tente novamente.');
+      console.error('Erro ao criar usuário:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        alertDialog(error.response.data.message || 'Falha ao criar o usuário na API.');
+      } else {
+        alertDialog('Ocorreu um erro ao tentar criar o usuário. Verifique os dados e tente novamente.');
+      }
     }
   };
 
@@ -66,11 +56,46 @@ export const CreateUserForm: React.FC = () => {
           <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
             <UserPlus size={20} />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">Criar Novo Utilizador</h3>
+          <h3 className="text-lg font-bold text-slate-800">Criar Novo Usuário</h3>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Nome de Exibição</label>
+              <input
+                type="text"
+                {...register('displayName')}
+                className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
+                placeholder="Nome do usuário"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Telefone</label>
+              <input
+                type="tel"
+                {...register('phoneNumber', {
+                  onChange: (e) => {
+                    let v = e.target.value.replace(/\D/g, '');
+                    if (v.length > 11) v = v.substring(0, 11);
+                    if (v.length > 7) {
+                      e.target.value = `(${v.substring(0, 2)}) ${v.substring(2, 4)} ${v.substring(4, 7)}-${v.substring(7)}`;
+                    } else if (v.length > 4) {
+                      e.target.value = `(${v.substring(0, 2)}) ${v.substring(2, 4)} ${v.substring(4)}`;
+                    } else if (v.length > 2) {
+                      e.target.value = `(${v.substring(0, 2)}) ${v.substring(2)}`;
+                    } else if (v.length > 0) {
+                      e.target.value = `(${v.substring(0)}`;
+                    }
+                    setValue('phoneNumber', e.target.value);
+                  }
+                })}
+                className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
+                placeholder="(00) 00 000-0000"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">E-mail</label>
               <input
@@ -97,17 +122,45 @@ export const CreateUserForm: React.FC = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Papel (Role)</label>
-              <select
-                {...register('role', { required: 'O papel é obrigatório.' })}
-                className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 cursor-pointer"
-              >
-                <option value="INSTRUCTOR">Professor(a)</option>
-                <option value="COORDINATOR">Coordenador(a)</option>
-                <option value="ADMIN">Administrador(a)</option>
-                <option value="SECRETARY">Secretário(a)</option>
-              </select>
-              {errors.role && <span className="text-sm font-semibold text-rose-500 mt-1.5 block">{errors.role.message}</span>}
+              <label className="block text-sm font-bold text-slate-700 mb-2">Papéis (Roles)</label>
+              <Controller
+                control={control}
+                name="roles"
+                rules={{ required: 'Selecione pelo menos um papel.' }}
+                render={({ field: { onChange, value } }) => (
+                  <div className="flex flex-wrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1 border border-slate-100">
+                    {([
+                      { value: 'INSTRUCTOR', label: 'Professor(a)' },
+                      { value: 'COORDINATOR', label: 'Coordenador(a)' },
+                      { value: 'ADMIN', label: 'Administrador(a)' },
+                      { value: 'SECRETARY', label: 'Secretário(a)' },
+                      { value: 'MEMBER', label: 'Membro(a)' },
+                    ] as const).map((role) => {
+                      const isSelected = value?.includes(role.value);
+                      return (
+                        <button
+                          key={role.value}
+                          type="button"
+                          onClick={() => {
+                            const newValue = isSelected
+                              ? value.filter((v) => v !== role.value)
+                              : [...(value || []), role.value];
+                            onChange(newValue);
+                          }}
+                          className={`flex-1 min-w-30 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                            isSelected
+                              ? 'bg-slate-800 text-white shadow-md'
+                              : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'
+                          }`}
+                        >
+                          {role.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+              {errors.roles && <span className="text-sm font-semibold text-rose-500 mt-1.5 block">{errors.roles.message}</span>}
             </div>
           </div>
 
@@ -123,7 +176,7 @@ export const CreateUserForm: React.FC = () => {
                   Salvando...
                 </>
               ) : (
-                'Criar Utilizador'
+                'Criar Usuário'
               )}
             </button>
           </div>

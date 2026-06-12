@@ -13,7 +13,7 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: isAuthLoading } = useAuth();
 
-  // Redireciona se o utilizador já estiver autenticado
+  // Redireciona se o usuário já estiver autenticado
   useEffect(() => {
     if (!isAuthLoading && user) {
       navigate('/', { replace: true });

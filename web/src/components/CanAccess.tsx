@@ -10,7 +10,7 @@ export const CanAccess: React.FC<CanAccessProps> = ({ roles, children }) => {
   const { profile } = useAuth();
 
   // Se não existir perfil carregado ou a role não estiver entre as permitidas, esconde
-  if (!profile || !roles.includes(profile.role)) {
+  if (!profile || !profile.roles?.some((role) => roles.includes(role))) {
     return null;
   }
 
