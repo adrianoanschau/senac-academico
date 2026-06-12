@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { type User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
-import api from '../services/api';
 
 // 1. Definição das interfaces estritas
 export type AppRole =
@@ -51,8 +50,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (session) {
         setUser(session.user);
         try {
-          // O interceptor do 'api' irá adicionar o token automaticamente.
-          const { data: userProfile } = await api.get<UserProfile>('/users/me');
+          // Busca o perfil do utilizador na tabela 'users_profiles' do Supabase.
+          // Esta é uma abordagem mais segura e comum do que um endpoint customizado.
+          const { data: userProfile, error } = await supabase
+            .from('users_profiles')
+            .select('id, email, role')
+            .eq('id', session.user.id)
+            .single();
+
+          if (error) throw error;
+
           setProfile(userProfile);
         } catch (error) {
           console.error('Erro ao buscar o perfil do utilizador:', error);

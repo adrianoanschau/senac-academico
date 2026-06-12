@@ -28,7 +28,7 @@ enum AppRole {
 }
 
 model UserProfile {
-  id    String  @id
+  id    String  @id @db.Uuid
   email String  @unique
   role  AppRole @default(MEMBER)
 
