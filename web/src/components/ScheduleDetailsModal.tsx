@@ -3,6 +3,7 @@ import { X, Calendar, MapPin, User, BookOpen, Layers, Clock, Loader2, AlertCircl
 import axios from 'axios';
 import { alertDialog, confirmDialog } from '../utils/dialog';
 import { DateSelect } from './DateSelect';
+import { CanAccess } from './CanAccess';
 import { MigrateRuleModal } from './MigrateRuleModal';
 import api from '../services/api';
 
@@ -242,38 +243,40 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({ isOp
             </div>
 
             {(details.status === 'SCHEDULED' || details.status === 'PLANNED') && !showPostponeForm && (
-              <div className="flex flex-col gap-3 mt-2">
-                <button 
-                  onClick={() => { setShowPostponeForm(true); setError(null); }}
-                  className="w-full bg-orange-50 hover:bg-orange-100 text-[#f37021] font-bold py-3 px-4 rounded-xl transition-colors border border-orange-200"
-                >
-                  Adiar / Reagendar Aula
-                </button>
-                
-                {details.ruleId && (
+              <CanAccess roles={['ADMIN']}>
+                <div className="flex flex-col gap-3 mt-2">
                   <button 
-                    onClick={() => setIsMigrateModalOpen(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl transition-colors border border-slate-300"
+                    onClick={() => { setShowPostponeForm(true); setError(null); }}
+                    className="w-full bg-orange-50 hover:bg-orange-100 text-[#f37021] font-bold py-3 px-4 rounded-xl transition-colors border border-orange-200"
                   >
-                    <Shuffle size={18} />
-                    Alterar Padrão desta Disciplina a partir desta data
+                    Adiar / Reagendar Aula
                   </button>
-                )}
-
-                {details.ruleId && details.status === 'PLANNED' && (
-                  <button 
-                    onClick={handlePublishRule}
-                    disabled={isPublishing}
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-70"
-                  >
-                    {isPublishing ? (
-                      <><Loader2 size={18} className="animate-spin" /> Efetivando...</>
-                    ) : (
-                      'Efetivar Cronograma'
-                    )}
-                  </button>
-                )}
-              </div>
+                  
+                  {details.ruleId && (
+                    <button 
+                      onClick={() => setIsMigrateModalOpen(true)}
+                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl transition-colors border border-slate-300"
+                    >
+                      <Shuffle size={18} />
+                      Alterar Padrão desta Disciplina a partir desta data
+                    </button>
+                  )}
+  
+                  {details.ruleId && details.status === 'PLANNED' && (
+                    <button 
+                      onClick={handlePublishRule}
+                      disabled={isPublishing}
+                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-70"
+                    >
+                      {isPublishing ? (
+                        <><Loader2 size={18} className="animate-spin" /> Efetivando...</>
+                      ) : (
+                        'Efetivar Cronograma'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </CanAccess>
             )}
 
             {showPostponeForm && (

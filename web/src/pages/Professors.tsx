@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Users, X, Info } from 'lucide-react';
 import { confirmDialog, alertDialog } from '../utils/dialog';
+import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
@@ -115,13 +116,15 @@ export const Professors: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Gerencie o corpo docente da instituição.</p>
         </div>
-        <button 
-          onClick={handleOpenNewModal}
-          className="bg-menu-professores hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-professores/30"
-        >
-          <Plus size={20} />
-          Novo Professor
-        </button>
+        <CanAccess roles={['ADMIN']}>
+          <button 
+            onClick={handleOpenNewModal}
+            className="bg-menu-professores hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-professores/30"
+          >
+            <Plus size={20} />
+            Novo Professor
+          </button>
+        </CanAccess>
       </div>
 
       {/* Main Card */}
@@ -194,22 +197,24 @@ export const Professors: React.FC = () => {
                   <td className="py-4 px-4 text-slate-500 font-medium">{prof.email}</td>
                   <td className="py-4 px-4 text-slate-500 font-medium">{prof.degree}</td>
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => handleOpenEditModal(prof)}
-                        className="p-2 text-slate-400 hover:text-menu-professores hover:bg-menu-professores/10 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button 
-                        onClick={() => prof.id && handleDelete(prof.id)}
-                        className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Excluir"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                    <CanAccess roles={['ADMIN']}>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleOpenEditModal(prof)}
+                          className="p-2 text-slate-400 hover:text-menu-professores hover:bg-menu-professores/10 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={() => prof.id && handleDelete(prof.id)}
+                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </CanAccess>
                   </td>
                 </tr>
               )))}

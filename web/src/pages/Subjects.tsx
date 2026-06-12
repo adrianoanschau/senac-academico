@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, BookOpen, X, Info } from 'lucide-react';
 import { confirmDialog, alertDialog } from '../utils/dialog';
+import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
@@ -111,13 +112,15 @@ export const Subjects: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Gerencie a base de disciplinas e suas cargas horárias.</p>
         </div>
-        <button 
-          onClick={handleOpenNewModal}
-          className="bg-menu-uc hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-uc/30"
-        >
-          <Plus size={20} />
-          Nova Disciplina
-        </button>
+        <CanAccess roles={['ADMIN']}>
+          <button 
+            onClick={handleOpenNewModal}
+            className="bg-menu-uc hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-uc/30"
+          >
+            <Plus size={20} />
+            Nova Disciplina
+          </button>
+        </CanAccess>
       </div>
 
       {/* Main Card */}
@@ -185,6 +188,7 @@ export const Subjects: React.FC = () => {
                     <td className="py-4 px-4 text-slate-500 font-medium">{subject.code}</td>
                     <td className="py-4 px-4 text-center font-bold text-menu-uc">{subject.hours} horas</td>
                     <td className="py-4 px-4 text-right">
+                    <CanAccess roles={['ADMIN']}>
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleOpenEditModal(subject)}
@@ -201,6 +205,7 @@ export const Subjects: React.FC = () => {
                           <Trash2 size={18} />
                         </button>
                       </div>
+                    </CanAccess>
                     </td>
                   </tr>
                 ))

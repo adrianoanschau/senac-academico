@@ -6,6 +6,7 @@ import { ModulePlanningModal } from '../components/ModulePlanning/ModulePlanning
 import { ScheduleDetailsModal } from '../components/ScheduleDetailsModal';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { ContextPanel } from '../components/ContextPanel';
+import { CanAccess } from '../components/CanAccess';
 import { Select } from '../components/Select';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
@@ -77,20 +78,22 @@ export const Schedule: React.FC = () => {
           <p className="text-slate-500 mt-1">Visualizar o cronograma de aulas de cada turma.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsModulePlannerOpen(true)}
-            className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Route size={20} />
-            Planejar Módulo
-          </button>
-          <button 
-            onClick={() => setIsBulkModalOpen(true)}
-            className="bg-senac-blue hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-senac-blue/30"
-          >
-            <Plus size={20} />
-            Novo Agendamento
-          </button>
+          <CanAccess roles={['ADMIN']}>
+            <button 
+              onClick={() => setIsModulePlannerOpen(true)}
+              className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <Route size={20} />
+              Planejar Módulo
+            </button>
+            <button 
+              onClick={() => setIsBulkModalOpen(true)}
+              className="bg-senac-blue hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-senac-blue/30"
+            >
+              <Plus size={20} />
+              Novo Agendamento
+            </button>
+          </CanAccess>
         </div>
       </div>
 

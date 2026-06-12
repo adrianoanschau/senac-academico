@@ -5,6 +5,7 @@ import { Select } from '../components/Select';
 import { DateSelect } from '../components/DateSelect';
 import { TimeSelect } from '../components/TimeSelect';
 import { confirmDialog, alertDialog } from '../utils/dialog';
+import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
@@ -119,17 +120,19 @@ export const CalendarReserves: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Gerencie períodos especiais (sobrescrita do padrão de dias letivos e não letivos).</p>
         </div>
-        <button 
-          onClick={() => {
-            setFormData({ title: '', startDate: '', startTime: '', endDate: '', endTime: '', type: 'BLOCK' });
-            setIsAllDay(true);
-            setIsModalOpen(true);
-          }}
-          className="bg-menu-especiais hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-especiais/30"
-        >
-          <Plus size={20} />
-          Adicionar Período Especial
-        </button>
+        <CanAccess roles={['ADMIN']}>
+          <button 
+            onClick={() => {
+              setFormData({ title: '', startDate: '', startTime: '', endDate: '', endTime: '', type: 'BLOCK' });
+              setIsAllDay(true);
+              setIsModalOpen(true);
+            }}
+            className="bg-menu-especiais hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-especiais/30"
+          >
+            <Plus size={20} />
+            Adicionar Período Especial
+          </button>
+        </CanAccess>
       </div>
 
       {/* Main Card */}
@@ -193,17 +196,19 @@ export const CalendarReserves: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="p-2 text-slate-400 hover:text-menu-especiais hover:bg-menu-especiais/10 rounded-lg transition-colors"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(feriado.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                <CanAccess roles={['ADMIN']}>
+                  <div className="flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => setIsModalOpen(true)}
+                      className="p-2 text-slate-400 hover:text-menu-especiais hover:bg-menu-especiais/10 rounded-lg transition-colors"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button onClick={() => handleDelete(feriado.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </CanAccess>
                   </td>
                 </tr>
               ))}

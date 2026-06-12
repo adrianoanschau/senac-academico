@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2, Layers, X, Calendar } from 'lucide-react';
 import { Select } from '../components/Select';
 import { DateSelect } from '../components/DateSelect';
 import { confirmDialog, alertDialog } from '../utils/dialog';
+import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
@@ -157,13 +158,15 @@ export const ClassGroups: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Gerencie os grupos de alunos e seus períodos letivos.</p>
         </div>
-        <button 
-          onClick={handleOpenNewModal}
-          className="bg-menu-turmas hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-turmas/30"
-        >
-          <Plus size={20} />
-          Nova Turma
-        </button>
+        <CanAccess roles={['ADMIN']}>
+          <button 
+            onClick={handleOpenNewModal}
+            className="bg-menu-turmas hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-turmas/30"
+          >
+            <Plus size={20} />
+            Nova Turma
+          </button>
+        </CanAccess>
       </div>
 
       {/* Main Card */}
@@ -249,18 +252,20 @@ export const ClassGroups: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => handleOpenEditModal(turma)}
-                          className="p-2 text-slate-400 hover:text-menu-turmas hover:bg-menu-turmas/10 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(turma.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Excluir">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                    <CanAccess roles={['ADMIN']}>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleOpenEditModal(turma)}
+                            className="p-2 text-slate-400 hover:text-menu-turmas hover:bg-menu-turmas/10 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button onClick={() => handleDelete(turma.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Excluir">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </CanAccess>
                   </td>
                 </tr>
                 ))
