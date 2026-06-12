@@ -1,19 +1,34 @@
-import { useEffect, useRef } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import ptBrLocale from '@fullcalendar/core/locales/pt-br';
-import { Check } from 'lucide-react';
-import { usePersistentState } from '../hooks/usePersistentState';
-import api from '../services/api';
+import { useEffect, useRef } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import interactionPlugin from "@fullcalendar/interaction";
+import ptBrLocale from "@fullcalendar/core/locales/pt-br";
+import { Check } from "lucide-react";
+import { usePersistentState } from "../hooks/usePersistentState";
+import api from "../services/api";
 
 // Google Calendar-like color palette
 const subjectColors = [
-  '#039be5', '#33b679', '#d60000', '#e67c73', '#f4511e', '#f6bf26',
-  '#3f51b5', '#7986cb', '#8e24aa', '#616161', '#0b8043', '#d50000',
-  '#e4a147', '#b39ddb', '#ad1457', '#795548', '#a79b8e', '#616161'
+  "#039be5",
+  "#33b679",
+  "#d60000",
+  "#e67c73",
+  "#f4511e",
+  "#f6bf26",
+  "#3f51b5",
+  "#7986cb",
+  "#8e24aa",
+  "#616161",
+  "#0b8043",
+  "#d50000",
+  "#e4a147",
+  "#b39ddb",
+  "#ad1457",
+  "#795548",
+  "#a79b8e",
+  "#616161",
 ];
 
 const stringToColorHash = (str: string): number => {
@@ -29,11 +44,11 @@ export interface ScheduleResponse {
   id: string;
   startTime: string;
   endTime: string;
-  subject: { name: string };
+  subject: { name: string; code: string };
   professor: { name: string };
   room: { name: string };
   classGroup: { code: string };
-  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'PLANNED';
+  status?: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "PLANNED";
   cancelReason?: string;
 }
 
@@ -69,9 +84,18 @@ interface ScheduleCalendarProps {
   onDateChange?: (date: Date) => void;
 }
 
-export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, selectedDate, onDateChange }: ScheduleCalendarProps) {
+export default function ScheduleCalendar({
+  filters,
+  onEventClick,
+  isFullscreen,
+  selectedDate,
+  onDateChange,
+}: ScheduleCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
-  const [calendarView, setCalendarView] = usePersistentState('schedule_calendar_view', 'timeGridWeek');
+  const [calendarView, setCalendarView] = usePersistentState(
+    "schedule_calendar_view",
+    "timeGridWeek",
+  );
 
   const filtersJson = JSON.stringify(filters);
 
@@ -91,8 +115,13 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
   }, [selectedDate]);
 
   return (
-    <div className={isFullscreen ? "h-[calc(100vh-140px)] flex flex-col" : "h-200 flex flex-col"}> 
-
+    <div
+      className={
+        isFullscreen
+          ? "h-[calc(100vh-140px)] flex flex-col"
+          : "h-200 flex flex-col"
+      }
+    >
       <div className="flex-1 min-h-0 senac-calendar">
         <style>{`
           .senac-calendar .fc-toolbar-title {
@@ -160,13 +189,18 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
         <FullCalendar
           ref={calendarRef}
           height="100%"
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            listPlugin,
+          ]}
           initialDate={selectedDate}
           initialView={calendarView}
           headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listYear'
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
           }}
           locales={[ptBrLocale]}
           locale="pt-br"
@@ -179,84 +213,98 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
             }
             if (onDateChange && calendarRef.current) {
               const calendarDate = calendarRef.current.getApi().getDate();
-              if (selectedDate && calendarDate.toISOString() !== selectedDate.toISOString()) {
+              if (
+                selectedDate &&
+                calendarDate.toISOString() !== selectedDate.toISOString()
+              ) {
                 onDateChange(calendarDate);
               }
             }
           }}
-          
           events={async (info: { startStr: string; endStr: string }) => {
             try {
-              if (filters?.status && Array.isArray(filters.status) && filters.status.length === 0) {
+              if (
+                filters?.status &&
+                Array.isArray(filters.status) &&
+                filters.status.length === 0
+              ) {
                 return [];
               }
 
               const params = new URLSearchParams();
-              params.append('startDate', info.startStr);
-              params.append('endDate', info.endStr);
-              
-              if (filters?.search) params.append('search', filters.search);
-              
+              params.append("startDate", info.startStr);
+              params.append("endDate", info.endStr);
+
+              if (filters?.search) params.append("search", filters.search);
+
               if (filters?.status) {
                 if (Array.isArray(filters.status)) {
-                  filters.status.forEach((s) => params.append('status', s));
-                } else if (filters.status !== 'all') {
-                  params.append('status', filters.status);
+                  filters.status.forEach((s) => params.append("status", s));
+                } else if (filters.status !== "all") {
+                  params.append("status", filters.status);
                 }
               }
 
-              if (filters?.subjectId) params.append('subjectId', filters.subjectId);
+              if (filters?.subjectId)
+                params.append("subjectId", filters.subjectId);
 
-              if (filters?.roomId) params.append('roomId', filters.roomId);
-              if (filters?.professorId) params.append('professorId', filters.professorId);
-              if (filters?.classGroupId) params.append('classGroupId', filters.classGroupId);
+              if (filters?.roomId) params.append("roomId", filters.roomId);
+              if (filters?.professorId)
+                params.append("professorId", filters.professorId);
+              if (filters?.classGroupId)
+                params.append("classGroupId", filters.classGroupId);
 
               const response = await api.get(`/schedules?${params.toString()}`);
-              const data: ScheduleResponse[] = response.data?.data || response.data || [];
+              const data: ScheduleResponse[] =
+                response.data?.data || response.data || [];
 
               const calendarEvents = data.map((schedule) => {
-                const status = schedule.status || 'SCHEDULED';
-                const color = subjectColors[stringToColorHash(schedule.subject?.name || '') % subjectColors.length];
-                
+                const status = schedule.status || "SCHEDULED";
+                const color =
+                  subjectColors[
+                    stringToColorHash(schedule.subject?.name || "") %
+                      subjectColors.length
+                  ];
+
                 let bgColor = color;
                 let borderColor = color;
-                let textColor = '#ffffff';
+                let textColor = "#ffffff";
                 const classNames: string[] = [];
 
-                if (status === 'PLANNED') {
+                if (status === "PLANNED") {
                   bgColor = `${color}20`; // Cor clara (com 20% de opacidade no formato hex)
-                  textColor = '#334155'; // text-slate-700
-                  classNames.push('!border-dashed', '!border-2', 'opacity-80');
-                } else if (status === 'CANCELLED') {
-                  bgColor = '#fef2f2'; // bg-rose-50
-                  borderColor = '#fca5a5'; // border-rose-300
-                  textColor = '#e11d48'; // text-rose-600
-                  classNames.push('opacity-70');
-                } else if (status === 'COMPLETED') {
-                  classNames.push('opacity-80', 'saturate-50');
+                  textColor = "#334155"; // text-slate-700
+                  classNames.push("!border-dashed", "!border-2", "opacity-80");
+                } else if (status === "CANCELLED") {
+                  bgColor = "#fef2f2"; // bg-rose-50
+                  borderColor = "#fca5a5"; // border-rose-300
+                  textColor = "#e11d48"; // text-rose-600
+                  classNames.push("opacity-70");
+                } else if (status === "COMPLETED") {
+                  classNames.push("opacity-80", "saturate-50");
                 }
 
                 return {
-                id: String(schedule.id),
-                  title: `${schedule.subject?.name || 'N/D'} - ${schedule.classGroup?.code || 'N/D'}`,
+                  id: String(schedule.id),
+                  title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"} - ${schedule.classGroup?.code || "N/D"}`,
                   start: schedule.startTime,
                   end: schedule.endTime,
                   extendedProps: {
-                    professor: schedule.professor?.name || 'N/D',
-                    room: schedule.room?.name || 'N/D',
+                    professor: schedule.professor?.name || "N/D",
+                    room: schedule.room?.name || "N/D",
                     status: schedule.status,
                     cancelReason: schedule.cancelReason,
                   },
                   backgroundColor: bgColor,
                   borderColor: borderColor,
                   textColor: textColor,
-                  className: classNames.join(' '),
+                  className: classNames.join(" "),
                 };
               });
 
               return calendarEvents;
             } catch (error) {
-              console.error('Failed to load schedule:', error);
+              console.error("Failed to load schedule:", error);
               return [];
             }
           }}
@@ -267,32 +315,50 @@ export default function ScheduleCalendar({ filters, onEventClick, isFullscreen, 
           }}
           eventContent={(eventInfo) => {
             const status = eventInfo.event.extendedProps.status;
-            const isCancelled = status === 'CANCELLED';
-            const isCompleted = status === 'COMPLETED';
-            
-            const tooltipTitle = isCancelled ? `Motivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || 'Não informado'}` : undefined;
+            const isCancelled = status === "CANCELLED";
+            const isCompleted = status === "COMPLETED";
 
-            const baseClasses = isCancelled ? 'line-through' : '';
+            const tooltipTitle = isCancelled
+              ? `Motivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || "Não informado"}`
+              : undefined;
 
-            if (eventInfo.view.type === 'dayGridMonth') {
+            const baseClasses = isCancelled ? "line-through" : "";
+
+            if (eventInfo.view.type === "dayGridMonth") {
               return (
-                <div className={`px-1 overflow-hidden whitespace-nowrap text-xs ${baseClasses}`} title={tooltipTitle}>
+                <div
+                  className={`px-1 overflow-hidden whitespace-nowrap text-xs ${baseClasses}`}
+                  title={tooltipTitle}
+                >
                   <b>{eventInfo.timeText}</b>
-                  <span className="ml-1">{eventInfo.event.title.split(' - ')[0]}</span>
-                  {isCompleted && <Check size={12} className="inline ml-1 opacity-80" />}
+                  <span className="ml-1">
+                    {eventInfo.event.title.split(" - ")[0]}
+                  </span>
+                  {isCompleted && (
+                    <Check size={12} className="inline ml-1 opacity-80" />
+                  )}
                 </div>
-              )
+              );
             }
             return (
-              <div className={`p-1 text-xs leading-tight overflow-hidden h-full flex flex-col ${baseClasses}`} title={tooltipTitle}>
+              <div
+                className={`p-1 text-xs leading-tight overflow-hidden h-full flex flex-col ${baseClasses}`}
+                title={tooltipTitle}
+              >
                 <div className="font-bold flex items-start justify-between gap-1">
                   <span className="truncate">{eventInfo.event.title}</span>
-                  {isCompleted && <Check size={14} className="shrink-0 opacity-80" />}
+                  {isCompleted && (
+                    <Check size={14} className="shrink-0 opacity-80" />
+                  )}
                 </div>
-                <div className="opacity-90 italic truncate mt-auto">{eventInfo.event.extendedProps.professor}</div>
-                <div className="opacity-90 truncate">{eventInfo.event.extendedProps.room}</div>
+                <div className="opacity-90 italic truncate mt-auto">
+                  {eventInfo.event.extendedProps.professor}
+                </div>
+                <div className="opacity-90 truncate">
+                  {eventInfo.event.extendedProps.room}
+                </div>
               </div>
-            )
+            );
           }}
         />
       </div>
