@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -14,9 +15,9 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ScheduleOverridesModule } from './schedule-overrides/schedule-overrides.module';
 import { ScheduleRulesModule } from './schedule-rules/schedule-rules.module';
-import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     SchedulesModule,
     ScheduleOverridesModule,
     ScheduleRulesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [

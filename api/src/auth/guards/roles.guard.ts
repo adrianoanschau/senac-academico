@@ -49,9 +49,7 @@ export class RolesGuard implements CanActivate {
 
     // Se o Guard de autenticação (ex: Supabase) não injetou um utilizador, negamos o acesso.
     if (!user || !user.userId) {
-      throw new ForbiddenException(
-        'Acesso negado. Utilizador não autenticado.',
-      );
+      throw new ForbiddenException('Acesso negado. Usuário não autenticado.');
     }
 
     const userProfile = await this.prisma.userProfile.findUnique({
@@ -59,16 +57,16 @@ export class RolesGuard implements CanActivate {
     });
 
     if (!userProfile) {
-      throw new ForbiddenException('Perfil de utilizador não encontrado.');
+      throw new ForbiddenException('Perfil de usuário não encontrado.');
     }
 
-    const hasRequiredRole = requiredRoles.some(
-      (role) => userProfile.role === role,
+    const hasRequiredRole = requiredRoles.some((role) =>
+      userProfile.roles?.includes(role),
     );
 
     if (!hasRequiredRole) {
       throw new ForbiddenException(
-        'Você não tem permissão para aceder a este recurso.',
+        'Você não tem permissão para acessar este recurso.',
       );
     }
 
