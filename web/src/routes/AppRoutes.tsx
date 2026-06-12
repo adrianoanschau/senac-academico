@@ -16,6 +16,7 @@ const ClassGroups = lazy(() => import('../pages/ClassGroups').then(m => ({ defau
 const Curriculums = lazy(() => import('../pages/Curriculums').then(m => ({ default: m.Curriculums })));
 const Schedule = lazy(() => import('../pages/Schedule').then(m => ({ default: m.Schedule })));
 const Courses = lazy(() => import('../pages/Courses').then(m => ({ default: m.Courses })));
+const Settings = lazy(() => import('../pages/Settings').then(m => ({ default: m.Settings })));
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -40,7 +41,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="schedule" element={<Schedule />} />
                 <Route path="curriculums" element={<Curriculums />} />
                 <Route path="enrollments" element={<Placeholder />} />
-                <Route path="profile" element={<Placeholder />} />
+                <Route path="settings" element={<Settings />} />
                 <Route path="professors" element={<Professors />} />
                 <Route path="rooms" element={<Rooms />} />
                 <Route path="calendar-reserves" element={<CalendarReserves />} />

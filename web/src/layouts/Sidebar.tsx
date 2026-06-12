@@ -41,7 +41,7 @@ const NAV_ITEMS: NavItemProps[] = [
 
 const BOTTOM_NAV_ITEMS: NavItemProps[] = [
   { to: '/students', label: 'Alunos', icon: Folder, activeClass: 'bg-senac-blue text-white shadow-md shadow-senac-blue/30', inactiveClass: 'text-slate-300 hover:text-senac-blue hover:bg-senac-blue/10' },
-  { to: '/profile', label: 'Configurações e Perfil', icon: Settings, activeClass: 'bg-senac-blue text-white shadow-md shadow-senac-blue/30', inactiveClass: 'text-slate-300 hover:text-senac-blue hover:bg-senac-blue/10' },
+  { to: '/settings', label: 'Configurações', icon: Settings, activeClass: 'bg-senac-blue text-white shadow-md shadow-senac-blue/30', inactiveClass: 'text-slate-300 hover:text-senac-blue hover:bg-senac-blue/10' },
 ];
 
 const SidebarItem = ({ to, icon: Icon, label, activeClass, inactiveClass, end }: NavItemProps) => (
