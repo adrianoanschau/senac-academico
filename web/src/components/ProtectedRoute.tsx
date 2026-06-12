@@ -1,27 +1,28 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+export const ProtectedRoute: React.FC = () => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-100 text-slate-600">
-        <Loader2 className="w-8 h-8 animate-spin" />
-        <span className="ml-3 text-lg">Verificando autenticação...</span>
+      <div className="flex items-center justify-center min-h-screen bg-[#f8f9fc]">
+        <Loader2 className="w-8 h-8 animate-spin text-senac-blue" />
       </div>
     );
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  // Interceta usuários que precisam trocar a senha (e garante que não vai entrar em loop)
+  if (user.user_metadata?.needsPasswordChange && location.pathname !== '/update-password') {
+    return <Navigate to="/update-password" replace />;
+  }
+
+  return <Outlet />;
 };

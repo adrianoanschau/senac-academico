@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,12 +26,18 @@ export const Login: React.FC = () => {
     setError(null);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
+
+      // Redireciona caso seja o primeiro acesso e exija a troca da senha
+      if (data.user?.user_metadata?.needsPasswordChange) {
+        navigate('/update-password', { replace: true });
+        return;
+      }
 
       // O AuthProvider e o ProtectedRoute tratarão do redirecionamento.
     } catch (err) {
@@ -132,9 +138,9 @@ export const Login: React.FC = () => {
                 <label className="block text-sm font-bold text-slate-700" htmlFor="password">
                   Senha
                 </label>
-                <a href="#" className="text-sm text-senac-blue hover:opacity-80 font-semibold transition-colors">
+                <Link to="/forgot-password" className="text-sm text-senac-blue hover:opacity-80 font-semibold transition-colors">
                   Esqueceu a senha?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

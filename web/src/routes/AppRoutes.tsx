@@ -8,6 +8,8 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 const Home = lazy(() => import('../pages/Home').then(m => ({ default: m.Home })));
 const Placeholder = lazy(() => import('../pages/Placeholder').then(m => ({ default: m.Placeholder })));
 const Login = lazy(() => import('../pages/Login').then(m => ({ default: m.Login })));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const UpdatePassword = lazy(() => import('../pages/UpdatePassword').then(m => ({ default: m.UpdatePassword })));
 const Professors = lazy(() => import('../pages/Professors').then(m => ({ default: m.Professors })));
 const Rooms = lazy(() => import('../pages/Rooms').then(m => ({ default: m.Rooms })));
 const CalendarReserves = lazy(() => import('../pages/CalendarReserves').then(m => ({ default: m.CalendarReserves })));
@@ -26,26 +28,23 @@ export const AppRoutes: React.FC = () => {
           <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-slate-500">Carregando...</div>}>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Home />} />
-                <Route path="students" element={<Placeholder />} />
-                <Route path="courses" element={<Courses />} />
-                <Route path="class-groups" element={<ClassGroups />} />
-                <Route path="schedule" element={<Schedule />} />
-                <Route path="curriculums" element={<Curriculums />} />
-                <Route path="enrollments" element={<Placeholder />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="professors" element={<Professors />} />
-                <Route path="rooms" element={<Rooms />} />
-                <Route path="calendar-reserves" element={<CalendarReserves />} />
-                <Route path="subjects" element={<Subjects />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="students" element={<Placeholder />} />
+                  <Route path="courses" element={<Courses />} />
+                  <Route path="class-groups" element={<ClassGroups />} />
+                  <Route path="schedule" element={<Schedule />} />
+                  <Route path="curriculums" element={<Curriculums />} />
+                  <Route path="enrollments" element={<Placeholder />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="professors" element={<Professors />} />
+                  <Route path="rooms" element={<Rooms />} />
+                  <Route path="calendar-reserves" element={<CalendarReserves />} />
+                  <Route path="subjects" element={<Subjects />} />
+                </Route>
               </Route>
             </Routes>
           </Suspense>

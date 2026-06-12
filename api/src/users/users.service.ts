@@ -24,6 +24,7 @@ export class UsersService {
         roles: dto.roles,
         displayName: dto.displayName || null,
         phoneNumber: dto.phoneNumber || null,
+        needsPasswordChange: true,
       },
     });
 
