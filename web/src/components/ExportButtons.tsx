@@ -55,7 +55,7 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
   };
 
   return (
-    <CanAccess roles={["ADMIN", "COORDINATOR"]}>
+    <CanAccess roles={["ADMIN", "COORDINATOR", "INSTRUCTOR", "SECRETARY"]}>
       <div className="flex items-center gap-3">
         <button
           onClick={handleExportPDF}
