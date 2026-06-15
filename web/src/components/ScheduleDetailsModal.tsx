@@ -12,6 +12,7 @@ import {
   Shuffle,
 } from "lucide-react";
 import axios from "axios";
+import { LoadingOverlay } from "./LoadingOverlay";
 import { alertDialog, confirmDialog } from "../utils/dialog";
 import { DateSelect } from "./DateSelect";
 import { CanAccess } from "./CanAccess";
@@ -191,7 +192,18 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-4xl p-8 w-full max-w-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-4xl p-8 w-full max-w-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[95vh] overflow-y-auto relative overflow-hidden">
+        <LoadingOverlay
+          visible={isLoading || isPostponing || isPublishing}
+          message={
+            isLoading
+              ? "Carregando detalhes..."
+              : isPostponing
+                ? "Adiando aula..."
+                : "Efetivando cronograma..."
+          }
+        />
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-slate-800">
             Detalhes da Aula
@@ -204,14 +216,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
           </button>
         </div>
 
-        {isLoading ? (
-          <div className="py-10 flex flex-col items-center justify-center text-[#004a8d]">
-            <Loader2 size={32} className="animate-spin mb-4" />
-            <p className="text-sm font-bold text-slate-500">
-              Carregando detalhes...
-            </p>
-          </div>
-        ) : error && !details ? (
+        {error && !details ? (
           <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl flex items-start gap-3">
             <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
             <div>

@@ -4,6 +4,7 @@ import { Select } from "../components/Select";
 import { confirmDialog, alertDialog } from "../utils/dialog";
 import { CanAccess } from "../components/CanAccess";
 import { ContextPanel } from "../components/ContextPanel";
+import { LoadingOverlay } from "../components/LoadingOverlay";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
 
@@ -135,7 +136,9 @@ export const Rooms: React.FC = () => {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
+      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
+        <LoadingOverlay visible={isLoading} message="Buscando ambientes..." />
+
         {/* Toolbar */}
         <div className="flex justify-between items-center mb-6">
           <div className="relative w-72">
@@ -188,16 +191,7 @@ export const Rooms: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {isLoading ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="py-8 text-center text-slate-500 font-medium"
-                  >
-                    Carregando salas...
-                  </td>
-                </tr>
-              ) : filteredRooms.length === 0 ? (
+          {filteredRooms.length === 0 && !isLoading ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -271,7 +265,7 @@ export const Rooms: React.FC = () => {
       {/* Modal de Cadastro/Edição */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">
                 Sala / Ambiente
@@ -283,6 +277,8 @@ export const Rooms: React.FC = () => {
                 <X size={20} />
               </button>
             </div>
+
+            <LoadingOverlay visible={isSaving} message="Salvando ambiente..." />
 
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>

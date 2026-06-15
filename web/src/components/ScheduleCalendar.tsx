@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -8,6 +8,7 @@ import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { Check } from "lucide-react";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
+import { LoadingOverlay } from "./LoadingOverlay";
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -92,10 +93,16 @@ export default function ScheduleCalendar({
   onDateChange,
 }: ScheduleCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const [isFetching, setIsFetching] = useState(false);
   const [calendarView, setCalendarView] = usePersistentState(
     "schedule_calendar_view",
     "timeGridWeek",
   );
+
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   const filtersJson = JSON.stringify(filters);
 
@@ -105,23 +112,122 @@ export default function ScheduleCalendar({
     }
   }, [filtersJson]);
 
+  const selectedDateMs = selectedDate?.getTime();
   useEffect(() => {
     if (calendarRef.current && selectedDate) {
       const calendarDate = calendarRef.current.getApi().getDate();
-      if (calendarDate.toISOString() !== selectedDate.toISOString()) {
+      if (calendarDate.getTime() !== selectedDate.getTime()) {
         calendarRef.current.getApi().gotoDate(selectedDate);
       }
     }
-  }, [selectedDate]);
+  }, [selectedDateMs]);
+
+  const fetchEvents = useCallback(
+    async (info: { startStr: string; endStr: string }) => {
+      try {
+        const currentFilters = filtersRef.current;
+        if (
+          currentFilters?.status &&
+          Array.isArray(currentFilters.status) &&
+          currentFilters.status.length === 0
+        ) {
+          return [];
+        }
+
+        const params = new URLSearchParams();
+        params.append("startDate", info.startStr);
+        params.append("endDate", info.endStr);
+
+        if (currentFilters?.search)
+          params.append("search", currentFilters.search);
+
+        if (currentFilters?.status) {
+          if (Array.isArray(currentFilters.status)) {
+            currentFilters.status.forEach((s) => params.append("status", s));
+          } else if (currentFilters.status !== "all") {
+            params.append("status", String(currentFilters.status));
+          }
+        }
+
+        if (currentFilters?.subjectId)
+          params.append("subjectId", currentFilters.subjectId);
+
+        if (currentFilters?.roomId)
+          params.append("roomId", currentFilters.roomId);
+        if (currentFilters?.professorId)
+          params.append("professorId", currentFilters.professorId);
+        if (currentFilters?.classGroupId)
+          params.append("classGroupId", currentFilters.classGroupId);
+
+        const response = await api.get(`/schedules?${params.toString()}`);
+        const data: ScheduleResponse[] =
+          response.data?.data || response.data || [];
+
+        const calendarEvents = data.map((schedule) => {
+          const status = schedule.status || "SCHEDULED";
+          const color =
+            subjectColors[
+              stringToColorHash(schedule.subject?.name || "") %
+                subjectColors.length
+            ];
+
+          let bgColor = color;
+          let borderColor = color;
+          let textColor = "#ffffff";
+          const classNames: string[] = [];
+
+          if (status === "PLANNED") {
+            bgColor = `${color}20`; // Cor clara (com 20% de opacidade no formato hex)
+            textColor = "#334155"; // text-slate-700
+            classNames.push("!border-dashed", "!border-2", "opacity-80");
+          } else if (status === "CANCELLED") {
+            bgColor = "#fef2f2"; // bg-rose-50
+            borderColor = "#fca5a5"; // border-rose-300
+            textColor = "#e11d48"; // text-rose-600
+            classNames.push("opacity-70");
+          } else if (status === "COMPLETED") {
+            classNames.push("opacity-80", "saturate-50");
+          }
+
+          return {
+            id: String(schedule.id),
+            title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"} - ${schedule.classGroup?.code || "N/D"}`,
+            start: schedule.startTime,
+            end: schedule.endTime,
+            extendedProps: {
+              professor: schedule.professor?.name || "N/D",
+              room: schedule.room?.name || "N/D",
+              status: schedule.status,
+              cancelReason: schedule.cancelReason,
+            },
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            textColor: textColor,
+            className: classNames.join(" "),
+          };
+        });
+
+        return calendarEvents;
+      } catch (error) {
+        console.error("Failed to load schedule:", error);
+        return [];
+      }
+    },
+    [],
+  );
 
   return (
     <div
       className={
         isFullscreen
-          ? "h-[calc(100vh-140px)] flex flex-col"
-          : "h-200 flex flex-col"
+          ? "h-[calc(100vh-140px)] flex flex-col relative overflow-hidden"
+          : "h-200 flex flex-col relative overflow-hidden"
       }
     >
+      <LoadingOverlay
+        visible={isFetching}
+        message="Carregando agendamentos..."
+      />
       <div className="flex-1 min-h-0 senac-calendar">
         <style>{`
           .senac-calendar .fc-toolbar-title {
@@ -188,6 +294,7 @@ export default function ScheduleCalendar({
         `}</style>
         <FullCalendar
           ref={calendarRef}
+          loading={(isLoading) => setIsFetching(isLoading)}
           height="100%"
           plugins={[
             dayGridPlugin,
@@ -215,99 +322,13 @@ export default function ScheduleCalendar({
               const calendarDate = calendarRef.current.getApi().getDate();
               if (
                 selectedDate &&
-                calendarDate.toISOString() !== selectedDate.toISOString()
+                calendarDate.getTime() !== selectedDate.getTime()
               ) {
                 onDateChange(calendarDate);
               }
             }
           }}
-          events={async (info: { startStr: string; endStr: string }) => {
-            try {
-              if (
-                filters?.status &&
-                Array.isArray(filters.status) &&
-                filters.status.length === 0
-              ) {
-                return [];
-              }
-
-              const params = new URLSearchParams();
-              params.append("startDate", info.startStr);
-              params.append("endDate", info.endStr);
-
-              if (filters?.search) params.append("search", filters.search);
-
-              if (filters?.status) {
-                if (Array.isArray(filters.status)) {
-                  filters.status.forEach((s) => params.append("status", s));
-                } else if (filters.status !== "all") {
-                  params.append("status", filters.status);
-                }
-              }
-
-              if (filters?.subjectId)
-                params.append("subjectId", filters.subjectId);
-
-              if (filters?.roomId) params.append("roomId", filters.roomId);
-              if (filters?.professorId)
-                params.append("professorId", filters.professorId);
-              if (filters?.classGroupId)
-                params.append("classGroupId", filters.classGroupId);
-
-              const response = await api.get(`/schedules?${params.toString()}`);
-              const data: ScheduleResponse[] =
-                response.data?.data || response.data || [];
-
-              const calendarEvents = data.map((schedule) => {
-                const status = schedule.status || "SCHEDULED";
-                const color =
-                  subjectColors[
-                    stringToColorHash(schedule.subject?.name || "") %
-                      subjectColors.length
-                  ];
-
-                let bgColor = color;
-                let borderColor = color;
-                let textColor = "#ffffff";
-                const classNames: string[] = [];
-
-                if (status === "PLANNED") {
-                  bgColor = `${color}20`; // Cor clara (com 20% de opacidade no formato hex)
-                  textColor = "#334155"; // text-slate-700
-                  classNames.push("!border-dashed", "!border-2", "opacity-80");
-                } else if (status === "CANCELLED") {
-                  bgColor = "#fef2f2"; // bg-rose-50
-                  borderColor = "#fca5a5"; // border-rose-300
-                  textColor = "#e11d48"; // text-rose-600
-                  classNames.push("opacity-70");
-                } else if (status === "COMPLETED") {
-                  classNames.push("opacity-80", "saturate-50");
-                }
-
-                return {
-                  id: String(schedule.id),
-                  title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"} - ${schedule.classGroup?.code || "N/D"}`,
-                  start: schedule.startTime,
-                  end: schedule.endTime,
-                  extendedProps: {
-                    professor: schedule.professor?.name || "N/D",
-                    room: schedule.room?.name || "N/D",
-                    status: schedule.status,
-                    cancelReason: schedule.cancelReason,
-                  },
-                  backgroundColor: bgColor,
-                  borderColor: borderColor,
-                  textColor: textColor,
-                  className: classNames.join(" "),
-                };
-              });
-
-              return calendarEvents;
-            } catch (error) {
-              console.error("Failed to load schedule:", error);
-              return [];
-            }
-          }}
+          events={fetchEvents}
           eventClick={(info) => {
             if (onEventClick) {
               onEventClick(info.event.id);
