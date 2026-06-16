@@ -12,11 +12,14 @@ import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('subjects')
 export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   async create(@Body() createSubjectDto: CreateSubjectDto) {
     const data = await this.subjectsService.create(createSubjectDto);
@@ -35,6 +38,7 @@ export class SubjectsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -44,6 +48,7 @@ export class SubjectsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const data = await this.subjectsService.remove(id);

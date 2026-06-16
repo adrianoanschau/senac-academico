@@ -10,11 +10,14 @@ import {
 import { ProfessorsService } from './professors.service';
 import { CreateProfessorDto } from './dto/create-professor.dto';
 import { UpdateProfessorDto } from './dto/update-professor.dto';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('professors')
 export class ProfessorsController {
   constructor(private readonly professorsService: ProfessorsService) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   async create(@Body() createProfessorDto: CreateProfessorDto) {
     const data = await this.professorsService.create(createProfessorDto);
@@ -33,6 +36,7 @@ export class ProfessorsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -42,6 +46,7 @@ export class ProfessorsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const data = await this.professorsService.remove(id);

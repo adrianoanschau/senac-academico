@@ -10,11 +10,14 @@ import {
 import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
 import { UpdateClassGroupDto } from './dto/update-class-group.dto';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('class-groups')
 export class ClassGroupsController {
   constructor(private readonly classGroupsService: ClassGroupsService) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   create(@Body() createClassGroupDto: CreateClassGroupDto) {
     return this.classGroupsService.create(createClassGroupDto);
@@ -38,6 +41,7 @@ export class ClassGroupsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -47,6 +51,7 @@ export class ClassGroupsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const data = await this.classGroupsService.remove(id);

@@ -10,11 +10,14 @@ import {
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('rooms')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   async create(@Body() createRoomDto: CreateRoomDto) {
     const data = await this.roomsService.create(createRoomDto);
@@ -33,12 +36,14 @@ export class RoomsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
     const data = await this.roomsService.update(id, updateRoomDto);
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const data = await this.roomsService.remove(id);
