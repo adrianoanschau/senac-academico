@@ -57,7 +57,7 @@ describe('SubjectsService', () => {
       hours: 60,
     };
 
-    it('deve lançar ConflictException caso o código da disciplina já exista (Caminho Triste)', async () => {
+    it('deve lançar ConflictException caso a combinação de código e nome da disciplina já exista (Caminho Triste)', async () => {
       // Arrange
       mockPrisma.subject.findUnique.mockResolvedValue(mockSubject);
 
