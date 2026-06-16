@@ -320,7 +320,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
 
             {(details.status === "SCHEDULED" || details.status === "PLANNED") &&
               !showPostponeForm && (
-                <CanAccess roles={["ADMIN"]}>
+                <CanAccess roles={["ADMIN", "SECRETARY"]}>
                   <div className="flex flex-col gap-3 mt-2">
                     <button
                       onClick={() => {

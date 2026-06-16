@@ -127,7 +127,7 @@ export const Subjects: React.FC = () => {
             Gerencie a base de disciplinas e suas cargas horárias.
           </p>
         </div>
-        <CanAccess roles={["ADMIN"]}>
+        <CanAccess roles={["ADMIN", "SECRETARY"]}>
           <button
             onClick={handleOpenNewModal}
             className="bg-menu-uc hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-uc/30"
@@ -195,7 +195,7 @@ export const Subjects: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-          {filteredSubjects.length === 0 && !isLoading ? (
+              {filteredSubjects.length === 0 && !isLoading ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -220,7 +220,7 @@ export const Subjects: React.FC = () => {
                       {subject.hours} horas
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <CanAccess roles={["ADMIN"]}>
+                      <CanAccess roles={["ADMIN", "SECRETARY"]}>
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(subject)}
@@ -285,7 +285,10 @@ export const Subjects: React.FC = () => {
               </button>
             </div>
 
-            <LoadingOverlay visible={isSaving} message="Salvando disciplina..." />
+            <LoadingOverlay
+              visible={isSaving}
+              message="Salvando disciplina..."
+            />
 
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>

@@ -167,7 +167,7 @@ export const ClassGroups: React.FC = () => {
             Gerencie os grupos de alunos e seus períodos letivos.
           </p>
         </div>
-        <CanAccess roles={["ADMIN"]}>
+        <CanAccess roles={["ADMIN", "SECRETARY"]}>
           <button
             onClick={handleOpenNewModal}
             className="bg-menu-turmas hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-turmas/30"
@@ -241,7 +241,7 @@ export const ClassGroups: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-          {filteredClassGroups.length === 0 && !isLoading ? (
+              {filteredClassGroups.length === 0 && !isLoading ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -289,7 +289,7 @@ export const ClassGroups: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <CanAccess roles={["ADMIN"]}>
+                      <CanAccess roles={["ADMIN", "SECRETARY"]}>
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(turma)}

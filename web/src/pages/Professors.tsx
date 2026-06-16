@@ -128,7 +128,7 @@ export const Professors: React.FC = () => {
             Gerencie o corpo docente da instituição.
           </p>
         </div>
-        <CanAccess roles={["ADMIN"]}>
+        <CanAccess roles={["ADMIN", "SECRETARY"]}>
           <button
             onClick={handleOpenNewModal}
             className="bg-menu-professores hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-professores/30"
@@ -195,7 +195,7 @@ export const Professors: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-          {filteredProfessors.length === 0 && !isLoading ? (
+              {filteredProfessors.length === 0 && !isLoading ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -227,7 +227,7 @@ export const Professors: React.FC = () => {
                       {prof.degree}
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <CanAccess roles={["ADMIN"]}>
+                      <CanAccess roles={["ADMIN", "SECRETARY"]}>
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(prof)}
@@ -287,7 +287,10 @@ export const Professors: React.FC = () => {
               </button>
             </div>
 
-            <LoadingOverlay visible={isSaving} message="Salvando professor..." />
+            <LoadingOverlay
+              visible={isSaving}
+              message="Salvando professor..."
+            />
 
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               <div>

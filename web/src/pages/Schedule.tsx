@@ -143,7 +143,7 @@ export const Schedule: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <ExportButtons fetchData={fetchReportData} />
-          <CanAccess roles={["ADMIN"]}>
+          <CanAccess roles={["ADMIN", "SECRETARY"]}>
             <button
               onClick={() => setIsModulePlannerOpen(true)}
               className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
