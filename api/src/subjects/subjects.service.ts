@@ -15,12 +15,17 @@ export class SubjectsService {
 
   async create(createSubjectDto: CreateSubjectDto) {
     const existingSubject = await this.prisma.subject.findUnique({
-      where: { code: createSubjectDto.code },
+      where: {
+        code_name: {
+          code: createSubjectDto.code,
+          name: createSubjectDto.name,
+        },
+      },
     });
 
     if (existingSubject) {
       throw new ConflictException(
-        `Já existe uma disciplina cadastrada com o código ${createSubjectDto.code}`,
+        `Já existe uma disciplina cadastrada com o código ${createSubjectDto.code} e nome ${createSubjectDto.name}`,
       );
     }
 

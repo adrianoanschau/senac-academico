@@ -15237,18 +15237,19 @@ export namespace Prisma {
 
   export type SubjectWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    code?: string
+    code_name?: SubjectCodeNameCompoundUniqueInput
     AND?: SubjectWhereInput | SubjectWhereInput[]
     OR?: SubjectWhereInput[]
     NOT?: SubjectWhereInput | SubjectWhereInput[]
     name?: StringFilter<"Subject"> | string
+    code?: StringFilter<"Subject"> | string
     hours?: IntFilter<"Subject"> | number
     createdAt?: DateTimeFilter<"Subject"> | Date | string
     updatedAt?: DateTimeFilter<"Subject"> | Date | string
     curriculums?: CurriculumSubjectListRelationFilter
     schedules?: ScheduleListRelationFilter
     scheduleRules?: ScheduleRuleListRelationFilter
-  }, "id" | "code">
+  }, "id" | "code_name">
 
   export type SubjectOrderByWithAggregationInput = {
     id?: SortOrder
@@ -16872,6 +16873,11 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type SubjectCodeNameCompoundUniqueInput = {
+    code: string
+    name: string
   }
 
   export type SubjectCountOrderByAggregateInput = {
