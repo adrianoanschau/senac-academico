@@ -120,7 +120,7 @@ export default function ScheduleCalendar({
         calendarRef.current.getApi().gotoDate(selectedDate);
       }
     }
-  }, [selectedDateMs]);
+  }, [selectedDate, selectedDateMs]);
 
   const fetchEvents = useCallback(
     async (info: { startStr: string; endStr: string }) => {

@@ -6,6 +6,7 @@ import { ContextPanel } from "../components/ContextPanel";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 
 interface Subject {
   id?: string | number;
@@ -127,7 +128,7 @@ export const Subjects: React.FC = () => {
             Gerencie a base de disciplinas e suas cargas horárias.
           </p>
         </div>
-        <CanAccess roles={["ADMIN", "SECRETARY"]}>
+        <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
           <button
             onClick={handleOpenNewModal}
             className="bg-menu-uc hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-uc/30"
@@ -220,7 +221,7 @@ export const Subjects: React.FC = () => {
                       {subject.hours} horas
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <CanAccess roles={["ADMIN", "SECRETARY"]}>
+                      <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(subject)}

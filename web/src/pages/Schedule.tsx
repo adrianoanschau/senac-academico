@@ -15,6 +15,7 @@ import { Select } from "../components/Select";
 import { ExportButtons } from "../components/ExportButtons";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 import type { ScheduleItem } from "../utils/exportUtils";
 
 const ScheduleCalendar = lazy(() => import("../components/ScheduleCalendar"));
@@ -143,7 +144,7 @@ export const Schedule: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <ExportButtons fetchData={fetchReportData} />
-          <CanAccess roles={["ADMIN", "SECRETARY"]}>
+          <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
             <button
               onClick={() => setIsModulePlannerOpen(true)}
               className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"

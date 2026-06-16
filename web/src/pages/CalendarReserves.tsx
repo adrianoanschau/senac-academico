@@ -21,6 +21,7 @@ import { ContextPanel } from "../components/ContextPanel";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 
 interface ScheduleOverride {
   id: string;
@@ -172,7 +173,7 @@ export const CalendarReserves: React.FC = () => {
             não letivos).
           </p>
         </div>
-        <CanAccess roles={["ADMIN", "SECRETARY"]}>
+        <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
           <button
             onClick={() => {
               setFormData({
@@ -283,7 +284,7 @@ export const CalendarReserves: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <CanAccess roles={["ADMIN", "SECRETARY"]}>
+                    <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setIsModalOpen(true)}

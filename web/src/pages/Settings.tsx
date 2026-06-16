@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { CanAccess } from "../components/CanAccess";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 import { alertDialog } from "../utils/dialog";
 
 const CreateUserForm = lazy(() =>
@@ -72,11 +73,11 @@ export const Settings: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roleColors: Record<string, string> = {
-    ADMIN: "bg-rose-100 text-rose-700 border-rose-200",
-    COORDINATOR: "bg-amber-100 text-amber-700 border-amber-200",
-    INSTRUCTOR: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    SECRETARY: "bg-indigo-100 text-indigo-700 border-indigo-200",
-    MEMBER: "bg-slate-300 text-slate-700 border-slate-400",
+    [Role.ADMIN]: "bg-rose-100 text-rose-700 border-rose-200",
+    [Role.COORDINATOR]: "bg-amber-100 text-amber-700 border-amber-200",
+    [Role.INSTRUCTOR]: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    [Role.SECRETARY]: "bg-indigo-100 text-indigo-700 border-indigo-200",
+    [Role.MEMBER]: "bg-slate-300 text-slate-700 border-slate-400",
   };
 
   const getInitials = (email?: string) => {
@@ -148,7 +149,7 @@ export const Settings: React.FC = () => {
           </button>
 
           {/* Renderização condicional protegida por RBAC */}
-          <CanAccess roles={["ADMIN", "COORDINATOR"]}>
+          <CanAccess roles={[Role.ADMIN, Role.COORDINATOR]}>
             <button
               onClick={() => setActiveTab("admin")}
               className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -183,7 +184,7 @@ export const Settings: React.FC = () => {
                       profile.roles.map((role) => (
                         <span
                           key={role}
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${roleColors[role] || roleColors.MEMBER}`}
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${roleColors[role] || roleColors[Role.MEMBER]}`}
                         >
                           {role.toLowerCase()}
                         </span>

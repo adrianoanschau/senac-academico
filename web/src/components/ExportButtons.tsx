@@ -3,6 +3,7 @@ import { FileText, FileSpreadsheet, Loader2 } from "lucide-react";
 import { CanAccess } from "./CanAccess";
 import { alertDialog } from "../utils/dialog";
 import { type ScheduleItem } from "../utils/exportUtils";
+import { Role } from "../utils/roles";
 
 interface ExportButtonsProps {
   fetchData: () => Promise<ScheduleItem[]>;
@@ -55,7 +56,9 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
   };
 
   return (
-    <CanAccess roles={["ADMIN", "COORDINATOR", "INSTRUCTOR", "SECRETARY"]}>
+    <CanAccess
+      roles={[Role.ADMIN, Role.COORDINATOR, Role.INSTRUCTOR, Role.SECRETARY]}
+    >
       <div className="flex items-center gap-3">
         <button
           onClick={handleExportPDF}

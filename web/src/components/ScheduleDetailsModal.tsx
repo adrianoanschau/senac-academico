@@ -17,6 +17,7 @@ import { alertDialog, confirmDialog } from "../utils/dialog";
 import { DateSelect } from "./DateSelect";
 import { CanAccess } from "./CanAccess";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 
 const MigrateRuleModal = lazy(() =>
   import("./MigrateRuleModal").then((m) => ({ default: m.MigrateRuleModal })),
@@ -320,7 +321,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
 
             {(details.status === "SCHEDULED" || details.status === "PLANNED") &&
               !showPostponeForm && (
-                <CanAccess roles={["ADMIN", "SECRETARY"]}>
+                <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                   <div className="flex flex-col gap-3 mt-2">
                     <button
                       onClick={() => {

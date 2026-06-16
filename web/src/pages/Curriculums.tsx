@@ -7,6 +7,7 @@ import { ContextPanel } from "../components/ContextPanel";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 
 interface Course {
   id: string;
@@ -211,7 +212,7 @@ export const Curriculums: React.FC = () => {
             Gerencie as grades, relacionando cursos e unidades curriculares.
           </p>
         </div>
-        <CanAccess roles={["ADMIN", "SECRETARY"]}>
+        <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
           <button
             onClick={handleOpenNewModal}
             className="bg-menu-matriz hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-matriz/30"
@@ -295,7 +296,7 @@ export const Curriculums: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <CanAccess roles={["ADMIN", "SECRETARY"]}>
+                      <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenEditModal(curriculum)}

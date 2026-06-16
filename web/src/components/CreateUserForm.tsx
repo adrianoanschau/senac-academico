@@ -6,6 +6,7 @@ import { CanAccess } from "./CanAccess";
 import { type AppRole } from "../contexts/AuthContext";
 import { alertDialog } from "../utils/dialog";
 import api from "../services/api";
+import { Role } from "../utils/roles";
 
 interface CreateUserFormData {
   email: string;
@@ -59,7 +60,7 @@ export const CreateUserForm: React.FC = () => {
   };
 
   return (
-    <CanAccess roles={["ADMIN"]}>
+    <CanAccess roles={[Role.ADMIN]}>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
@@ -163,11 +164,11 @@ export const CreateUserForm: React.FC = () => {
                   <div className="flex flex-wrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1 border border-slate-100">
                     {(
                       [
-                        { value: "INSTRUCTOR", label: "Professor(a)" },
-                        { value: "COORDINATOR", label: "Coordenador(a)" },
-                        { value: "ADMIN", label: "Administrador(a)" },
-                        { value: "SECRETARY", label: "Secretário(a)" },
-                        { value: "MEMBER", label: "Membro(a)" },
+                        { value: Role.INSTRUCTOR, label: "Professor(a)" },
+                        { value: Role.COORDINATOR, label: "Coordenador(a)" },
+                        { value: Role.ADMIN, label: "Administrador(a)" },
+                        { value: Role.SECRETARY, label: "Secretário(a)" },
+                        { value: Role.MEMBER, label: "Membro(a)" },
                       ] as const
                     ).map((role) => {
                       const isSelected = value?.includes(role.value);
