@@ -76,7 +76,7 @@ export function useGanttBlueprint(classGroupId: string) {
       curriculumSubjectId: cfg.curriculumSubjectId,
       subjectId: cfg.subjectId,
       daysOfWeek: cfg.daysOfWeek,
-      startDate: cfg.startDate,
+      ...(cfg.dependsOnId || !cfg.startDate ? {} : { startDate: cfg.startDate }),
       dependsOnId: cfg.dependsOnId || null,
       ...(cfg.isPriority ? { isPriority: true } : {}),
       professorId: cfg.professorId || undefined,
@@ -90,7 +90,9 @@ export function useGanttBlueprint(classGroupId: string) {
     if (missingDays.length) {
       return `Configure os dias da semana para: ${missingDays.map((c) => c.subjectCode).join(', ')}`;
     }
-    const missingStart = subjectConfigs.filter((c) => !c.startDate);
+    const missingStart = subjectConfigs.filter(
+      (c) => !c.dependsOnId && !c.startDate,
+    );
     if (missingStart.length) {
       return `Informe a data de início para: ${missingStart.map((c) => c.subjectCode).join(', ')}`;
     }

@@ -188,6 +188,55 @@ describe('GanttPlannerService', () => {
       );
     });
 
+    it('deve iniciar UC encadeada sem data de início informada', async () => {
+      mockGenerator.generateProjections.mockReset();
+      mockGenerator.generateProjections
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-02T08:00:00'),
+            endTime: new Date('2026-03-02T10:00:00'),
+            durationInMinutes: 120,
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-03T08:00:00'),
+            endTime: new Date('2026-03-03T10:00:00'),
+            durationInMinutes: 120,
+          },
+        ]);
+
+      await service.buildBlueprint({
+        classGroupId: 'class-1',
+        moduleNumber: 1,
+        startTimeStr: '08:00',
+        endTimeStr: '10:00',
+        subjects: [
+          {
+            curriculumSubjectId: 'cs-1',
+            subjectId: 'sub-1',
+            daysOfWeek: [1, 3],
+            startDate: new Date('2026-03-01'),
+            professorId: 'prof-1',
+            roomId: 'room-1',
+          },
+          {
+            curriculumSubjectId: 'cs-2',
+            subjectId: 'sub-2',
+            daysOfWeek: [2, 4],
+            dependsOnId: 'cs-1',
+            professorId: 'prof-2',
+            roomId: 'room-2',
+          },
+        ],
+      });
+
+      const uc2Anchor = mockGenerator.generateProjections.mock.calls[1][0] as Date;
+      expect(uc2Anchor.getFullYear()).toBe(2026);
+      expect(uc2Anchor.getMonth()).toBe(2);
+      expect(uc2Anchor.getDate()).toBe(3);
+    });
+
     it('deve iniciar UC encadeada no dia seguinte ao término da predecessora', async () => {
       mockPrisma.curriculumSubject.findMany.mockResolvedValue([
         {

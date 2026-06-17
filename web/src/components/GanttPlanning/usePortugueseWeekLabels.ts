@@ -1,8 +1,14 @@
 import { useEffect, type RefObject } from 'react';
+import { ViewMode } from 'gantt-task-react';
 
 /** A lib gantt-task-react renderiza semanas como "W12" — substituímos por "Sem. 12". */
-export function usePortugueseWeekLabels(containerRef: RefObject<HTMLElement | null>) {
+export function usePortugueseWeekLabels(
+  containerRef: RefObject<HTMLElement | null>,
+  viewMode: ViewMode = ViewMode.Week,
+) {
   useEffect(() => {
+    if (viewMode !== ViewMode.Week) return;
+
     const root = containerRef.current;
     if (!root) return;
 
@@ -22,5 +28,5 @@ export function usePortugueseWeekLabels(containerRef: RefObject<HTMLElement | nu
     observer.observe(root, { childList: true, subtree: true, characterData: true });
 
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [containerRef, viewMode]);
 }

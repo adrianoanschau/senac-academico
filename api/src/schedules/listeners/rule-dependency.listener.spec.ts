@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RuleDependencyListener } from './rule-dependency.listener';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulesService } from '../schedules.service';
@@ -25,6 +26,10 @@ describe('RuleDependencyListener', () => {
     generateBulk: vi.fn(),
   };
 
+  const mockEventEmitter = {
+    emit: vi.fn(),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -33,6 +38,7 @@ describe('RuleDependencyListener', () => {
         RuleDependencyListener,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: SchedulesService, useValue: mockSchedulesService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -100,6 +106,7 @@ describe('RuleDependencyListener', () => {
       mockSchedulesService.generateBulk.mockResolvedValue({
         ruleId: 'rule-2',
         generatedCount: 3,
+        lastClassEndDate: new Date('2026-06-20T10:00:00Z'),
       });
 
       // Act
@@ -128,6 +135,14 @@ describe('RuleDependencyListener', () => {
           existingRuleId: 'rule-2',
           remainingHours: 6,
           startDate: expectedStartDate,
+        }),
+      );
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'rule.end_date.changed',
+        expect.objectContaining({
+          ruleId: 'rule-2',
+          classGroupId: 'class-1',
         }),
       );
     });

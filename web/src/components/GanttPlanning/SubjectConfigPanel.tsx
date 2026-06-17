@@ -197,31 +197,16 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-600 mb-2">Data de início</p>
-                <DateSelect
-                  value={cfg.startDate}
-                  onChange={(val) =>
-                    updateSubjectConfig(cfg.curriculumSubjectId, { startDate: val })
-                  }
-                  placeholder="DD/MM/AAAA"
-                />
-                {cfg.dependsOnId ? (
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    Data mínima; o início efetivo será o dia seguinte ao término da UC
-                    predecessora, se for posterior.
-                  </p>
-                ) : null}
-              </div>
-
-              <div>
                 <p className="text-xs font-bold text-slate-600 mb-2">Iniciar após</p>
                 <Select
                   value={cfg.dependsOnId || ''}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const dependsOnId = e.target.value;
                     updateSubjectConfig(cfg.curriculumSubjectId, {
-                      dependsOnId: e.target.value,
-                    })
-                  }
+                      dependsOnId,
+                      ...(dependsOnId ? { startDate: '' } : {}),
+                    });
+                  }}
                   className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs cursor-pointer"
                 >
                   <option value="">Sem encadeamento</option>
@@ -239,7 +224,26 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
                       </option>
                     ))}
                 </Select>
+                {cfg.dependsOnId ? (
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                    O início será calculado automaticamente no dia seguinte ao término
+                    da UC predecessora.
+                  </p>
+                ) : null}
               </div>
+
+              {!cfg.dependsOnId ? (
+                <div>
+                  <p className="text-xs font-bold text-slate-600 mb-2">Data de início</p>
+                  <DateSelect
+                    value={cfg.startDate}
+                    onChange={(val) =>
+                      updateSubjectConfig(cfg.curriculumSubjectId, { startDate: val })
+                    }
+                    placeholder="DD/MM/AAAA"
+                  />
+                </div>
+              ) : null}
 
               <label className="flex items-center gap-2 cursor-pointer group/priority">
                 <input

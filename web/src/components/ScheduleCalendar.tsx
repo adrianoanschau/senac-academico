@@ -37,15 +37,61 @@ const stringToColorHash = (str: string): number => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash);
 };
+
+function getSubjectColorKey(schedule: {
+  id: string;
+  subject?: { code?: string; name?: string };
+}): string {
+  return schedule.subject?.code || schedule.subject?.name || schedule.id;
+}
+
+function getSubjectAccentColor(subjectKey: string): string {
+  return subjectColors[stringToColorHash(subjectKey) % subjectColors.length];
+}
+
+function getEventColors(subjectKey: string, status: string) {
+  const accent = getSubjectAccentColor(subjectKey);
+
+  if (status === "PLANNED") {
+    return {
+      bg: `${accent}28`,
+      border: accent,
+      text: "#334155",
+    };
+  }
+
+  if (status === "CANCELLED") {
+    return {
+      bg: "#fef2f2",
+      border: "#fca5a5",
+      text: "#e11d48",
+    };
+  }
+
+  if (status === "COMPLETED") {
+    return {
+      bg: `${accent}99`,
+      border: accent,
+      text: "#ffffff",
+    };
+  }
+
+  return {
+    bg: accent,
+    border: accent,
+    text: "#ffffff",
+  };
+}
+
 export interface ScheduleResponse {
   id: string;
   startTime: string;
   endTime: string;
-  subject: { name: string; code: string };
+  subject: { id?: string; name: string; code: string };
   professor: { name: string };
   room: { name: string };
   classGroup: { code: string };
@@ -165,28 +211,16 @@ export default function ScheduleCalendar({
 
         const calendarEvents = data.map((schedule) => {
           const status = schedule.status || "SCHEDULED";
-          const color =
-            subjectColors[
-              stringToColorHash(schedule.subject?.name || "") %
-                subjectColors.length
-            ];
-
-          let bgColor = color;
-          let borderColor = color;
-          let textColor = "#ffffff";
+          const subjectKey = getSubjectColorKey(schedule);
+          const colors = getEventColors(subjectKey, status);
           const classNames: string[] = [];
 
           if (status === "PLANNED") {
-            bgColor = `${color}20`; // Cor clara (com 20% de opacidade no formato hex)
-            textColor = "#334155"; // text-slate-700
-            classNames.push("!border-dashed", "!border-2", "opacity-80");
+            classNames.push("!border-dashed", "!border-2", "opacity-90");
           } else if (status === "CANCELLED") {
-            bgColor = "#fef2f2"; // bg-rose-50
-            borderColor = "#fca5a5"; // border-rose-300
-            textColor = "#e11d48"; // text-rose-600
             classNames.push("opacity-70");
           } else if (status === "COMPLETED") {
-            classNames.push("opacity-80", "saturate-50");
+            classNames.push("opacity-90");
           }
 
           return {
@@ -200,12 +234,13 @@ export default function ScheduleCalendar({
               classGroup: schedule.classGroup?.code || "N/D",
               subjectCode: schedule.subject?.code || "N/D",
               subjectName: schedule.subject?.name || "N/D",
+              subjectColor: colors.border,
               status: schedule.status,
               cancelReason: schedule.cancelReason,
             },
-            backgroundColor: bgColor,
-            borderColor: borderColor,
-            textColor: textColor,
+            backgroundColor: colors.bg,
+            borderColor: colors.border,
+            textColor: colors.text,
             className: classNames.join(" "),
           };
         });
@@ -291,8 +326,22 @@ export default function ScheduleCalendar({
           .senac-calendar .fc-event-main {
             color: white;
           }
+          .senac-calendar .fc-dayGridMonth-view .fc-event-main {
+            color: inherit;
+          }
           .senac-calendar .fc-daygrid-event-harness .fc-event-main {
             padding: 1px 4px;
+          }
+          .senac-calendar .fc-dayGridMonth-view .fc-daygrid-block-event .fc-event {
+            border: none !important;
+            border-radius: 4px !important;
+            overflow: hidden;
+          }
+          .senac-calendar .fc-dayGridMonth-view .schedule-month-event {
+            width: 100%;
+            min-height: 100%;
+            border-radius: 4px;
+            box-sizing: border-box;
           }
         `}</style>
         <FullCalendar
@@ -317,6 +366,12 @@ export default function ScheduleCalendar({
           allDaySlot={false}
           slotMinTime="08:00:00"
           slotMaxTime="23:00:00"
+          views={{
+            dayGridMonth: {
+              eventDisplay: "block",
+              dayMaxEvents: 5,
+            },
+          }}
           datesSet={(arg) => {
             if (calendarView !== arg.view.type) {
               setCalendarView(arg.view.type);
@@ -357,9 +412,18 @@ export default function ScheduleCalendar({
             const baseClasses = isCancelled ? "line-through" : "";
 
             if (eventInfo.view.type === "dayGridMonth") {
+              const subjectKey =
+                eventInfo.event.extendedProps.subjectCode || eventInfo.event.id;
+              const colors = getEventColors(subjectKey, status || "SCHEDULED");
+
               return (
                 <div
-                  className={`px-1 py-0.5 overflow-hidden text-xs flex flex-col gap-0.5 ${baseClasses}`}
+                  className={`schedule-month-event px-1.5 py-1 overflow-hidden text-xs flex flex-col gap-0.5 ${baseClasses}`}
+                  style={{
+                    backgroundColor: colors.bg,
+                    borderLeft: `3px solid ${colors.border}`,
+                    color: colors.text,
+                  }}
                   title={tooltipTitle}
                 >
                   <div className="font-bold flex items-start justify-between gap-1 leading-tight">

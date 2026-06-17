@@ -130,7 +130,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
           const conflictingSubject = data.conflictingSubject || "Desconhecida";
 
           const isConfirmed = await confirmDialog(
-            `Atenção: A data já está ocupada pela disciplina de ${conflictingSubject}.\n\nDeseja sobrepor este horário? A disciplina afetada será automaticamente reagendada para a frente.`,
+            `Atenção: A data já está ocupada pela disciplina de ${conflictingSubject}.\n\nDeseja confirmar? A aula ocupante e as dependentes em sequência serão adiadas automaticamente para o fim de cada disciplina.`,
           );
 
           if (isConfirmed) {
@@ -140,7 +140,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                 force: true,
               });
               alertDialog(
-                "Aula sobreposta com sucesso! As agendas dependentes foram recalculadas.",
+                "Aula adiada com sucesso! As aulas em conflito foram empurradas em cascata.",
               );
               onSuccess();
               onClose();
@@ -405,8 +405,9 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
                     Se preenchida, tentará encaixar a aula nesta data. Caso
-                    vazia, a aula será empurrada para o final do cronograma
-                    (respeitando a regra original da turma).
+                    vazia, a aula será realocada na primeira data disponível
+                    após a última aula desta disciplina, empurrando as
+                    dependentes para frente.
                   </p>
                 </div>
                 <div className="flex justify-end gap-3 mt-2">

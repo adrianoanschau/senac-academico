@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ClassStatus } from '@/prisma/generated';
 import {
@@ -15,6 +15,7 @@ export class RuleDependencyListener {
   constructor(
     private readonly prisma: PrismaService,
     private readonly schedulesService: SchedulesService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @OnEvent(RULE_EVENTS.END_DATE_CHANGED)
@@ -45,7 +46,7 @@ export class RuleDependencyListener {
         return;
       }
 
-      // 4. Calcula a nova data de início (data final da regra anterior + 1 dia)
+      // 4. Calcula a nova data de início (dia seguinte ao término da regra predecessora)
       const newStartDate = new Date(event.newEndDate);
       newStartDate.setDate(newStartDate.getDate() + 1);
       newStartDate.setHours(0, 0, 0, 0);
@@ -87,7 +88,7 @@ export class RuleDependencyListener {
       );
 
       // 7. Chama o motor de geração informando explicitamente a carga horária restante
-      await this.schedulesService.generateBulk({
+      const bulkResult = await this.schedulesService.generateBulk({
         classGroupId: dependentRule.classGroupId,
         subjectId: dependentRule.subjectId,
         professorId: dependentRule.professorId,
@@ -96,10 +97,21 @@ export class RuleDependencyListener {
         daysOfWeek: dependentRule.daysOfWeek,
         startTimeStr: dependentRule.startTimeStr,
         endTimeStr: dependentRule.endTimeStr,
-        dependsOnRuleId: event.ruleId, // <-- Usamos o ID do evento diretamente!
-        remainingHours, // <-- Passamos a carga horária restante explícita!
-        existingRuleId: dependentRule.id, // <-- Reutiliza a regra existente para não quebrar a cadeia!
+        dependsOnRuleId: event.ruleId,
+        remainingHours,
+        existingRuleId: dependentRule.id,
       });
+
+      if (bulkResult.lastClassEndDate) {
+        this.eventEmitter.emit(
+          RULE_EVENTS.END_DATE_CHANGED,
+          new RuleEndDateChangedEvent(
+            dependentRule.id,
+            bulkResult.lastClassEndDate,
+            dependentRule.classGroupId,
+          ),
+        );
+      }
     } catch (error) {
       this.logger.error(
         `[Efeito Dominó] Erro crítico ao propagar reagendamento: ${error instanceof Error ? error.message : error}`,

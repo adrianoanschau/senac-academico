@@ -1,11 +1,24 @@
 .gantt-planning-wrapper {
   min-height: 560px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.gantt-planning-wrapper > div {
+  width: 100%;
+  min-width: 0;
+}
+
+.gantt-planning-wrapper ._3eULf {
+  width: 100%;
+  min-width: 0;
 }
 
 .gantt-planning-wrapper .gantt-container,
 .gantt-planning-wrapper ._CZjuD {
   font-family: inherit;
-  min-width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* Coluna de disciplinas: mais larga e com quebra de linha */
@@ -32,8 +45,25 @@
   width: 10px;
 }
 
+/*
+ * A lib usa margin-left + max-width:100%, o que estoura o container
+ * e encurta o scroll horizontal. Alinhamos a barra só à área do gráfico.
+ */
 .gantt-planning-wrapper ._2k9Ys {
-  height: 14px !important;
+  width: calc(100% - var(--gantt-list-width, 200px)) !important;
+  max-width: calc(100% - var(--gantt-list-width, 200px)) !important;
+  margin-left: var(--gantt-list-width, 200px) !important;
+  height: 16px !important;
+  box-sizing: border-box;
+}
+
+.gantt-planning-wrapper ._2k9Ys::-webkit-scrollbar {
+  height: 12px;
+}
+
+.gantt-planning-wrapper ._2k9Ys::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgb(148 163 184);
 }
 
 .gantt-draft-bar .bar {

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SchedulesService } from './schedules.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -27,10 +26,6 @@ describe('SchedulesService', () => {
     generateProjections: vi.fn(),
   };
 
-  const mockEventEmitter = {
-    emit: vi.fn(),
-  };
-
   beforeEach(async () => {
     // Arrange
     vi.clearAllMocks();
@@ -40,7 +35,6 @@ describe('SchedulesService', () => {
         SchedulesService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: ScheduleGeneratorService, useValue: mockGeneratorService },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 

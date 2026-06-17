@@ -68,7 +68,7 @@ export interface GanttSubjectPayload {
   curriculumSubjectId: string;
   subjectId: string;
   daysOfWeek: number[];
-  startDate: string;
+  startDate?: string;
   dependsOnId?: string | null;
   isPriority?: boolean;
   professorId?: string;

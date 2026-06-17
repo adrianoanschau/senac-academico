@@ -28,10 +28,10 @@ export class GanttSubjectConfigDto {
   @Max(6, { each: true })
   daysOfWeek: number[];
 
+  @IsOptional()
   @Type(() => Date)
   @IsDate()
-  @IsNotEmpty()
-  startDate: Date;
+  startDate?: Date;
 
   @IsOptional()
   @IsBoolean()

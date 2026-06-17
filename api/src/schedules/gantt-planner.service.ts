@@ -354,26 +354,26 @@ export class GanttPlannerService {
         );
       }
 
-      if (!config.startDate) {
+      const dependsOnId = this.resolveDependsOnId(cs, config, idSet);
+
+      let anchor: Date;
+
+      if (anchorOverrides?.has(csId)) {
+        anchor = new Date(anchorOverrides.get(csId)!);
+      } else if (dependsOnId) {
+        const predecessor = completed.get(dependsOnId);
+        if (!predecessor) {
+          throw new BadRequestException(
+            `A UC ${cs.subject.code} depende de uma predecessora que ainda não foi agendada.`,
+          );
+        }
+        anchor = this.dayAfter(predecessor.end);
+      } else if (!config.startDate) {
         throw new BadRequestException(
           `Informe a data de início da UC ${cs.subject.code}.`,
         );
-      }
-
-      let anchor = anchorOverrides?.has(csId)
-        ? new Date(anchorOverrides.get(csId)!)
-        : new Date(config.startDate);
-
-      const dependsOnId = this.resolveDependsOnId(cs, config, idSet);
-
-      if (!anchorOverrides?.has(csId) && dependsOnId) {
-        const predecessor = completed.get(dependsOnId);
-        if (predecessor) {
-          const dependencyStart = this.dayAfter(predecessor.end);
-          if (dependencyStart > anchor) {
-            anchor = dependencyStart;
-          }
-        }
+      } else {
+        anchor = new Date(config.startDate);
       }
 
       anchor.setHours(0, 0, 0, 0);
@@ -514,7 +514,7 @@ export class GanttPlannerService {
 
     if (!earliest) {
       throw new BadRequestException(
-        'Informe a data de início de cada disciplina.',
+        'Informe a data de início das disciplinas sem encadeamento.',
       );
     }
 

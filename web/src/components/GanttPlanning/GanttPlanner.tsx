@@ -17,6 +17,31 @@ interface GanttPlannerProps {
 const LIST_CELL_WIDTH = '200px';
 const ROW_HEIGHT = 52;
 
+function getTimelineConfig(tasks: Task[]): {
+  viewMode: ViewMode;
+  columnWidth: number;
+  preStepsCount: number;
+} {
+  if (tasks.length === 0) {
+    return { viewMode: ViewMode.Week, columnWidth: 72, preStepsCount: 1 };
+  }
+
+  const minStart = Math.min(...tasks.map((t) => t.start.getTime()));
+  const maxEnd = Math.max(...tasks.map((t) => t.end.getTime()));
+  const spanDays = (maxEnd - minStart) / (1000 * 60 * 60 * 24);
+
+  // Week view só adiciona ~1,5 mês após a última tarefa; Month cobre melhor módulos longos.
+  if (spanDays > 120) {
+    return { viewMode: ViewMode.Month, columnWidth: 140, preStepsCount: 1 };
+  }
+
+  return {
+    viewMode: ViewMode.Week,
+    columnWidth: 72,
+    preStepsCount: Math.min(4, Math.max(1, Math.ceil(spanDays / 56))),
+  };
+}
+
 function toGanttTasks(blueprint: GanttBlueprintResult): Task[] {
   const conflictTaskIds = new Set(
     blueprint.conflicts.flatMap((c) => c.taskIds),
@@ -50,8 +75,9 @@ export const GanttPlanner: React.FC<GanttPlannerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const tasks = toGanttTasks(blueprint);
+  const timeline = getTimelineConfig(tasks);
 
-  usePortugueseWeekLabels(containerRef);
+  usePortugueseWeekLabels(containerRef, timeline.viewMode);
 
   const chartHeight = isFullscreen
     ? Math.max(640, tasks.length * (ROW_HEIGHT + 4) + 120)
@@ -65,7 +91,8 @@ export const GanttPlanner: React.FC<GanttPlannerProps> = ({
   return (
     <div
       ref={containerRef}
-      className="gantt-planning-wrapper relative w-full overflow-x-auto rounded-xl border border-slate-100"
+      className="gantt-planning-wrapper relative w-full min-w-0 rounded-xl border border-slate-100"
+      style={{ ['--gantt-list-width' as string]: LIST_CELL_WIDTH }}
     >
       {isRecalculating && (
         <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center rounded-xl">
@@ -74,10 +101,11 @@ export const GanttPlanner: React.FC<GanttPlannerProps> = ({
       )}
       <Gantt
         tasks={tasks}
-        viewMode={ViewMode.Week}
+        viewMode={timeline.viewMode}
+        preStepsCount={timeline.preStepsCount}
         locale="pt-BR"
         listCellWidth={LIST_CELL_WIDTH}
-        columnWidth={72}
+        columnWidth={timeline.columnWidth}
         rowHeight={ROW_HEIGHT}
         headerHeight={56}
         ganttHeight={chartHeight}
