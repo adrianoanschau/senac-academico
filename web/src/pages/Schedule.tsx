@@ -126,18 +126,16 @@ export const Schedule: React.FC = () => {
     const response = await api.get(`/schedules?${params.toString()}`);
     const data = response.data?.data || response.data || [];
 
-    return data.map(
-      (item: { subject: { name: string; code: string; hours: number } }) => {
-        if (!item.subject) return item;
-        return {
-          ...item,
-          subject: {
-            ...item.subject,
-            name: `${item.subject.code}: ${item.subject.name} ${item.subject.hours}h`,
-          },
-        };
-      },
-    );
+    return data.map((item: ScheduleItem) => {
+      if (!item.subject) return item;
+      return {
+        ...item,
+        subject: {
+          ...item.subject,
+          name: `${item.subject.code}: ${item.subject.name} ${item.subject.hours}h`,
+        },
+      };
+    });
   };
 
   return (
