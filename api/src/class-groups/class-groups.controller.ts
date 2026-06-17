@@ -41,6 +41,18 @@ export class ClassGroupsController {
     return { data };
   }
 
+  @Get(':id/modules/:moduleNumber/subjects')
+  async findModuleSubjects(
+    @Param('id') id: string,
+    @Param('moduleNumber') moduleNumber: string,
+  ) {
+    const data = await this.classGroupsService.findModuleSubjects(
+      id,
+      Number(moduleNumber),
+    );
+    return { data };
+  }
+
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(

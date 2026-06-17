@@ -121,4 +121,38 @@ describe('ClassGroupsService', () => {
       expect(result).toEqual([1, 2]);
     });
   });
+
+  describe('findModuleSubjects', () => {
+    it('deve retornar array vazio se a turma não tiver matriz', async () => {
+      mockPrisma.classGroup.findUnique.mockResolvedValue(null);
+
+      const result = await service.findModuleSubjects('invalid', 1);
+
+      expect(result).toEqual([]);
+    });
+
+    it('deve ordenar disciplinas respeitando dependsOnId dentro do módulo', async () => {
+      mockPrisma.classGroup.findUnique.mockResolvedValue({
+        curriculumId: 'curr-1',
+      });
+      mockPrisma.curriculumSubject.findMany.mockResolvedValue([
+        {
+          id: 'cs-2',
+          dependsOnId: 'cs-1',
+          subjectId: 'sub-2',
+          subject: { id: 'sub-2', name: 'B', code: 'B' },
+        },
+        {
+          id: 'cs-1',
+          dependsOnId: null,
+          subjectId: 'sub-1',
+          subject: { id: 'sub-1', name: 'A', code: 'A' },
+        },
+      ]);
+
+      const result = await service.findModuleSubjects('class-1', 1);
+
+      expect(result.map((item) => item.subjectId)).toEqual(['sub-1', 'sub-2']);
+    });
+  });
 });

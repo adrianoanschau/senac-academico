@@ -1,34 +1,21 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   Search,
-  Plus,
   CalendarClock,
   Maximize,
   Minimize,
   Info,
-  Route,
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { MiniCalendar } from "../components/MiniCalendar";
 import { ContextPanel } from "../components/ContextPanel";
-import { CanAccess } from "../components/CanAccess";
 import { Select } from "../components/Select";
 import { ExportButtons } from "../components/ExportButtons";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
-import { Role } from "../utils/roles";
 import type { ScheduleItem } from "../utils/exportUtils";
 
 const ScheduleCalendar = lazy(() => import("../components/ScheduleCalendar"));
-const BulkGenerateModal = lazy(() =>
-  import("../components/BulkGenerateModal").then((m) => ({
-    default: m.BulkGenerateModal,
-  })),
-);
-const ModulePlanningModal = lazy(() =>
-  import("../components/ModulePlanning/ModulePlanningModal").then((m) => ({
-    default: m.ModulePlanningModal,
-  })),
-);
 const ScheduleDetailsModal = lazy(() =>
   import("../components/ScheduleDetailsModal").then((m) => ({
     default: m.ScheduleDetailsModal,
@@ -42,9 +29,10 @@ interface Subject {
 }
 
 export const Schedule: React.FC = () => {
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const initialClassGroupId = searchParams.get("classGroupId") || "";
+
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isModulePlannerOpen, setIsModulePlannerOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = usePersistentState(
     "schedule_fullscreen",
@@ -67,7 +55,7 @@ export const Schedule: React.FC = () => {
   );
   const [classGroupId, setClassGroupId] = usePersistentState<string>(
     "schedule_classGroupId",
-    "",
+    initialClassGroupId,
   );
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -87,6 +75,12 @@ export const Schedule: React.FC = () => {
   const selectedDate = !isNaN(new Date(selectedDateStr).getTime())
     ? new Date(selectedDateStr)
     : new Date();
+
+  useEffect(() => {
+    if (initialClassGroupId) {
+      setClassGroupId(initialClassGroupId);
+    }
+  }, [initialClassGroupId, setClassGroupId]);
 
   useEffect(() => {
     const fetchFiltersData = async () => {
@@ -140,7 +134,6 @@ export const Schedule: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto pb-10">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
@@ -150,31 +143,12 @@ export const Schedule: React.FC = () => {
             Cronograma
           </h1>
           <p className="text-slate-500 mt-1">
-            Visualizar o cronograma de aulas de cada turma.
+            Visualize o cronograma de aulas de cada turma.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <ExportButtons fetchData={fetchReportData} />
-          <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <button
-              onClick={() => setIsModulePlannerOpen(true)}
-              className="bg-white border-2 border-senac-blue text-senac-blue hover:bg-senac-blue/5 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Route size={20} />
-              Planejar Módulo
-            </button>
-            <button
-              onClick={() => setIsBulkModalOpen(true)}
-              className="bg-senac-blue hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-senac-blue/30"
-            >
-              <Plus size={20} />
-              Novo Agendamento
-            </button>
-          </CanAccess>
-        </div>
+        <ExportButtons fetchData={fetchReportData} />
       </div>
 
-      {/* Main Card */}
       <div
         className={
           isFullscreen
@@ -182,7 +156,6 @@ export const Schedule: React.FC = () => {
             : "bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100"
         }
       >
-        {/* Toolbar */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <div className="relative w-72">
@@ -292,7 +265,6 @@ export const Schedule: React.FC = () => {
           </div>
         </div>
 
-        {/* Calendário */}
         <Suspense
           fallback={
             <div className="h-200 flex items-center justify-center text-slate-500 font-medium">
@@ -319,40 +291,10 @@ export const Schedule: React.FC = () => {
       </div>
 
       <Suspense fallback={null}>
-        {isBulkModalOpen && (
-          <BulkGenerateModal
-            isOpen={isBulkModalOpen}
-            onClose={() => setIsBulkModalOpen(false)}
-            onSuccess={() => {
-              setIsBulkModalOpen(false);
-              setRefreshTrigger((prev) => prev + 1);
-            }}
-          />
-        )}
-
-        {isModulePlannerOpen && (
-          <ModulePlanningModal
-            isOpen={isModulePlannerOpen}
-            onClose={() => setIsModulePlannerOpen(false)}
-            onSuccess={(startDate) => {
-              setIsModulePlannerOpen(false);
-              if (startDate) {
-                const parsedDate = new Date(
-                  startDate.includes("T") ? startDate : `${startDate}T12:00:00`,
-                );
-                setSelectedDateStr(parsedDate.toISOString());
-              }
-              if (!status.includes("PLANNED")) {
-                setStatus([...status, "PLANNED"]);
-              }
-              setRefreshTrigger((prev) => prev + 1);
-            }}
-          />
-        )}
-
         {isDetailsModalOpen && (
           <ScheduleDetailsModal
             isOpen={isDetailsModalOpen}
+            readOnly
             onClose={() => {
               setIsDetailsModalOpen(false);
               setSelectedEventId(null);
@@ -367,12 +309,12 @@ export const Schedule: React.FC = () => {
 
       <ContextPanel
         title="Cronograma"
-        description="Visualize e aloque aulas no calendário geral. Utilize a geração em massa para preencher as rotinas de um semestre inteiro rapidamente."
+        description="Visualize o calendário de aulas de todas as turmas. Para planejar módulos ou gerenciar aulas, acesse a página de Turmas."
         icon={<Info className="text-senac-blue" size={24} />}
         tips={[
-          'Use o botão "Novo Agendamento" (ou a Geração em Massa) para preencher os horários das turmas.',
-          "Você pode filtrar os eventos por status (Agendados, Concluídos, Cancelados).",
-          "O sistema respeita os Períodos Especiais (Feriados) para não agendar aulas em dias não letivos.",
+          "Esta tela é somente leitura — clique em uma aula para ver os detalhes.",
+          "Use os filtros por turma, professor, sala ou status para refinar a visualização.",
+          "O planejamento de módulos e a gestão operacional (adiar, efetivar) estão na página de Turmas.",
         ]}
       >
         <MiniCalendar

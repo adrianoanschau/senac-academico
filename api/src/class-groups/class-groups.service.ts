@@ -108,4 +108,77 @@ export class ClassGroupsService {
 
     return distinctModules.map((item) => item.module);
   }
+
+  async findModuleSubjects(classGroupId: string, moduleNumber: number) {
+    const classGroup = await this.prisma.classGroup.findUnique({
+      where: { id: classGroupId },
+      select: { curriculumId: true },
+    });
+
+    if (!classGroup?.curriculumId) {
+      return [];
+    }
+
+    const curriculumSubjects = await this.prisma.curriculumSubject.findMany({
+      where: {
+        curriculumId: classGroup.curriculumId,
+        module: moduleNumber,
+      },
+      include: {
+        subject: true,
+      },
+    });
+
+    return this.orderSubjectsByPrecedence(curriculumSubjects);
+  }
+
+  private orderSubjectsByPrecedence<
+    T extends { id: string; dependsOnId: string | null },
+  >(items: T[]): T[] {
+    if (items.length <= 1) {
+      return items;
+    }
+
+    const idSet = new Set(items.map((item) => item.id));
+    const itemMap = new Map(items.map((item) => [item.id, item]));
+    const inDegree = new Map<string, number>();
+    const successors = new Map<string, string[]>();
+
+    for (const item of items) {
+      inDegree.set(item.id, 0);
+      successors.set(item.id, []);
+    }
+
+    for (const item of items) {
+      if (item.dependsOnId && idSet.has(item.dependsOnId)) {
+        inDegree.set(item.id, (inDegree.get(item.id) ?? 0) + 1);
+        successors.get(item.dependsOnId)!.push(item.id);
+      }
+    }
+
+    const queue = items
+      .filter((item) => (inDegree.get(item.id) ?? 0) === 0)
+      .map((item) => item.id);
+    const sorted: T[] = [];
+
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      sorted.push(itemMap.get(currentId)!);
+
+      for (const successorId of successors.get(currentId) ?? []) {
+        const nextDegree = (inDegree.get(successorId) ?? 0) - 1;
+        inDegree.set(successorId, nextDegree);
+        if (nextDegree === 0) {
+          queue.push(successorId);
+        }
+      }
+    }
+
+    if (sorted.length < items.length) {
+      const sortedIds = new Set(sorted.map((item) => item.id));
+      sorted.push(...items.filter((item) => !sortedIds.has(item.id)));
+    }
+
+    return sorted;
+  }
 }

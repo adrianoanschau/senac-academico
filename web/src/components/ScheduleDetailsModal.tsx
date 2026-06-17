@@ -28,6 +28,7 @@ interface ScheduleDetailsModalProps {
   onClose: () => void;
   eventId: string | null;
   onSuccess: () => void;
+  readOnly?: boolean;
 }
 
 interface ScheduleDetails {
@@ -48,6 +49,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
   onClose,
   eventId,
   onSuccess,
+  readOnly = false,
 }) => {
   const [details, setDetails] = useState<ScheduleDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -320,7 +322,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
             </div>
 
             {(details.status === "SCHEDULED" || details.status === "PLANNED") &&
-              !showPostponeForm && (
+              !showPostponeForm &&
+              !readOnly && (
                 <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                   <div className="flex flex-col gap-3 mt-2">
                     <button
@@ -363,7 +366,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                 </CanAccess>
               )}
 
-            {showPostponeForm && (
+            {showPostponeForm && !readOnly && (
               <form
                 onSubmit={handlePostpone}
                 className="mt-4 bg-orange-50 p-5 rounded-xl border border-orange-200 flex flex-col gap-4"
@@ -438,7 +441,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
         ) : null}
       </div>
 
-      {details?.ruleId && (
+      {details?.ruleId && !readOnly && (
         <Suspense fallback={null}>
           {isMigrateModalOpen && (
             <MigrateRuleModal

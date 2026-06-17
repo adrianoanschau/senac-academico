@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, Layers, X, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, Plus, Edit2, Trash2, Layers, X, Calendar, Route, Settings2 } from "lucide-react";
 import { Select } from "../components/Select";
 import { DateSelect } from "../components/DateSelect";
 import { confirmDialog, alertDialog } from "../utils/dialog";
@@ -292,6 +293,20 @@ export const ClassGroups: React.FC = () => {
                     <td className="py-4 px-4 text-right">
                       <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                         <div className="flex items-center justify-end gap-2">
+                          <Link
+                            to={`/schedules/planning/${turma.id}`}
+                            className="p-2 text-slate-400 hover:text-senac-blue hover:bg-senac-blue/10 rounded-lg transition-colors"
+                            title="Planejar Módulo"
+                          >
+                            <Route size={18} />
+                          </Link>
+                          <Link
+                            to={`/schedules/operations/${turma.id}`}
+                            className="p-2 text-slate-400 hover:text-[#f37021] hover:bg-orange-50 rounded-lg transition-colors"
+                            title="Gestão Operacional"
+                          >
+                            <Settings2 size={18} />
+                          </Link>
                           <button
                             onClick={() => handleOpenEditModal(turma)}
                             className="p-2 text-slate-400 hover:text-menu-turmas hover:bg-menu-turmas/10 rounded-lg transition-colors"
@@ -460,8 +475,8 @@ export const ClassGroups: React.FC = () => {
         icon={<Layers className="text-menu-turmas" size={24} />}
         tips={[
           "Toda turma precisa de uma Matriz Curricular (Grade) para ter disciplinas.",
+          "Use o ícone de trilha para planejar módulos e o ícone de engrenagem para gestão operacional.",
           "Fique atento às datas de início e término para a correta geração de aulas.",
-          'Após criar uma turma, vá até "Cronograma" para gerar a rotina de horários.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
