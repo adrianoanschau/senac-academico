@@ -174,9 +174,11 @@ exports.Prisma.SubjectScalarFieldEnum = {
 };
 
 exports.Prisma.CurriculumSubjectScalarFieldEnum = {
+  id: 'id',
   curriculumId: 'curriculumId',
   subjectId: 'subjectId',
-  module: 'module'
+  module: 'module',
+  dependsOnId: 'dependsOnId'
 };
 
 exports.Prisma.ClassGroupScalarFieldEnum = {

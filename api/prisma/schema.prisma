@@ -110,14 +110,20 @@ model Subject {
 }
 
 model CurriculumSubject {
+  id           String @id @default(uuid()) // Novo ID primário para o CurriculumSubject
   curriculumId String
   subjectId    String
   module       Int
 
-  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  // Relação de precedência auto-referenciada (Finish-to-Start)
+  dependsOnId String?
+  predecessor CurriculumSubject? @relation("PredecessorSuccessors", fields: [dependsOnId], references: [id], onDelete: SetNull)
+  successors  CurriculumSubject[] @relation("PredecessorSuccessors")
 
-  @@id([curriculumId, subjectId])
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade) // onDelete: Cascade para remover ao deletar o currículo
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict) // onDelete: Restrict para não deletar a disciplina se ainda estiver em uso
+
+  @@unique([curriculumId, subjectId]) // Garante que uma disciplina só pode ser associada a um currículo uma vez
   @@map("curriculum_subjects")
 }
 

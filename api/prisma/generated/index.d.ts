@@ -2018,6 +2018,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type CurriculumSubjectCountOutputType
+   */
+
+  export type CurriculumSubjectCountOutputType = {
+    successors: number
+  }
+
+  export type CurriculumSubjectCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    successors?: boolean | CurriculumSubjectCountOutputTypeCountSuccessorsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CurriculumSubjectCountOutputType without action
+   */
+  export type CurriculumSubjectCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumSubjectCountOutputType
+     */
+    select?: CurriculumSubjectCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CurriculumSubjectCountOutputType without action
+   */
+  export type CurriculumSubjectCountOutputTypeCountSuccessorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CurriculumSubjectWhereInput
+  }
+
+
+  /**
    * Count Type ClassGroupCountOutputType
    */
 
@@ -8793,21 +8824,27 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectMinAggregateOutputType = {
+    id: string | null
     curriculumId: string | null
     subjectId: string | null
     module: number | null
+    dependsOnId: string | null
   }
 
   export type CurriculumSubjectMaxAggregateOutputType = {
+    id: string | null
     curriculumId: string | null
     subjectId: string | null
     module: number | null
+    dependsOnId: string | null
   }
 
   export type CurriculumSubjectCountAggregateOutputType = {
+    id: number
     curriculumId: number
     subjectId: number
     module: number
+    dependsOnId: number
     _all: number
   }
 
@@ -8821,21 +8858,27 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectMinAggregateInputType = {
+    id?: true
     curriculumId?: true
     subjectId?: true
     module?: true
+    dependsOnId?: true
   }
 
   export type CurriculumSubjectMaxAggregateInputType = {
+    id?: true
     curriculumId?: true
     subjectId?: true
     module?: true
+    dependsOnId?: true
   }
 
   export type CurriculumSubjectCountAggregateInputType = {
+    id?: true
     curriculumId?: true
     subjectId?: true
     module?: true
+    dependsOnId?: true
     _all?: true
   }
 
@@ -8926,9 +8969,11 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectGroupByOutputType = {
+    id: string
     curriculumId: string
     subjectId: string
     module: number
+    dependsOnId: string | null
     _count: CurriculumSubjectCountAggregateOutputType | null
     _avg: CurriculumSubjectAvgAggregateOutputType | null
     _sum: CurriculumSubjectSumAggregateOutputType | null
@@ -8951,45 +8996,63 @@ export namespace Prisma {
 
 
   export type CurriculumSubjectSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     curriculumId?: boolean
     subjectId?: boolean
     module?: boolean
+    dependsOnId?: boolean
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
+    successors?: boolean | CurriculumSubject$successorsArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
+    _count?: boolean | CurriculumSubjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["curriculumSubject"]>
 
   export type CurriculumSubjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     curriculumId?: boolean
     subjectId?: boolean
     module?: boolean
+    dependsOnId?: boolean
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["curriculumSubject"]>
 
   export type CurriculumSubjectSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     curriculumId?: boolean
     subjectId?: boolean
     module?: boolean
+    dependsOnId?: boolean
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["curriculumSubject"]>
 
   export type CurriculumSubjectSelectScalar = {
+    id?: boolean
     curriculumId?: boolean
     subjectId?: boolean
     module?: boolean
+    dependsOnId?: boolean
   }
 
-  export type CurriculumSubjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"curriculumId" | "subjectId" | "module", ExtArgs["result"]["curriculumSubject"]>
+  export type CurriculumSubjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "curriculumId" | "subjectId" | "module" | "dependsOnId", ExtArgs["result"]["curriculumSubject"]>
   export type CurriculumSubjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
+    successors?: boolean | CurriculumSubject$successorsArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
+    _count?: boolean | CurriculumSubjectCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CurriculumSubjectIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
   }
   export type CurriculumSubjectIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    predecessor?: boolean | CurriculumSubject$predecessorArgs<ExtArgs>
     curriculum?: boolean | CurriculumDefaultArgs<ExtArgs>
     subject?: boolean | SubjectDefaultArgs<ExtArgs>
   }
@@ -8997,13 +9060,17 @@ export namespace Prisma {
   export type $CurriculumSubjectPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CurriculumSubject"
     objects: {
+      predecessor: Prisma.$CurriculumSubjectPayload<ExtArgs> | null
+      successors: Prisma.$CurriculumSubjectPayload<ExtArgs>[]
       curriculum: Prisma.$CurriculumPayload<ExtArgs>
       subject: Prisma.$SubjectPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
+      id: string
       curriculumId: string
       subjectId: string
       module: number
+      dependsOnId: string | null
     }, ExtArgs["result"]["curriculumSubject"]>
     composites: {}
   }
@@ -9087,8 +9154,8 @@ export namespace Prisma {
      * // Get first 10 CurriculumSubjects
      * const curriculumSubjects = await prisma.curriculumSubject.findMany({ take: 10 })
      * 
-     * // Only select the `curriculumId`
-     * const curriculumSubjectWithCurriculumIdOnly = await prisma.curriculumSubject.findMany({ select: { curriculumId: true } })
+     * // Only select the `id`
+     * const curriculumSubjectWithIdOnly = await prisma.curriculumSubject.findMany({ select: { id: true } })
      * 
      */
     findMany<T extends CurriculumSubjectFindManyArgs>(args?: SelectSubset<T, CurriculumSubjectFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumSubjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -9132,9 +9199,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Create many CurriculumSubjects and only return the `curriculumId`
-     * const curriculumSubjectWithCurriculumIdOnly = await prisma.curriculumSubject.createManyAndReturn({
-     *   select: { curriculumId: true },
+     * // Create many CurriculumSubjects and only return the `id`
+     * const curriculumSubjectWithIdOnly = await prisma.curriculumSubject.createManyAndReturn({
+     *   select: { id: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -9223,9 +9290,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more CurriculumSubjects and only return the `curriculumId`
-     * const curriculumSubjectWithCurriculumIdOnly = await prisma.curriculumSubject.updateManyAndReturn({
-     *   select: { curriculumId: true },
+     * // Update zero or more CurriculumSubjects and only return the `id`
+     * const curriculumSubjectWithIdOnly = await prisma.curriculumSubject.updateManyAndReturn({
+     *   select: { id: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -9398,6 +9465,8 @@ export namespace Prisma {
    */
   export interface Prisma__CurriculumSubjectClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    predecessor<T extends CurriculumSubject$predecessorArgs<ExtArgs> = {}>(args?: Subset<T, CurriculumSubject$predecessorArgs<ExtArgs>>): Prisma__CurriculumSubjectClient<$Result.GetResult<Prisma.$CurriculumSubjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    successors<T extends CurriculumSubject$successorsArgs<ExtArgs> = {}>(args?: Subset<T, CurriculumSubject$successorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumSubjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     curriculum<T extends CurriculumDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CurriculumDefaultArgs<ExtArgs>>): Prisma__CurriculumClient<$Result.GetResult<Prisma.$CurriculumPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     subject<T extends SubjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SubjectDefaultArgs<ExtArgs>>): Prisma__SubjectClient<$Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -9429,9 +9498,11 @@ export namespace Prisma {
    * Fields of the CurriculumSubject model
    */
   interface CurriculumSubjectFieldRefs {
+    readonly id: FieldRef<"CurriculumSubject", 'String'>
     readonly curriculumId: FieldRef<"CurriculumSubject", 'String'>
     readonly subjectId: FieldRef<"CurriculumSubject", 'String'>
     readonly module: FieldRef<"CurriculumSubject", 'Int'>
+    readonly dependsOnId: FieldRef<"CurriculumSubject", 'String'>
   }
     
 
@@ -9830,6 +9901,49 @@ export namespace Prisma {
      * Limit how many CurriculumSubjects to delete.
      */
     limit?: number
+  }
+
+  /**
+   * CurriculumSubject.predecessor
+   */
+  export type CurriculumSubject$predecessorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumSubject
+     */
+    select?: CurriculumSubjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumSubject
+     */
+    omit?: CurriculumSubjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumSubjectInclude<ExtArgs> | null
+    where?: CurriculumSubjectWhereInput
+  }
+
+  /**
+   * CurriculumSubject.successors
+   */
+  export type CurriculumSubject$successorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumSubject
+     */
+    select?: CurriculumSubjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumSubject
+     */
+    omit?: CurriculumSubjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumSubjectInclude<ExtArgs> | null
+    where?: CurriculumSubjectWhereInput
+    orderBy?: CurriculumSubjectOrderByWithRelationInput | CurriculumSubjectOrderByWithRelationInput[]
+    cursor?: CurriculumSubjectWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CurriculumSubjectScalarFieldEnum | CurriculumSubjectScalarFieldEnum[]
   }
 
   /**
@@ -14693,9 +14807,11 @@ export namespace Prisma {
 
 
   export const CurriculumSubjectScalarFieldEnum: {
+    id: 'id',
     curriculumId: 'curriculumId',
     subjectId: 'subjectId',
-    module: 'module'
+    module: 'module',
+    dependsOnId: 'dependsOnId'
   };
 
   export type CurriculumSubjectScalarFieldEnum = (typeof CurriculumSubjectScalarFieldEnum)[keyof typeof CurriculumSubjectScalarFieldEnum]
@@ -15281,22 +15397,31 @@ export namespace Prisma {
     AND?: CurriculumSubjectWhereInput | CurriculumSubjectWhereInput[]
     OR?: CurriculumSubjectWhereInput[]
     NOT?: CurriculumSubjectWhereInput | CurriculumSubjectWhereInput[]
+    id?: StringFilter<"CurriculumSubject"> | string
     curriculumId?: StringFilter<"CurriculumSubject"> | string
     subjectId?: StringFilter<"CurriculumSubject"> | string
     module?: IntFilter<"CurriculumSubject"> | number
+    dependsOnId?: StringNullableFilter<"CurriculumSubject"> | string | null
+    predecessor?: XOR<CurriculumSubjectNullableScalarRelationFilter, CurriculumSubjectWhereInput> | null
+    successors?: CurriculumSubjectListRelationFilter
     curriculum?: XOR<CurriculumScalarRelationFilter, CurriculumWhereInput>
     subject?: XOR<SubjectScalarRelationFilter, SubjectWhereInput>
   }
 
   export type CurriculumSubjectOrderByWithRelationInput = {
+    id?: SortOrder
     curriculumId?: SortOrder
     subjectId?: SortOrder
     module?: SortOrder
+    dependsOnId?: SortOrderInput | SortOrder
+    predecessor?: CurriculumSubjectOrderByWithRelationInput
+    successors?: CurriculumSubjectOrderByRelationAggregateInput
     curriculum?: CurriculumOrderByWithRelationInput
     subject?: SubjectOrderByWithRelationInput
   }
 
   export type CurriculumSubjectWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
     curriculumId_subjectId?: CurriculumSubjectCurriculumIdSubjectIdCompoundUniqueInput
     AND?: CurriculumSubjectWhereInput | CurriculumSubjectWhereInput[]
     OR?: CurriculumSubjectWhereInput[]
@@ -15304,14 +15429,19 @@ export namespace Prisma {
     curriculumId?: StringFilter<"CurriculumSubject"> | string
     subjectId?: StringFilter<"CurriculumSubject"> | string
     module?: IntFilter<"CurriculumSubject"> | number
+    dependsOnId?: StringNullableFilter<"CurriculumSubject"> | string | null
+    predecessor?: XOR<CurriculumSubjectNullableScalarRelationFilter, CurriculumSubjectWhereInput> | null
+    successors?: CurriculumSubjectListRelationFilter
     curriculum?: XOR<CurriculumScalarRelationFilter, CurriculumWhereInput>
     subject?: XOR<SubjectScalarRelationFilter, SubjectWhereInput>
-  }, "curriculumId_subjectId">
+  }, "id" | "curriculumId_subjectId">
 
   export type CurriculumSubjectOrderByWithAggregationInput = {
+    id?: SortOrder
     curriculumId?: SortOrder
     subjectId?: SortOrder
     module?: SortOrder
+    dependsOnId?: SortOrderInput | SortOrder
     _count?: CurriculumSubjectCountOrderByAggregateInput
     _avg?: CurriculumSubjectAvgOrderByAggregateInput
     _max?: CurriculumSubjectMaxOrderByAggregateInput
@@ -15323,9 +15453,11 @@ export namespace Prisma {
     AND?: CurriculumSubjectScalarWhereWithAggregatesInput | CurriculumSubjectScalarWhereWithAggregatesInput[]
     OR?: CurriculumSubjectScalarWhereWithAggregatesInput[]
     NOT?: CurriculumSubjectScalarWhereWithAggregatesInput | CurriculumSubjectScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CurriculumSubject"> | string
     curriculumId?: StringWithAggregatesFilter<"CurriculumSubject"> | string
     subjectId?: StringWithAggregatesFilter<"CurriculumSubject"> | string
     module?: IntWithAggregatesFilter<"CurriculumSubject"> | number
+    dependsOnId?: StringNullableWithAggregatesFilter<"CurriculumSubject"> | string | null
   }
 
   export type ClassGroupWhereInput = {
@@ -16100,43 +16232,60 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCreateInput = {
+    id?: string
     module: number
+    predecessor?: CurriculumSubjectCreateNestedOneWithoutSuccessorsInput
+    successors?: CurriculumSubjectCreateNestedManyWithoutPredecessorInput
     curriculum: CurriculumCreateNestedOneWithoutSubjectsInput
     subject: SubjectCreateNestedOneWithoutCurriculumsInput
   }
 
   export type CurriculumSubjectUncheckedCreateInput = {
+    id?: string
     curriculumId: string
     subjectId: string
     module: number
+    dependsOnId?: string | null
+    successors?: CurriculumSubjectUncheckedCreateNestedManyWithoutPredecessorInput
   }
 
   export type CurriculumSubjectUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    predecessor?: CurriculumSubjectUpdateOneWithoutSuccessorsNestedInput
+    successors?: CurriculumSubjectUpdateManyWithoutPredecessorNestedInput
     curriculum?: CurriculumUpdateOneRequiredWithoutSubjectsNestedInput
     subject?: SubjectUpdateOneRequiredWithoutCurriculumsNestedInput
   }
 
   export type CurriculumSubjectUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
     curriculumId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
+    successors?: CurriculumSubjectUncheckedUpdateManyWithoutPredecessorNestedInput
   }
 
   export type CurriculumSubjectCreateManyInput = {
+    id?: string
     curriculumId: string
     subjectId: string
     module: number
+    dependsOnId?: string | null
   }
 
   export type CurriculumSubjectUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
   }
 
   export type CurriculumSubjectUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
     curriculumId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ClassGroupCreateInput = {
@@ -16915,6 +17064,11 @@ export namespace Prisma {
     hours?: SortOrder
   }
 
+  export type CurriculumSubjectNullableScalarRelationFilter = {
+    is?: CurriculumSubjectWhereInput | null
+    isNot?: CurriculumSubjectWhereInput | null
+  }
+
   export type CurriculumScalarRelationFilter = {
     is?: CurriculumWhereInput
     isNot?: CurriculumWhereInput
@@ -16931,9 +17085,11 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCountOrderByAggregateInput = {
+    id?: SortOrder
     curriculumId?: SortOrder
     subjectId?: SortOrder
     module?: SortOrder
+    dependsOnId?: SortOrder
   }
 
   export type CurriculumSubjectAvgOrderByAggregateInput = {
@@ -16941,15 +17097,19 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectMaxOrderByAggregateInput = {
+    id?: SortOrder
     curriculumId?: SortOrder
     subjectId?: SortOrder
     module?: SortOrder
+    dependsOnId?: SortOrder
   }
 
   export type CurriculumSubjectMinOrderByAggregateInput = {
+    id?: SortOrder
     curriculumId?: SortOrder
     subjectId?: SortOrder
     module?: SortOrder
+    dependsOnId?: SortOrder
   }
 
   export type CurriculumSubjectSumOrderByAggregateInput = {
@@ -17674,6 +17834,19 @@ export namespace Prisma {
     deleteMany?: ScheduleRuleScalarWhereInput | ScheduleRuleScalarWhereInput[]
   }
 
+  export type CurriculumSubjectCreateNestedOneWithoutSuccessorsInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutSuccessorsInput, CurriculumSubjectUncheckedCreateWithoutSuccessorsInput>
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutSuccessorsInput
+    connect?: CurriculumSubjectWhereUniqueInput
+  }
+
+  export type CurriculumSubjectCreateNestedManyWithoutPredecessorInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput> | CurriculumSubjectCreateWithoutPredecessorInput[] | CurriculumSubjectUncheckedCreateWithoutPredecessorInput[]
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutPredecessorInput | CurriculumSubjectCreateOrConnectWithoutPredecessorInput[]
+    createMany?: CurriculumSubjectCreateManyPredecessorInputEnvelope
+    connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+  }
+
   export type CurriculumCreateNestedOneWithoutSubjectsInput = {
     create?: XOR<CurriculumCreateWithoutSubjectsInput, CurriculumUncheckedCreateWithoutSubjectsInput>
     connectOrCreate?: CurriculumCreateOrConnectWithoutSubjectsInput
@@ -17684,6 +17857,37 @@ export namespace Prisma {
     create?: XOR<SubjectCreateWithoutCurriculumsInput, SubjectUncheckedCreateWithoutCurriculumsInput>
     connectOrCreate?: SubjectCreateOrConnectWithoutCurriculumsInput
     connect?: SubjectWhereUniqueInput
+  }
+
+  export type CurriculumSubjectUncheckedCreateNestedManyWithoutPredecessorInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput> | CurriculumSubjectCreateWithoutPredecessorInput[] | CurriculumSubjectUncheckedCreateWithoutPredecessorInput[]
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutPredecessorInput | CurriculumSubjectCreateOrConnectWithoutPredecessorInput[]
+    createMany?: CurriculumSubjectCreateManyPredecessorInputEnvelope
+    connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+  }
+
+  export type CurriculumSubjectUpdateOneWithoutSuccessorsNestedInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutSuccessorsInput, CurriculumSubjectUncheckedCreateWithoutSuccessorsInput>
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutSuccessorsInput
+    upsert?: CurriculumSubjectUpsertWithoutSuccessorsInput
+    disconnect?: CurriculumSubjectWhereInput | boolean
+    delete?: CurriculumSubjectWhereInput | boolean
+    connect?: CurriculumSubjectWhereUniqueInput
+    update?: XOR<XOR<CurriculumSubjectUpdateToOneWithWhereWithoutSuccessorsInput, CurriculumSubjectUpdateWithoutSuccessorsInput>, CurriculumSubjectUncheckedUpdateWithoutSuccessorsInput>
+  }
+
+  export type CurriculumSubjectUpdateManyWithoutPredecessorNestedInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput> | CurriculumSubjectCreateWithoutPredecessorInput[] | CurriculumSubjectUncheckedCreateWithoutPredecessorInput[]
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutPredecessorInput | CurriculumSubjectCreateOrConnectWithoutPredecessorInput[]
+    upsert?: CurriculumSubjectUpsertWithWhereUniqueWithoutPredecessorInput | CurriculumSubjectUpsertWithWhereUniqueWithoutPredecessorInput[]
+    createMany?: CurriculumSubjectCreateManyPredecessorInputEnvelope
+    set?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    disconnect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    delete?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    update?: CurriculumSubjectUpdateWithWhereUniqueWithoutPredecessorInput | CurriculumSubjectUpdateWithWhereUniqueWithoutPredecessorInput[]
+    updateMany?: CurriculumSubjectUpdateManyWithWhereWithoutPredecessorInput | CurriculumSubjectUpdateManyWithWhereWithoutPredecessorInput[]
+    deleteMany?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
   }
 
   export type CurriculumUpdateOneRequiredWithoutSubjectsNestedInput = {
@@ -17700,6 +17904,20 @@ export namespace Prisma {
     upsert?: SubjectUpsertWithoutCurriculumsInput
     connect?: SubjectWhereUniqueInput
     update?: XOR<XOR<SubjectUpdateToOneWithWhereWithoutCurriculumsInput, SubjectUpdateWithoutCurriculumsInput>, SubjectUncheckedUpdateWithoutCurriculumsInput>
+  }
+
+  export type CurriculumSubjectUncheckedUpdateManyWithoutPredecessorNestedInput = {
+    create?: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput> | CurriculumSubjectCreateWithoutPredecessorInput[] | CurriculumSubjectUncheckedCreateWithoutPredecessorInput[]
+    connectOrCreate?: CurriculumSubjectCreateOrConnectWithoutPredecessorInput | CurriculumSubjectCreateOrConnectWithoutPredecessorInput[]
+    upsert?: CurriculumSubjectUpsertWithWhereUniqueWithoutPredecessorInput | CurriculumSubjectUpsertWithWhereUniqueWithoutPredecessorInput[]
+    createMany?: CurriculumSubjectCreateManyPredecessorInputEnvelope
+    set?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    disconnect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    delete?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    connect?: CurriculumSubjectWhereUniqueInput | CurriculumSubjectWhereUniqueInput[]
+    update?: CurriculumSubjectUpdateWithWhereUniqueWithoutPredecessorInput | CurriculumSubjectUpdateWithWhereUniqueWithoutPredecessorInput[]
+    updateMany?: CurriculumSubjectUpdateManyWithWhereWithoutPredecessorInput | CurriculumSubjectUpdateManyWithWhereWithoutPredecessorInput[]
+    deleteMany?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
   }
 
   export type CurriculumCreateNestedOneWithoutClassGroupsInput = {
@@ -18689,13 +18907,19 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCreateWithoutCurriculumInput = {
+    id?: string
     module: number
+    predecessor?: CurriculumSubjectCreateNestedOneWithoutSuccessorsInput
+    successors?: CurriculumSubjectCreateNestedManyWithoutPredecessorInput
     subject: SubjectCreateNestedOneWithoutCurriculumsInput
   }
 
   export type CurriculumSubjectUncheckedCreateWithoutCurriculumInput = {
+    id?: string
     subjectId: string
     module: number
+    dependsOnId?: string | null
+    successors?: CurriculumSubjectUncheckedCreateNestedManyWithoutPredecessorInput
   }
 
   export type CurriculumSubjectCreateOrConnectWithoutCurriculumInput = {
@@ -18789,9 +19013,11 @@ export namespace Prisma {
     AND?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
     OR?: CurriculumSubjectScalarWhereInput[]
     NOT?: CurriculumSubjectScalarWhereInput | CurriculumSubjectScalarWhereInput[]
+    id?: StringFilter<"CurriculumSubject"> | string
     curriculumId?: StringFilter<"CurriculumSubject"> | string
     subjectId?: StringFilter<"CurriculumSubject"> | string
     module?: IntFilter<"CurriculumSubject"> | number
+    dependsOnId?: StringNullableFilter<"CurriculumSubject"> | string | null
   }
 
   export type ClassGroupUpsertWithWhereUniqueWithoutCurriculumInput = {
@@ -18825,13 +19051,19 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCreateWithoutSubjectInput = {
+    id?: string
     module: number
+    predecessor?: CurriculumSubjectCreateNestedOneWithoutSuccessorsInput
+    successors?: CurriculumSubjectCreateNestedManyWithoutPredecessorInput
     curriculum: CurriculumCreateNestedOneWithoutSubjectsInput
   }
 
   export type CurriculumSubjectUncheckedCreateWithoutSubjectInput = {
+    id?: string
     curriculumId: string
     module: number
+    dependsOnId?: string | null
+    successors?: CurriculumSubjectUncheckedCreateNestedManyWithoutPredecessorInput
   }
 
   export type CurriculumSubjectCreateOrConnectWithoutSubjectInput = {
@@ -18976,6 +19208,53 @@ export namespace Prisma {
     data: XOR<ScheduleRuleUpdateManyMutationInput, ScheduleRuleUncheckedUpdateManyWithoutSubjectInput>
   }
 
+  export type CurriculumSubjectCreateWithoutSuccessorsInput = {
+    id?: string
+    module: number
+    predecessor?: CurriculumSubjectCreateNestedOneWithoutSuccessorsInput
+    curriculum: CurriculumCreateNestedOneWithoutSubjectsInput
+    subject: SubjectCreateNestedOneWithoutCurriculumsInput
+  }
+
+  export type CurriculumSubjectUncheckedCreateWithoutSuccessorsInput = {
+    id?: string
+    curriculumId: string
+    subjectId: string
+    module: number
+    dependsOnId?: string | null
+  }
+
+  export type CurriculumSubjectCreateOrConnectWithoutSuccessorsInput = {
+    where: CurriculumSubjectWhereUniqueInput
+    create: XOR<CurriculumSubjectCreateWithoutSuccessorsInput, CurriculumSubjectUncheckedCreateWithoutSuccessorsInput>
+  }
+
+  export type CurriculumSubjectCreateWithoutPredecessorInput = {
+    id?: string
+    module: number
+    successors?: CurriculumSubjectCreateNestedManyWithoutPredecessorInput
+    curriculum: CurriculumCreateNestedOneWithoutSubjectsInput
+    subject: SubjectCreateNestedOneWithoutCurriculumsInput
+  }
+
+  export type CurriculumSubjectUncheckedCreateWithoutPredecessorInput = {
+    id?: string
+    curriculumId: string
+    subjectId: string
+    module: number
+    successors?: CurriculumSubjectUncheckedCreateNestedManyWithoutPredecessorInput
+  }
+
+  export type CurriculumSubjectCreateOrConnectWithoutPredecessorInput = {
+    where: CurriculumSubjectWhereUniqueInput
+    create: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput>
+  }
+
+  export type CurriculumSubjectCreateManyPredecessorInputEnvelope = {
+    data: CurriculumSubjectCreateManyPredecessorInput | CurriculumSubjectCreateManyPredecessorInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CurriculumCreateWithoutSubjectsInput = {
     id?: string
     name: string
@@ -19026,6 +19305,49 @@ export namespace Prisma {
   export type SubjectCreateOrConnectWithoutCurriculumsInput = {
     where: SubjectWhereUniqueInput
     create: XOR<SubjectCreateWithoutCurriculumsInput, SubjectUncheckedCreateWithoutCurriculumsInput>
+  }
+
+  export type CurriculumSubjectUpsertWithoutSuccessorsInput = {
+    update: XOR<CurriculumSubjectUpdateWithoutSuccessorsInput, CurriculumSubjectUncheckedUpdateWithoutSuccessorsInput>
+    create: XOR<CurriculumSubjectCreateWithoutSuccessorsInput, CurriculumSubjectUncheckedCreateWithoutSuccessorsInput>
+    where?: CurriculumSubjectWhereInput
+  }
+
+  export type CurriculumSubjectUpdateToOneWithWhereWithoutSuccessorsInput = {
+    where?: CurriculumSubjectWhereInput
+    data: XOR<CurriculumSubjectUpdateWithoutSuccessorsInput, CurriculumSubjectUncheckedUpdateWithoutSuccessorsInput>
+  }
+
+  export type CurriculumSubjectUpdateWithoutSuccessorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    module?: IntFieldUpdateOperationsInput | number
+    predecessor?: CurriculumSubjectUpdateOneWithoutSuccessorsNestedInput
+    curriculum?: CurriculumUpdateOneRequiredWithoutSubjectsNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutCurriculumsNestedInput
+  }
+
+  export type CurriculumSubjectUncheckedUpdateWithoutSuccessorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    curriculumId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CurriculumSubjectUpsertWithWhereUniqueWithoutPredecessorInput = {
+    where: CurriculumSubjectWhereUniqueInput
+    update: XOR<CurriculumSubjectUpdateWithoutPredecessorInput, CurriculumSubjectUncheckedUpdateWithoutPredecessorInput>
+    create: XOR<CurriculumSubjectCreateWithoutPredecessorInput, CurriculumSubjectUncheckedCreateWithoutPredecessorInput>
+  }
+
+  export type CurriculumSubjectUpdateWithWhereUniqueWithoutPredecessorInput = {
+    where: CurriculumSubjectWhereUniqueInput
+    data: XOR<CurriculumSubjectUpdateWithoutPredecessorInput, CurriculumSubjectUncheckedUpdateWithoutPredecessorInput>
+  }
+
+  export type CurriculumSubjectUpdateManyWithWhereWithoutPredecessorInput = {
+    where: CurriculumSubjectScalarWhereInput
+    data: XOR<CurriculumSubjectUpdateManyMutationInput, CurriculumSubjectUncheckedUpdateManyWithoutPredecessorInput>
   }
 
   export type CurriculumUpsertWithoutSubjectsInput = {
@@ -20467,8 +20789,10 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCreateManyCurriculumInput = {
+    id?: string
     subjectId: string
     module: number
+    dependsOnId?: string | null
   }
 
   export type ClassGroupCreateManyCurriculumInput = {
@@ -20482,18 +20806,26 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectUpdateWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    predecessor?: CurriculumSubjectUpdateOneWithoutSuccessorsNestedInput
+    successors?: CurriculumSubjectUpdateManyWithoutPredecessorNestedInput
     subject?: SubjectUpdateOneRequiredWithoutCurriculumsNestedInput
   }
 
   export type CurriculumSubjectUncheckedUpdateWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
+    successors?: CurriculumSubjectUncheckedUpdateManyWithoutPredecessorNestedInput
   }
 
   export type CurriculumSubjectUncheckedUpdateManyWithoutCurriculumInput = {
+    id?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ClassGroupUpdateWithoutCurriculumInput = {
@@ -20531,8 +20863,10 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectCreateManySubjectInput = {
+    id?: string
     curriculumId: string
     module: number
+    dependsOnId?: string | null
   }
 
   export type ScheduleCreateManySubjectInput = {
@@ -20565,18 +20899,26 @@ export namespace Prisma {
   }
 
   export type CurriculumSubjectUpdateWithoutSubjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    predecessor?: CurriculumSubjectUpdateOneWithoutSuccessorsNestedInput
+    successors?: CurriculumSubjectUpdateManyWithoutPredecessorNestedInput
     curriculum?: CurriculumUpdateOneRequiredWithoutSubjectsNestedInput
   }
 
   export type CurriculumSubjectUncheckedUpdateWithoutSubjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
     curriculumId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
+    successors?: CurriculumSubjectUncheckedUpdateManyWithoutPredecessorNestedInput
   }
 
   export type CurriculumSubjectUncheckedUpdateManyWithoutSubjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
     curriculumId?: StringFieldUpdateOperationsInput | string
     module?: IntFieldUpdateOperationsInput | number
+    dependsOnId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ScheduleUpdateWithoutSubjectInput = {
@@ -20670,6 +21012,36 @@ export namespace Prisma {
     dependsOnRuleId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumSubjectCreateManyPredecessorInput = {
+    id?: string
+    curriculumId: string
+    subjectId: string
+    module: number
+  }
+
+  export type CurriculumSubjectUpdateWithoutPredecessorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    module?: IntFieldUpdateOperationsInput | number
+    successors?: CurriculumSubjectUpdateManyWithoutPredecessorNestedInput
+    curriculum?: CurriculumUpdateOneRequiredWithoutSubjectsNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutCurriculumsNestedInput
+  }
+
+  export type CurriculumSubjectUncheckedUpdateWithoutPredecessorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    curriculumId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    module?: IntFieldUpdateOperationsInput | number
+    successors?: CurriculumSubjectUncheckedUpdateManyWithoutPredecessorNestedInput
+  }
+
+  export type CurriculumSubjectUncheckedUpdateManyWithoutPredecessorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    curriculumId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    module?: IntFieldUpdateOperationsInput | number
   }
 
   export type ScheduleCreateManyClassGroupInput = {
