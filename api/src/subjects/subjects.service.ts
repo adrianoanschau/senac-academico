@@ -37,6 +37,21 @@ export class SubjectsService {
   async findAll(query?: FindSubjectsQueryDto) {
     const where: Prisma.SubjectWhereInput = {};
 
+    if (query?.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { code: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (query?.excludeCurriculumId) {
+      where.NOT = {
+        curriculums: {
+          some: { curriculumId: query.excludeCurriculumId },
+        },
+      };
+    }
+
     // Se uma turma foi informada, a busca de disciplinas é restrita à grade dela.
     if (query?.classGroupId) {
       const classGroup = await this.prisma.classGroup.findUnique({
@@ -67,6 +82,18 @@ export class SubjectsService {
     return this.prisma.subject.findMany({
       where,
       orderBy: [{ code: 'asc' }, { name: 'asc' }],
+      ...(query?.includeCurriculums && {
+        include: {
+          curriculums: {
+            include: {
+              curriculum: {
+                include: { course: true },
+              },
+            },
+            orderBy: { module: 'asc' },
+          },
+        },
+      }),
     });
   }
 

@@ -35,7 +35,8 @@ export class CreateCurriculumDto {
   courseId: string;
 
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CurriculumSubjectDto)
-  subjects: CurriculumSubjectDto[];
+  subjects?: CurriculumSubjectDto[];
 }

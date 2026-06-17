@@ -10,6 +10,7 @@ import {
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
+import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 
 @Controller('curriculums')
 export class CurriculumsController {
@@ -46,5 +47,23 @@ export class CurriculumsController {
   async remove(@Param('id') id: string) {
     await this.curriculumsService.remove(id);
     return { data: { message: 'Curriculum removed successfully' } };
+  }
+
+  @Post(':id/subjects')
+  async addSubject(
+    @Param('id') id: string,
+    @Body() dto: AddSubjectToCurriculumDto,
+  ) {
+    const data = await this.curriculumsService.addSubject(id, dto);
+    return { data };
+  }
+
+  @Delete(':id/subjects/:curriculumSubjectId')
+  async removeSubject(
+    @Param('id') id: string,
+    @Param('curriculumSubjectId') curriculumSubjectId: string,
+  ) {
+    await this.curriculumsService.removeSubject(id, curriculumSubjectId);
+    return { data: { message: 'Subject link removed successfully' } };
   }
 }

@@ -51,6 +51,11 @@ const ClassGroups = lazy(() =>
 const Curriculums = lazy(() =>
   import("../pages/Curriculums").then((m) => ({ default: m.Curriculums })),
 );
+const CurriculumDetail = lazy(() =>
+  import("../pages/CurriculumDetail").then((m) => ({
+    default: m.CurriculumDetail,
+  })),
+);
 const Schedule = lazy(() =>
   import("../pages/Schedule").then((m) => ({ default: m.Schedule })),
 );
@@ -103,6 +108,7 @@ export const AppRoutes: React.FC = () => {
                     element={<ScheduleOperations />}
                   />
                   <Route path="curriculums" element={<Curriculums />} />
+                  <Route path="curriculums/:id" element={<CurriculumDetail />} />
                   <Route path="enrollments" element={<Placeholder />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="professors" element={<Professors />} />

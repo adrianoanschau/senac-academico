@@ -32,7 +32,7 @@ const NAV_ITEMS: NavItemProps[] = [
   { to: '/schedule', label: 'Cronograma', icon: CalendarClock, activeClass: 'bg-senac-blue text-white shadow-md shadow-senac-blue/30', inactiveClass: 'text-slate-300 hover:text-senac-blue hover:bg-senac-blue/10' },
   { to: '/class-groups', label: 'Turmas', icon: Layers, activeClass: 'bg-menu-turmas text-white shadow-md shadow-menu-turmas/30', inactiveClass: 'text-slate-300 hover:text-menu-turmas hover:bg-menu-turmas/10' },
   { to: '/courses', label: 'Cursos', icon: GraduationCap, activeClass: 'bg-menu-cursos text-white shadow-md shadow-menu-cursos/30', inactiveClass: 'text-slate-300 hover:text-menu-cursos hover:bg-menu-cursos/10' },
-  { to: '/subjects', label: 'Unidades Curriculares', icon: BookOpen, activeClass: 'bg-menu-uc text-white shadow-md shadow-menu-uc/30', inactiveClass: 'text-slate-300 hover:text-menu-uc hover:bg-menu-uc/10' },
+  { to: '/subjects', label: 'Dicionário de UCs', icon: BookOpen, activeClass: 'bg-menu-uc text-white shadow-md shadow-menu-uc/30', inactiveClass: 'text-slate-300 hover:text-menu-uc hover:bg-menu-uc/10' },
   { to: '/curriculums', label: 'Matriz Curricular', icon: Library, activeClass: 'bg-menu-matriz text-white shadow-md shadow-menu-matriz/30', inactiveClass: 'text-slate-300 hover:text-menu-matriz hover:bg-menu-matriz/10' },
   { to: '/professors', label: 'Professores', icon: Users, activeClass: 'bg-menu-professores text-white shadow-md shadow-menu-professores/30', inactiveClass: 'text-slate-300 hover:text-menu-professores hover:bg-menu-professores/10' },
   { to: '/rooms', label: 'Salas e Ambientes', icon: MapPin, activeClass: 'bg-menu-salas text-white shadow-md shadow-menu-salas/30', inactiveClass: 'text-slate-300 hover:text-menu-salas hover:bg-menu-salas/10' },

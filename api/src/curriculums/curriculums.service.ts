@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
+import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 
 @Injectable()
 export class CurriculumsService {
@@ -24,7 +30,7 @@ export class CurriculumsService {
         active,
         courseId,
         subjects: {
-          create: subjects.map((sub) => ({
+          create: (subjects ?? []).map((sub) => ({
             subjectId: sub.subjectId,
             module: sub.module,
           })),
@@ -107,6 +113,100 @@ export class CurriculumsService {
     await this.findOne(id);
     return this.prisma.curriculum.delete({
       where: { id },
+    });
+  }
+
+  async addSubject(curriculumId: string, dto: AddSubjectToCurriculumDto) {
+    const { subjectId, module, createSubject } = dto;
+
+    if (!subjectId && !createSubject) {
+      throw new BadRequestException(
+        'Informe subjectId ou createSubject para adicionar a disciplina.',
+      );
+    }
+    if (subjectId && createSubject) {
+      throw new BadRequestException(
+        'Informe apenas subjectId ou createSubject, não ambos.',
+      );
+    }
+
+    await this.findOne(curriculumId);
+
+    return this.prisma.$transaction(async (tx) => {
+      let resolvedSubjectId = subjectId;
+
+      if (createSubject) {
+        const existing = await tx.subject.findUnique({
+          where: {
+            code_name: {
+              code: createSubject.code,
+              name: createSubject.name,
+            },
+          },
+        });
+
+        if (existing) {
+          throw new ConflictException(
+            `Já existe uma disciplina cadastrada com o código ${createSubject.code} e nome ${createSubject.name}`,
+          );
+        }
+
+        const created = await tx.subject.create({ data: createSubject });
+        resolvedSubjectId = created.id;
+      } else {
+        const subject = await tx.subject.findUnique({
+          where: { id: resolvedSubjectId },
+        });
+        if (!subject) {
+          throw new NotFoundException(
+            `Disciplina com ID ${resolvedSubjectId} não encontrada`,
+          );
+        }
+      }
+
+      const existingLink = await tx.curriculumSubject.findUnique({
+        where: {
+          curriculumId_subjectId: {
+            curriculumId,
+            subjectId: resolvedSubjectId!,
+          },
+        },
+      });
+
+      if (existingLink) {
+        throw new ConflictException(
+          'Esta disciplina já está vinculada a esta grade.',
+        );
+      }
+
+      return tx.curriculumSubject.create({
+        data: {
+          curriculumId,
+          subjectId: resolvedSubjectId!,
+          module,
+        },
+        include: {
+          subject: true,
+        },
+      });
+    });
+  }
+
+  async removeSubject(curriculumId: string, curriculumSubjectId: string) {
+    await this.findOne(curriculumId);
+
+    const link = await this.prisma.curriculumSubject.findFirst({
+      where: { id: curriculumSubjectId, curriculumId },
+    });
+
+    if (!link) {
+      throw new NotFoundException(
+        `Vínculo de disciplina com ID ${curriculumSubjectId} não encontrado nesta grade.`,
+      );
+    }
+
+    return this.prisma.curriculumSubject.delete({
+      where: { id: curriculumSubjectId },
     });
   }
 }
