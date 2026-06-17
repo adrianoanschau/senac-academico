@@ -191,12 +191,15 @@ export default function ScheduleCalendar({
 
           return {
             id: String(schedule.id),
-            title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"} - ${schedule.classGroup?.code || "N/D"}`,
+            title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"}`,
             start: schedule.startTime,
             end: schedule.endTime,
             extendedProps: {
               professor: schedule.professor?.name || "N/D",
               room: schedule.room?.name || "N/D",
+              classGroup: schedule.classGroup?.code || "N/D",
+              subjectCode: schedule.subject?.code || "N/D",
+              subjectName: schedule.subject?.name || "N/D",
               status: schedule.status,
               cancelReason: schedule.cancelReason,
             },
@@ -339,25 +342,44 @@ export default function ScheduleCalendar({
             const isCancelled = status === "CANCELLED";
             const isCompleted = status === "COMPLETED";
 
-            const tooltipTitle = isCancelled
-              ? `Motivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || "Não informado"}`
-              : undefined;
+            const tooltipTitle = [
+              `Disciplina: ${eventInfo.event.extendedProps.subjectCode} - ${eventInfo.event.extendedProps.subjectName}`,
+              `Turma: ${eventInfo.event.extendedProps.classGroup}`,
+              `Professor(a): ${eventInfo.event.extendedProps.professor}`,
+              `Sala: ${eventInfo.event.extendedProps.room}`,
+              isCancelled
+                ? `\nMotivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || "Não informado"}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n");
 
             const baseClasses = isCancelled ? "line-through" : "";
 
             if (eventInfo.view.type === "dayGridMonth") {
               return (
                 <div
-                  className={`px-1 overflow-hidden whitespace-nowrap text-xs ${baseClasses}`}
+                  className={`px-1 py-0.5 overflow-hidden text-xs flex flex-col gap-0.5 ${baseClasses}`}
                   title={tooltipTitle}
                 >
-                  <b>{eventInfo.timeText}</b>
-                  <span className="ml-1">
-                    {eventInfo.event.title.split(" - ")[0]}
-                  </span>
-                  {isCompleted && (
-                    <Check size={12} className="inline ml-1 opacity-80" />
-                  )}
+                  <div className="font-bold flex items-start justify-between gap-1 leading-tight">
+                    <span className="truncate">
+                      {eventInfo.event.extendedProps.subjectCode} -{" "}
+                      {eventInfo.event.extendedProps.subjectName}
+                    </span>
+                    {isCompleted && (
+                      <Check size={12} className="shrink-0 opacity-80 mt-0.5" />
+                    )}
+                  </div>
+                  <div className="opacity-90 truncate font-medium">
+                    Turma: {eventInfo.event.extendedProps.classGroup}
+                  </div>
+                  <div className="opacity-90 truncate">
+                    Prof: {eventInfo.event.extendedProps.professor}
+                  </div>
+                  <div className="opacity-90 truncate">
+                    Sala: {eventInfo.event.extendedProps.room}
+                  </div>
                 </div>
               );
             }
@@ -367,10 +389,18 @@ export default function ScheduleCalendar({
                 title={tooltipTitle}
               >
                 <div className="font-bold flex items-start justify-between gap-1">
-                  <span className="truncate">{eventInfo.event.title}</span>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="opacity-80 text-[10px] mb-0.5 font-semibold">
+                      {eventInfo.timeText}
+                    </span>
+                    <span className="truncate">{eventInfo.event.title}</span>
+                  </div>
                   {isCompleted && (
-                    <Check size={14} className="shrink-0 opacity-80" />
+                    <Check size={14} className="shrink-0 opacity-80 mt-1" />
                   )}
+                </div>
+                <div className="opacity-90 truncate font-medium mt-0.5">
+                  Turma: {eventInfo.event.extendedProps.classGroup}
                 </div>
                 <div className="opacity-90 italic truncate mt-auto">
                   {eventInfo.event.extendedProps.professor}
