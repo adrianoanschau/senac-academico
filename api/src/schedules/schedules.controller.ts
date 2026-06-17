@@ -16,12 +16,17 @@ import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { PlanModuleDto } from './dto/plan-module.dto';
+import { GanttPlannerService } from './gantt-planner.service';
+import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
+import { GanttPublishDto } from './dto/gantt-publish.dto';
+import { GanttRecalculateDto } from './dto/gantt-recalculate.dto';
 
 @Controller('schedules')
 export class SchedulesController {
   constructor(
     private readonly schedulesService: SchedulesService,
     private readonly moduleOrchestratorService: ModuleOrchestratorService,
+    private readonly ganttPlannerService: GanttPlannerService,
   ) {}
 
   @Post()
@@ -84,6 +89,24 @@ export class SchedulesController {
   async planModule(@Body() planModuleDto: PlanModuleDto) {
     const data =
       await this.moduleOrchestratorService.planModuleTracks(planModuleDto);
+    return { data };
+  }
+
+  @Post('gantt/blueprint')
+  async ganttBlueprint(@Body() dto: GanttBlueprintDto) {
+    const data = await this.ganttPlannerService.buildBlueprint(dto);
+    return { data };
+  }
+
+  @Post('gantt/recalculate')
+  async ganttRecalculate(@Body() dto: GanttRecalculateDto) {
+    const data = await this.ganttPlannerService.recalculate(dto);
+    return { data };
+  }
+
+  @Post('gantt/publish')
+  async ganttPublish(@Body() dto: GanttPublishDto) {
+    const data = await this.ganttPlannerService.publishBlueprint(dto);
     return { data };
   }
 

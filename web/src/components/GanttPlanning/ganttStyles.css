@@ -1,0 +1,47 @@
+.gantt-planning-wrapper {
+  min-height: 560px;
+}
+
+.gantt-planning-wrapper .gantt-container,
+.gantt-planning-wrapper ._CZjuD {
+  font-family: inherit;
+  min-width: 100%;
+}
+
+/* Coluna de disciplinas: mais larga e com quebra de linha */
+.gantt-planning-wrapper ._3lLk3 {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  line-height: 1.35;
+  padding: 6px 10px !important;
+  word-break: break-word;
+}
+
+.gantt-planning-wrapper ._34SS0 {
+  height: auto !important;
+  min-height: 52px;
+}
+
+/* Barra de rolagem vertical mais visível */
+.gantt-planning-wrapper ._1eT-t {
+  width: 14px !important;
+}
+
+.gantt-planning-wrapper ._1eT-t::-webkit-scrollbar {
+  width: 10px;
+}
+
+.gantt-planning-wrapper ._2k9Ys {
+  height: 14px !important;
+}
+
+.gantt-draft-bar .bar {
+  opacity: 0.55 !important;
+  stroke-dasharray: 4 2;
+}
+
+.gantt-conflict-bar .bar {
+  stroke: #ef4444 !important;
+  stroke-width: 2px;
+}
