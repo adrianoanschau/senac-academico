@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { findOrThrow } from '@/common/entity.utils';
 
 @Injectable()
 export class ScheduleRulesService {
@@ -32,12 +33,9 @@ export class ScheduleRulesService {
       },
     });
 
-    if (!rule) {
-      throw new NotFoundException(
-        `Regra de agendamento com ID ${id} não encontrada.`,
-      );
-    }
-
-    return rule;
+    return findOrThrow(
+      rule,
+      `Regra de agendamento com ID ${id} não encontrada.`,
+    );
   }
 }
