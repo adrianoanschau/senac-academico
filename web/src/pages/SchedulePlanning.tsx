@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -41,6 +41,23 @@ export const SchedulePlanning: React.FC = () => {
     false,
   );
 
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsFullscreen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isFullscreen, setIsFullscreen]);
+
   const gantt = useGanttBlueprint(classGroupId ?? '');
 
   if (!classGroupId) {
@@ -54,32 +71,62 @@ export const SchedulePlanning: React.FC = () => {
 
   const plannerBody = classGroup ? (
     <>
-      <div
-        className={`px-6 pt-6 pb-4 border-b border-slate-100 ${isFullscreen ? 'shrink-0' : ''}`}
-      >
-        <div className="flex justify-between items-start gap-4">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-              Turma
-            </p>
-            <p className="text-xl font-bold text-slate-800">
+      {isFullscreen ? (
+        <div className="shrink-0 flex items-center justify-between gap-4 px-4 py-3 border-b border-slate-200 bg-white">
+          <div className="min-w-0">
+            <p className="font-bold text-slate-800 truncate">
               {classGroup.code}
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-xs text-slate-500 truncate">
               {classGroup.curriculum?.name || 'Sem grade'} · Turno{' '}
               {classGroup.shift}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors shrink-0"
-            title={isFullscreen ? 'Sair da tela cheia' : 'Maximizar planejador'}
-          >
-            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => navigate(`/schedule?classGroupId=${classGroupId}`)}
+              className="hidden sm:flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl text-sm font-bold transition-colors"
+            >
+              <CalendarClock size={16} />
+              Ver Cronograma
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsFullscreen(false)}
+              className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors"
+              title="Sair da tela cheia (Esc)"
+            >
+              <Minimize size={20} />
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="px-6 pt-6 pb-4 border-b border-slate-100">
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Turma
+              </p>
+              <p className="text-xl font-bold text-slate-800">
+                {classGroup.code}
+              </p>
+              <p className="text-sm text-slate-500">
+                {classGroup.curriculum?.name || 'Sem grade'} · Turno{' '}
+                {classGroup.shift}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsFullscreen(true)}
+              className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors shrink-0"
+              title="Maximizar planejador"
+            >
+              <Maximize size={20} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         className={`flex flex-col lg:flex-row ${isFullscreen ? 'flex-1 min-h-0' : 'min-h-[560px]'}`}
@@ -235,7 +282,11 @@ export const SchedulePlanning: React.FC = () => {
       <PageLayout size={isFullscreen ? 'default' : 'wide'}>
         {!isFullscreen && (
           <>
-            <PageBackLink to="/class-groups" label="Voltar para Turmas" />
+            <PageBackLink
+              to="/class-groups"
+              label="Voltar para Turmas"
+              accent="senac"
+            />
             <PageHeader
               accent="senac"
               icon={<Route size={28} />}
