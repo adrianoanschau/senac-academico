@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { findOrThrow } from '@/common/entity.utils';
 import { CreateProfessorDto } from './dto/create-professor.dto';
 import { UpdateProfessorDto } from './dto/update-professor.dto';
 
@@ -7,14 +8,26 @@ import { UpdateProfessorDto } from './dto/update-professor.dto';
 export class ProfessorsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createProfessorDto: CreateProfessorDto) {
+  async create(createProfessorDto: CreateProfessorDto) {
+    const existingProfessor = await this.prisma.professor.findUnique({
+      where: { email: createProfessorDto.email },
+    });
+
+    if (existingProfessor) {
+      throw new ConflictException(
+        `Já existe um professor cadastrado com o e-mail ${createProfessorDto.email}.`,
+      );
+    }
+
     return this.prisma.professor.create({
       data: createProfessorDto,
     });
   }
 
   findAll() {
-    return this.prisma.professor.findMany();
+    return this.prisma.professor.findMany({
+      orderBy: { name: 'asc' },
+    });
   }
 
   async findOne(id: string) {
@@ -22,15 +35,26 @@ export class ProfessorsService {
       where: { id },
     });
 
-    if (!professor) {
-      throw new NotFoundException(`Professor com ID ${id} não encontrado`);
-    }
-
-    return professor;
+    return findOrThrow(professor, `Professor com ID ${id} não encontrado.`);
   }
 
   async update(id: string, updateProfessorDto: UpdateProfessorDto) {
     await this.findOne(id);
+
+    if (updateProfessorDto.email) {
+      const emailConflict = await this.prisma.professor.findFirst({
+        where: {
+          email: updateProfessorDto.email,
+          NOT: { id },
+        },
+      });
+
+      if (emailConflict) {
+        throw new ConflictException(
+          `Já existe um professor cadastrado com o e-mail ${updateProfessorDto.email}.`,
+        );
+      }
+    }
 
     return this.prisma.professor.update({
       where: { id },

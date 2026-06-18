@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 import { ProfessorsService } from './professors.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateProfessorDto } from './dto/create-professor.dto';
@@ -62,16 +62,31 @@ describe('ProfessorsService', () => {
         name: 'João Silva',
         email: 'joao.silva@senac.br',
       };
+      mockPrisma.professor.findUnique.mockResolvedValue(null);
       mockPrisma.professor.create.mockResolvedValue(mockProfessor);
 
       // Act
       const result = await service.create(dto);
 
       // Assert
+      expect(mockPrisma.professor.findUnique).toHaveBeenCalledWith({
+        where: { email: dto.email },
+      });
       expect(vi.spyOn(prismaService.professor, 'create')).toHaveBeenCalledWith({
         data: dto,
       });
       expect(result).toEqual(mockProfessor);
+    });
+
+    it('deve lançar ConflictException para e-mail duplicado', async () => {
+      const dto: CreateProfessorDto = {
+        name: 'Outro',
+        email: 'joao.silva@senac.br',
+      };
+      mockPrisma.professor.findUnique.mockResolvedValue(mockProfessor);
+
+      await expect(service.create(dto)).rejects.toThrow(ConflictException);
+      expect(mockPrisma.professor.create).not.toHaveBeenCalled();
     });
   });
 

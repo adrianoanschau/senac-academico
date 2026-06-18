@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProfessorsService } from './professors.service';
 import { CreateProfessorDto } from './dto/create-professor.dto';
@@ -31,7 +32,7 @@ export class ProfessorsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.professorsService.findOne(id);
     return { data };
   }
@@ -39,7 +40,7 @@ export class ProfessorsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProfessorDto: UpdateProfessorDto,
   ) {
     const data = await this.professorsService.update(id, updateProfessorDto);
@@ -48,7 +49,7 @@ export class ProfessorsController {
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.professorsService.remove(id);
     return { data };
   }
