@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
@@ -13,8 +12,11 @@ import { GanttRecalculateDto } from './dto/gantt-recalculate.dto';
 import { GanttSubjectConfigDto } from './dto/gantt-subject-config.dto';
 import {
   dayAfterInScheduleTz,
+  intervalsOverlap,
   startOfScheduleDay,
 } from './utils/schedule-date.utils';
+import { fetchOccupiedSlots } from './utils/schedule-query.utils';
+import { mapSlotsToPlannedSchedules } from './utils/schedule-rule.utils';
 
 export interface GanttSessionSlot {
   startTime: Date;
@@ -199,7 +201,9 @@ export class GanttPlannerService {
       let schedulesCreated = 0;
 
       for (const taskId of ordered) {
-        const task = tasksInternal.find((t) => t.curriculumSubjectId === taskId)!;
+        const task = tasksInternal.find(
+          (t) => t.curriculumSubjectId === taskId,
+        )!;
         const dependsOnRuleId = task.dependsOnId
           ? ruleIdMap.get(task.dependsOnId)
           : undefined;
@@ -221,16 +225,16 @@ export class GanttPlannerService {
         ruleIdMap.set(task.curriculumSubjectId, rule.id);
 
         const created = await tx.schedule.createMany({
-          data: task.sessions.map((session) => ({
-            classGroupId: dto.classGroupId,
-            subjectId: task.subjectId,
-            professorId: task.professorId!,
-            roomId: task.roomId!,
-            startTime: session.startTime,
-            endTime: session.endTime,
-            ruleId: rule.id,
-            status: ClassStatus.PLANNED,
-          })),
+          data: mapSlotsToPlannedSchedules(
+            {
+              id: rule.id,
+              classGroupId: dto.classGroupId,
+              subjectId: task.subjectId,
+              professorId: task.professorId!,
+              roomId: task.roomId!,
+            },
+            task.sessions,
+          ),
         });
 
         schedulesCreated += created.count;
@@ -293,7 +297,9 @@ export class GanttPlannerService {
           `UC ${config.curriculumSubjectId} não pertence ao módulo.`,
         );
       }
-      if (csMap.get(config.curriculumSubjectId)!.subjectId !== config.subjectId) {
+      if (
+        csMap.get(config.curriculumSubjectId)!.subjectId !== config.subjectId
+      ) {
         throw new BadRequestException(
           'subjectId inconsistente com a matriz curricular.',
         );
@@ -439,56 +445,16 @@ export class GanttPlannerService {
       subjectConfigs.map((s) => [s.curriculumSubjectId, s]),
     );
 
-    const inDegree = new Map<string, number>();
-    const successors = new Map<string, string[]>();
-
-    for (const cs of curriculumSubjects) {
-      inDegree.set(cs.id, 0);
-      successors.set(cs.id, []);
-    }
-
-    for (const cs of curriculumSubjects) {
-      const dependsOnId = this.resolveDependsOnId(
-        cs,
-        configMap.get(cs.id),
-        idSet,
-      );
-      if (dependsOnId) {
-        inDegree.set(cs.id, (inDegree.get(cs.id) ?? 0) + 1);
-        successors.get(dependsOnId)!.push(cs.id);
-      }
-    }
-
-    const queue = curriculumSubjects
-      .filter((cs) => (inDegree.get(cs.id) ?? 0) === 0)
-      .map((cs) => cs.id);
-    const sorted: string[] = [];
-
-    while (queue.length > 0) {
-      queue.sort((a, b) => {
-        const aPriority = configMap.get(a)?.isPriority ? 0 : 1;
-        const bPriority = configMap.get(b)?.isPriority ? 0 : 1;
+    return this.topologicalSort(
+      curriculumSubjects,
+      (cs) => this.resolveDependsOnId(cs, configMap.get(cs.id), idSet),
+      (a, b) => {
+        const aPriority = configMap.get(a.id)?.isPriority ? 0 : 1;
+        const bPriority = configMap.get(b.id)?.isPriority ? 0 : 1;
         if (aPriority !== bPriority) return aPriority - bPriority;
-        return a.localeCompare(b);
-      });
-
-      const current = queue.shift()!;
-      sorted.push(current);
-
-      for (const succ of successors.get(current) ?? []) {
-        const deg = (inDegree.get(succ) ?? 0) - 1;
-        inDegree.set(succ, deg);
-        if (deg === 0) queue.push(succ);
-      }
-    }
-
-    if (sorted.length < curriculumSubjects.length) {
-      throw new BadRequestException(
-        'Ciclo detectado nas precedências do módulo.',
-      );
-    }
-
-    return sorted;
+        return a.id.localeCompare(b.id);
+      },
+    );
   }
 
   private resolveDependsOnId(
@@ -535,28 +501,17 @@ export class GanttPlannerService {
       ),
     ];
     const roomIds = [
-      ...new Set(subjectConfigs.map((s) => s.roomId).filter(Boolean) as string[]),
+      ...new Set(
+        subjectConfigs.map((s) => s.roomId).filter(Boolean) as string[],
+      ),
     ];
 
-    const searchLimit = new Date(earliestStartDate);
-    searchLimit.setFullYear(searchLimit.getFullYear() + 2);
-
-    const orConditions: Prisma.ScheduleWhereInput[] = [{ classGroupId }];
-    if (professorIds.length) {
-      orConditions.push({ professorId: { in: professorIds } });
-    }
-    if (roomIds.length) {
-      orConditions.push({ roomId: { in: roomIds } });
-    }
-
-    const existing = await this.prisma.schedule.findMany({
-      where: {
-        OR: orConditions,
-        startTime: { gte: earliestStartDate },
-        endTime: { lte: searchLimit },
-        status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
-      },
-      select: { startTime: true, endTime: true },
+    const existing = await fetchOccupiedSlots(this.prisma, {
+      from: earliestStartDate,
+      yearsAhead: 2,
+      classGroupId,
+      professorIds,
+      roomIds,
     });
 
     return existing.map((s) => ({
@@ -593,7 +548,7 @@ export class GanttPlannerService {
         const a = entries[i];
         const b = entries[j];
 
-        if (!this.sessionsOverlap(a.session, b.session)) continue;
+        if (!intervalsOverlap(a.session, b.session)) continue;
 
         if (a.professorId && b.professorId && a.professorId === b.professorId) {
           conflicts.push({
@@ -672,14 +627,12 @@ export class GanttPlannerService {
     };
   }
 
-  private sessionsOverlap(a: GanttSessionSlot, b: GanttSessionSlot): boolean {
-    return a.startTime < b.endTime && a.endTime > b.startTime;
-  }
-
-  private topologicalOrder(
-    items: { id: string; dependsOnId: string | null }[],
-    idSet: Set<string>,
+  private topologicalSort<T extends { id: string }>(
+    items: T[],
+    getDependsOnId: (item: T) => string | null,
+    compareReady?: (a: T, b: T) => number,
   ): string[] {
+    const byId = new Map(items.map((item) => [item.id, item]));
     const inDegree = new Map<string, number>();
     const successors = new Map<string, string[]>();
 
@@ -689,24 +642,30 @@ export class GanttPlannerService {
     }
 
     for (const item of items) {
-      if (item.dependsOnId && idSet.has(item.dependsOnId)) {
+      const dependsOnId = getDependsOnId(item);
+      if (dependsOnId && byId.has(dependsOnId)) {
         inDegree.set(item.id, (inDegree.get(item.id) ?? 0) + 1);
-        successors.get(item.dependsOnId)!.push(item.id);
+        successors.get(dependsOnId)!.push(item.id);
       }
     }
 
-    const queue = items
-      .filter((item) => (inDegree.get(item.id) ?? 0) === 0)
-      .map((item) => item.id);
+    const queue = items.filter((item) => (inDegree.get(item.id) ?? 0) === 0);
     const sorted: string[] = [];
 
     while (queue.length > 0) {
+      if (compareReady) {
+        queue.sort(compareReady);
+      }
+
       const current = queue.shift()!;
-      sorted.push(current);
-      for (const succ of successors.get(current) ?? []) {
-        const deg = (inDegree.get(succ) ?? 0) - 1;
-        inDegree.set(succ, deg);
-        if (deg === 0) queue.push(succ);
+      sorted.push(current.id);
+
+      for (const succId of successors.get(current.id) ?? []) {
+        const deg = (inDegree.get(succId) ?? 0) - 1;
+        inDegree.set(succId, deg);
+        if (deg === 0) {
+          queue.push(byId.get(succId)!);
+        }
       }
     }
 
@@ -723,12 +682,15 @@ export class GanttPlannerService {
     tasks: ScheduledTaskInternal[],
     idSet: Set<string>,
   ): string[] {
-    return this.topologicalOrder(
-      tasks.map((t) => ({
-        id: t.curriculumSubjectId,
-        dependsOnId: t.dependsOnId,
+    return this.topologicalSort(
+      tasks.map((task) => ({
+        id: task.curriculumSubjectId,
+        dependsOnId: task.dependsOnId,
       })),
-      idSet,
+      (item) =>
+        item.dependsOnId && idSet.has(item.dependsOnId)
+          ? item.dependsOnId
+          : null,
     );
   }
 
@@ -736,8 +698,14 @@ export class GanttPlannerService {
     T extends { id: string; dependsOnId: string | null },
   >(items: T[]): T[] {
     const idSet = new Set(items.map((item) => item.id));
-    return this.topologicalOrder(items, idSet).map(
-      (id) => items.find((i) => i.id === id)!,
+    const orderedIds = this.topologicalSort(
+      items,
+      (item) =>
+        item.dependsOnId && idSet.has(item.dependsOnId)
+          ? item.dependsOnId
+          : null,
     );
+
+    return orderedIds.map((id) => items.find((item) => item.id === id)!);
   }
 }

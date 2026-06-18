@@ -3,7 +3,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -14,6 +13,10 @@ import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { ScheduleConflictService } from './conflict/schedule-conflict.service';
 import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
 import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
+import {
+  buildScheduleProjections,
+  persistGeneratedScheduleBatch,
+} from './utils/schedule-generation.utils';
 import {
   buildScheduleWhereInput,
   resolveSchedulePageLimit,
@@ -53,7 +56,11 @@ export class SchedulesService {
 
   async findAll(
     query: FindSchedulesQueryDto,
-  ): Promise<SchedulesFindAllResult<Awaited<ReturnType<PrismaService['schedule']['findMany']>>[number]>> {
+  ): Promise<
+    SchedulesFindAllResult<
+      Awaited<ReturnType<PrismaService['schedule']['findMany']>>[number]
+    >
+  > {
     const whereCondition = buildScheduleWhereInput(query);
     const pageLimit = resolveSchedulePageLimit(query.limit);
     const take = pageLimit ? pageLimit + 1 : undefined;
@@ -89,7 +96,8 @@ export class SchedulesService {
       meta: {
         limit: pageLimit,
         hasMore,
-        nextCursor: hasMore && lastItem ? lastItem.startTime.toISOString() : null,
+        nextCursor:
+          hasMore && lastItem ? lastItem.startTime.toISOString() : null,
       },
     };
   }
@@ -173,26 +181,22 @@ export class SchedulesService {
         );
     }
 
-    const searchLimitDate = new Date(actualStartDate);
-    searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
+    const totalHours =
+      remainingHours !== undefined ? remainingHours : subject.hours;
 
-    const existingSchedules = await this.prisma.schedule.findMany({
-      where: {
-        OR: [{ classGroupId }, { professorId }, { roomId }],
-        startTime: { gte: actualStartDate },
-        endTime: { lte: searchLimitDate },
-        status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+    const projections = await buildScheduleProjections(
+      this.prisma,
+      this.generatorService,
+      {
+        from: actualStartDate,
+        classGroupId,
+        professorId,
+        roomId,
+        daysOfWeek,
+        startTimeStr,
+        endTimeStr,
+        totalHours,
       },
-      select: { startTime: true, endTime: true },
-    });
-
-    const projections = await this.generatorService.generateProjections(
-      actualStartDate,
-      daysOfWeek,
-      startTimeStr,
-      endTimeStr,
-      remainingHours !== undefined ? remainingHours : subject.hours,
-      existingSchedules,
     );
 
     if (projections.length === 0) {
@@ -201,64 +205,31 @@ export class SchedulesService {
       );
     }
 
-    const result = await this.prisma.$transaction(async (prisma) => {
-      let ruleId = existingRuleId;
-
-      if (existingRuleId) {
-        await prisma.scheduleRule.update({
-          where: { id: existingRuleId },
-          data: {
-            daysOfWeek,
-            startTimeStr,
-            endTimeStr,
-            professorId,
-            roomId,
-            dependsOnRuleId,
-          },
-        });
-      } else {
-        const rule = await prisma.scheduleRule.create({
-          data: {
-            daysOfWeek,
-            startTimeStr,
-            endTimeStr,
-            totalHours: subject.hours,
-            classGroupId,
-            subjectId,
-            professorId,
-            roomId,
-            dependsOnRuleId,
-          },
-        });
-        ruleId = rule.id;
-      }
-
-      const schedulesToCreate = projections.map((proj) => ({
-        classGroupId,
-        subjectId,
-        professorId,
-        roomId,
-        startTime: proj.startTime,
-        endTime: proj.endTime,
-        ruleId: ruleId as string,
-        status: ClassStatus.PLANNED,
-      }));
-
-      const createdSchedules = await prisma.schedule.createMany({
-        data: schedulesToCreate,
-      });
-
-      return { count: createdSchedules.count, ruleId: ruleId as string };
-    });
-
-    const lastProjection = projections[projections.length - 1];
+    const result = await this.prisma.$transaction((tx) =>
+      persistGeneratedScheduleBatch(
+        tx,
+        {
+          existingRuleId,
+          dependsOnRuleId,
+          classGroupId,
+          subjectId,
+          professorId,
+          roomId,
+          daysOfWeek,
+          startTimeStr,
+          endTimeStr,
+          totalHours: subject.hours,
+        },
+        projections,
+      ),
+    );
 
     return {
-      message: `Grade gerada com sucesso! ${result.count} aulas foram alocadas e a regra foi salva no histórico.`,
-      generatedCount: result.count,
+      message: `Grade gerada com sucesso! ${result.generatedCount} aulas foram alocadas e a regra foi salva no histórico.`,
+      generatedCount: result.generatedCount,
       ruleId: result.ruleId,
-      lastClassDate: lastProjection.startTime,
-      lastClassEndDate: lastProjection.endTime,
+      lastClassDate: result.lastClassDate!,
+      lastClassEndDate: result.lastClassEndDate!,
     };
   }
 

@@ -5,6 +5,7 @@ import {
   dailyClassDurationMinutes,
   dayAfterInScheduleTz,
   getScheduleWeekday,
+  intervalsOverlap,
   startOfScheduleDay,
 } from './utils/schedule-date.utils';
 import { hoursToMinutes } from './utils/schedule-hours.utils';
@@ -54,18 +55,6 @@ export class ScheduleGeneratorService {
     let safetyCounter = 0;
     const MAX_DAYS_PROJECTION = 730;
 
-    const hasConflict = (
-      targetStartTime: Date,
-      targetEndTime: Date,
-      schedules: { startTime: Date; endTime: Date }[],
-    ) => {
-      return schedules.some(
-        (schedule) =>
-          schedule.startTime < targetEndTime &&
-          schedule.endTime > targetStartTime,
-      );
-    };
-
     while (remainingMinutes > 0 && safetyCounter < MAX_DAYS_PROJECTION) {
       safetyCounter++;
       const dayOfWeek = getScheduleWeekday(cursorDate);
@@ -82,11 +71,12 @@ export class ScheduleGeneratorService {
           minutesForThisClass,
         );
 
+      const proposedSlot = { startTime: proposedStart, endTime: proposedEnd };
+
       const isBlocked = overrides.some(
         (override) =>
           override.type === OverrideType.BLOCK &&
-          override.startTime < proposedEnd &&
-          override.endTime > proposedStart,
+          intervalsOverlap(proposedSlot, override),
       );
 
       if (isBlocked) {
@@ -105,7 +95,11 @@ export class ScheduleGeneratorService {
       const isAllowedDay = daysOfWeek.includes(dayOfWeek);
 
       if (isExtraDay || (!isWeekend && isAllowedDay)) {
-        if (hasConflict(proposedStart, proposedEnd, existingSchedules)) {
+        if (
+          existingSchedules.some((schedule) =>
+            intervalsOverlap(proposedSlot, schedule),
+          )
+        ) {
           cursorDate = dayAfterInScheduleTz(cursorDate);
           continue;
         }

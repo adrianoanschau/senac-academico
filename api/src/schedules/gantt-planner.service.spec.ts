@@ -363,4 +363,57 @@ describe('GanttPlannerService', () => {
       ).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('topologicalSort', () => {
+    const sort = (
+      items: Array<{ id: string; dependsOnId: string | null }>,
+      compareReady?: (a: { id: string }, b: { id: string }) => number,
+    ) =>
+      (
+        service as unknown as {
+          topologicalSort: (
+            nodes: Array<{ id: string; dependsOnId: string | null }>,
+            getDependsOnId: (item: { id: string; dependsOnId: string | null }) => string | null,
+            compare?: (a: { id: string }, b: { id: string }) => number,
+          ) => string[];
+        }
+      ).topologicalSort(
+        items,
+        (item) => item.dependsOnId,
+        compareReady,
+      );
+
+    it('deve ordenar nós por precedência', () => {
+      expect(
+        sort([
+          { id: 'b', dependsOnId: 'a' },
+          { id: 'a', dependsOnId: null },
+        ]),
+      ).toEqual(['a', 'b']);
+    });
+
+    it('deve priorizar nós marcados como prioritários', () => {
+      expect(
+        sort(
+          [
+            { id: 'b', dependsOnId: null },
+            { id: 'a', dependsOnId: null },
+          ],
+          (left, right) => {
+            const priority = (id: string) => (id === 'a' ? 0 : 1);
+            return priority(left.id) - priority(right.id);
+          },
+        ),
+      ).toEqual(['a', 'b']);
+    });
+
+    it('deve detectar ciclo nas precedências', () => {
+      expect(() =>
+        sort([
+          { id: 'a', dependsOnId: 'b' },
+          { id: 'b', dependsOnId: 'a' },
+        ]),
+      ).toThrow(BadRequestException);
+    });
+  });
 });
