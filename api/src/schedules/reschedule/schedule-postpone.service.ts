@@ -6,8 +6,7 @@ import { ScheduleConflictService } from '../conflict/schedule-conflict.service';
 import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
 import { throwPostponeConfirmRequired } from '../constants/schedule-error.constants';
 import {
-  RULE_EVENTS,
-  RuleEndDateChangedEvent,
+  emitRuleEndDateChanged,
 } from '../events/rule-end-date-changed.event';
 import {
   dayAfterInScheduleTz,
@@ -63,13 +62,11 @@ export class SchedulePostponeService {
       await this.ruleLifecycleService.findRuleFamilyLastClass(targetRootId);
 
     if (lastClass) {
-      this.eventEmitter.emit(
-        RULE_EVENTS.END_DATE_CHANGED,
-        new RuleEndDateChangedEvent(
-          targetRootId,
-          lastClass.endTime,
-          original.classGroupId,
-        ),
+      emitRuleEndDateChanged(
+        this.eventEmitter,
+        targetRootId,
+        lastClass.endTime,
+        original.classGroupId,
       );
     }
 
