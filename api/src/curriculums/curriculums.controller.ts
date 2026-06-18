@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AppRole } from '@/prisma/generated';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -32,7 +33,7 @@ export class CurriculumsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.curriculumsService.findOne(id);
     return { data };
   }
@@ -40,7 +41,7 @@ export class CurriculumsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
     const data = await this.curriculumsService.update(id, updateCurriculumDto);
@@ -49,7 +50,7 @@ export class CurriculumsController {
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.curriculumsService.remove(id);
     return { data: { message: 'Curriculum removed successfully' } };
   }
@@ -57,7 +58,7 @@ export class CurriculumsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post(':id/subjects')
   async addSubject(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddSubjectToCurriculumDto,
   ) {
     const data = await this.curriculumsService.addSubject(id, dto);
@@ -67,8 +68,8 @@ export class CurriculumsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id/subjects/:curriculumSubjectId')
   async removeSubject(
-    @Param('id') id: string,
-    @Param('curriculumSubjectId') curriculumSubjectId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('curriculumSubjectId', ParseUUIDPipe) curriculumSubjectId: string,
   ) {
     await this.curriculumsService.removeSubject(id, curriculumSubjectId);
     return { data: { message: 'Subject link removed successfully' } };
