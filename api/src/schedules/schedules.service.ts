@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { findOrThrow } from '@/common/entity.utils';
+import { Subject } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { ScheduleConflictService } from './conflict/schedule-conflict.service';
@@ -18,7 +19,11 @@ import {
 } from './utils/schedule-generation.utils';
 import {
   buildScheduleWhereInput,
+  findScheduleById,
+  findSchedulesForList,
   resolveSchedulePageLimit,
+  ScheduleDetail,
+  ScheduleListItem,
   SchedulesFindAllResult,
 } from './utils/schedule-query.utils';
 
@@ -55,29 +60,13 @@ export class SchedulesService {
 
   async findAll(
     query: FindSchedulesQueryDto,
-  ): Promise<
-    SchedulesFindAllResult<
-      Awaited<ReturnType<PrismaService['schedule']['findMany']>>[number]
-    >
-  > {
+  ): Promise<SchedulesFindAllResult<ScheduleListItem>> {
     const whereCondition = buildScheduleWhereInput(query);
     const pageLimit = resolveSchedulePageLimit(query.limit);
     const take = pageLimit ? pageLimit + 1 : undefined;
 
-    const schedules = await this.prisma.schedule.findMany({
+    const schedules = await findSchedulesForList(this.prisma, {
       where: whereCondition,
-      include: {
-        professor: true,
-        room: true,
-        subject: true,
-        classGroup: {
-          include: {
-            curriculum: {
-              include: { course: true },
-            },
-          },
-        },
-      },
       orderBy: { startTime: 'asc' },
       take,
     });
@@ -101,18 +90,13 @@ export class SchedulesService {
     };
   }
 
-  async findOne(id: string) {
-    const schedule = await this.prisma.schedule.findUnique({
-      where: { id },
-      include: {
-        professor: true,
-        room: true,
-        subject: true,
-        classGroup: true,
-      },
-    });
+  async findOne(id: string): Promise<ScheduleDetail> {
+    const schedule = await findScheduleById(this.prisma, id);
 
-    return findOrThrow(schedule, `Aula com ID ${id} não encontrada.`);
+    return findOrThrow<ScheduleDetail>(
+      schedule,
+      `Aula com ID ${id} não encontrada.`,
+    );
   }
 
   async update(id: string, updateScheduleDto: UpdateScheduleDto) {
@@ -159,11 +143,12 @@ export class SchedulesService {
       existingRuleId,
     } = dto;
 
-    const subject = await this.prisma.subject.findUnique({
-      where: { id: subjectId },
-    });
-
-    findOrThrow(subject, 'Disciplina não encontrada.');
+    const subject = findOrThrow<Subject>(
+      await this.prisma.subject.findUnique({
+        where: { id: subjectId },
+      }),
+      'Disciplina não encontrada.',
+    );
 
     let actualStartDate = new Date(startDate);
 

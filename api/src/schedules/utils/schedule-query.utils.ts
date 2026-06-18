@@ -21,6 +21,68 @@ export interface SchedulesFindAllResult<T> {
   meta?: SchedulesPageMeta;
 }
 
+export const scheduleFindOneQuery =
+  Prisma.validator<Prisma.ScheduleDefaultArgs>()({
+    include: {
+      professor: true,
+      room: true,
+      subject: true,
+      classGroup: true,
+    },
+  });
+
+export type ScheduleDetail = Prisma.ScheduleGetPayload<
+  typeof scheduleFindOneQuery
+>;
+
+export const scheduleListQuery = Prisma.validator<Prisma.ScheduleDefaultArgs>()(
+  {
+    include: {
+      professor: true,
+      room: true,
+      subject: true,
+      classGroup: {
+        include: {
+          curriculum: {
+            include: { course: true },
+          },
+        },
+      },
+    },
+  },
+);
+
+export type ScheduleListItem = Prisma.ScheduleGetPayload<
+  typeof scheduleListQuery
+>;
+
+type ScheduleQueryClient = Pick<PrismaService, 'schedule'>;
+
+type ScheduleListFindManyArgs = Omit<
+  Prisma.ScheduleFindManyArgs,
+  'include' | 'select'
+>;
+
+export function findSchedulesForList(
+  client: ScheduleQueryClient,
+  args: ScheduleListFindManyArgs,
+): Promise<ScheduleListItem[]> {
+  return client.schedule.findMany({
+    ...args,
+    ...scheduleListQuery,
+  });
+}
+
+export function findScheduleById(
+  client: ScheduleQueryClient,
+  id: string,
+): Promise<ScheduleDetail | null> {
+  return client.schedule.findUnique({
+    where: { id },
+    ...scheduleFindOneQuery,
+  });
+}
+
 export function buildScheduleWhereInput(
   query: FindSchedulesQueryDto,
 ): Prisma.ScheduleWhereInput {
