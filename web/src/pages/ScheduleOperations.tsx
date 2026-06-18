@@ -1,20 +1,14 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
-import {
-  ArrowLeft,
-  CalendarClock,
-  Maximize,
-  Minimize,
-  Search,
-  Settings2,
-} from 'lucide-react';
+import { ArrowLeft, CalendarClock, Settings2 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { LoadingOverlay } from '../components/LoadingOverlay';
-import { Select } from '../components/Select';
-import { usePersistentState } from '../hooks/usePersistentState';
+import { ScheduleFilterBar } from '../components/schedule/ScheduleFilterBar';
+import { useScheduleFilters } from '../hooks/useScheduleFilters';
 import api from '../services/api';
+import { extractEntityData } from '../utils/apiResponse';
 import { Role } from '../utils/roles';
 
 const ScheduleCalendar = lazy(() => import('../components/ScheduleCalendar'));
@@ -23,12 +17,6 @@ const ScheduleDetailsModal = lazy(() =>
     default: m.ScheduleDetailsModal,
   })),
 );
-
-interface Subject {
-  id: string;
-  name: string;
-  code?: string;
-}
 
 interface ClassGroupInfo {
   id: string;
@@ -43,41 +31,31 @@ export const ScheduleOperations: React.FC = () => {
   const [isLoadingClassGroup, setIsLoadingClassGroup] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const [isFullscreen, setIsFullscreen] = usePersistentState(
-    'schedule_ops_fullscreen',
-    false,
-  );
-  const [search, setSearch] = usePersistentState('schedule_ops_search', '');
-  const [status, setStatus] = usePersistentState<string[]>(
-    'schedule_ops_status',
-    ['PLANNED', 'SCHEDULED', 'COMPLETED'],
-  );
-  const [subjectId, setSubjectId] = usePersistentState<string>(
-    'schedule_ops_subjectId',
-    '',
-  );
-  const [roomId, setRoomId] = usePersistentState<string>(
-    'schedule_ops_roomId',
-    '',
-  );
-  const [professorId, setProfessorId] = usePersistentState<string>(
-    'schedule_ops_professorId',
-    '',
-  );
-
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
-  const [professors, setProfessors] = useState<{ id: string; name: string }[]>(
-    [],
-  );
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [selectedDateStr, setSelectedDateStr] = usePersistentState<string>(
-    'schedule_ops_selected_date',
-    new Date().toISOString(),
-  );
-  const selectedDate = !isNaN(new Date(selectedDateStr).getTime())
-    ? new Date(selectedDateStr)
-    : new Date();
+  const {
+    search,
+    setSearch,
+    status,
+    toggleStatus,
+    subjectId,
+    setSubjectId,
+    roomId,
+    setRoomId,
+    professorId,
+    setProfessorId,
+    isFullscreen,
+    setIsFullscreen,
+    selectedDate,
+    setSelectedDate,
+    bumpRefresh,
+    subjects,
+    rooms,
+    professors,
+    calendarFilters,
+  } = useScheduleFilters({
+    storagePrefix: 'schedule_ops',
+    fixedClassGroupId: classGroupId,
+    scopeSubjectsToClassGroup: true,
+  });
 
   useEffect(() => {
     if (!classGroupId) return;
@@ -86,7 +64,7 @@ export const ScheduleOperations: React.FC = () => {
       setIsLoadingClassGroup(true);
       try {
         const response = await api.get(`/class-groups/${classGroupId}`);
-        setClassGroup(response.data?.data || response.data);
+        setClassGroup(extractEntityData<ClassGroupInfo>(response));
         setNotFound(false);
       } catch {
         setNotFound(true);
@@ -95,25 +73,7 @@ export const ScheduleOperations: React.FC = () => {
       }
     };
 
-    fetchClassGroup();
-  }, [classGroupId]);
-
-  useEffect(() => {
-    const fetchFiltersData = async () => {
-      try {
-        const [subjectsRes, roomsRes, professorsRes] = await Promise.all([
-          api.get('/subjects', { params: { classGroupId } }),
-          api.get('/rooms'),
-          api.get('/professors'),
-        ]);
-        setSubjects(subjectsRes.data?.data || subjectsRes.data || []);
-        setRooms(roomsRes.data?.data || roomsRes.data || []);
-        setProfessors(professorsRes.data?.data || professorsRes.data || []);
-      } catch (error) {
-        console.error('Erro ao buscar dados para os filtros:', error);
-      }
-    };
-    if (classGroupId) fetchFiltersData();
+    void fetchClassGroup();
   }, [classGroupId]);
 
   if (!classGroupId) {
@@ -189,104 +149,25 @@ export const ScheduleOperations: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-4 mb-6">
-                <div className="flex flex-wrap justify-between items-center gap-4">
-                  <div className="relative w-72">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Search size={18} className="text-slate-400" />
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
-                      placeholder="Buscar aulas..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
-                    <span>Status:</span>
-                    <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
-                      {[
-                        { id: 'PLANNED', label: 'Planejados' },
-                        { id: 'SCHEDULED', label: 'Agendados' },
-                        { id: 'COMPLETED', label: 'Concluídos' },
-                        { id: 'CANCELLED', label: 'Cancelados' },
-                      ].map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            setStatus((prev) =>
-                              prev.includes(s.id)
-                                ? prev.filter((st) => st !== s.id)
-                                : [...prev, s.id],
-                            );
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status.includes(s.id) ? 'bg-[#f37021] text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => setIsFullscreen(!isFullscreen)}
-                      className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors ml-2"
-                      title={isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
-                    >
-                      {isFullscreen ? (
-                        <Minimize size={20} />
-                      ) : (
-                        <Maximize size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl">
-                  <div className="flex-1 min-w-50">
-                    <Select
-                      value={professorId}
-                      onChange={(e) => setProfessorId(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
-                    >
-                      <option value="">Todos os Professores...</option>
-                      {professors.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div className="flex-1 min-w-50">
-                    <Select
-                      value={roomId}
-                      onChange={(e) => setRoomId(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
-                    >
-                      <option value="">Todas as Salas...</option>
-                      {rooms.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div className="flex-1 min-w-50">
-                    <Select
-                      value={subjectId}
-                      onChange={(e) => setSubjectId(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#f37021] outline-none transition-all text-slate-800 cursor-pointer font-medium text-sm"
-                    >
-                      <option value="">Todas as Disciplinas...</option>
-                      {subjects.map((sub) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.code ? `${sub.code}: ${sub.name}` : sub.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                </div>
-              </div>
+              <ScheduleFilterBar
+                accent="operacional"
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Buscar aulas..."
+                status={status}
+                onToggleStatus={toggleStatus}
+                isFullscreen={isFullscreen}
+                onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
+                professorId={professorId}
+                onProfessorIdChange={setProfessorId}
+                professors={professors}
+                roomId={roomId}
+                onRoomIdChange={setRoomId}
+                rooms={rooms}
+                subjectId={subjectId}
+                onSubjectIdChange={setSubjectId}
+                subjects={subjects}
+              />
 
               <Suspense
                 fallback={
@@ -296,21 +177,11 @@ export const ScheduleOperations: React.FC = () => {
                 }
               >
                 <ScheduleCalendar
-                  filters={{
-                    search,
-                    status,
-                    subjectId,
-                    roomId,
-                    professorId,
-                    classGroupId,
-                    _refresh: refreshTrigger,
-                  }}
+                  filters={calendarFilters}
                   onEventClick={handleEventClick}
                   isFullscreen={isFullscreen}
                   selectedDate={selectedDate}
-                  onDateChange={(date) =>
-                    setSelectedDateStr(date.toISOString())
-                  }
+                  onDateChange={setSelectedDate}
                 />
               </Suspense>
             </>
@@ -327,9 +198,7 @@ export const ScheduleOperations: React.FC = () => {
                 setSelectedEventId(null);
               }}
               eventId={selectedEventId}
-              onSuccess={() => {
-                setRefreshTrigger((prev) => prev + 1);
-              }}
+              onSuccess={bumpRefresh}
             />
           )}
         </Suspense>

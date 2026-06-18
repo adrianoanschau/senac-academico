@@ -112,9 +112,8 @@ export function useScheduleFilters({
 
         if (!effectiveClassGroupId) return;
 
-        const [subjectsRes, roomsRes, professorsRes] = await Promise.all(
-          requests,
-        );
+        const [subjectsRes, roomsRes, professorsRes] =
+          await Promise.all(requests);
         setSubjects(extractListData<ScheduleFilterSubject>(subjectsRes));
         setRooms(extractListData<ScheduleFilterOption>(roomsRes));
         setProfessors(extractListData<ScheduleFilterOption>(professorsRes));

@@ -5,16 +5,12 @@ import { Edit2, ExternalLink, Info, Library, Plus, Trash2 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
-import { Select } from '../components/Select';
+import { CurriculumMetadataForm } from '../components/Curriculum/CurriculumMetadataForm';
 import {
   ContextSummaryCard,
   DataTable,
   type DataTableColumn,
-  FormActions,
-  FormField,
-  FormInput,
   FormModal,
-  getFormControlClass,
   ListToolbar,
   PageCard,
   PageHeader,
@@ -112,8 +108,6 @@ export const Curriculums: React.FC = () => {
       (c.course?.name &&
         c.course.name.toLowerCase().includes(search.toLowerCase())),
   );
-
-  const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer`;
 
   const columns = useMemo<DataTableColumn<CurriculumRow>[]>(
     () => [
@@ -237,67 +231,16 @@ export const Curriculums: React.FC = () => {
         isSaving={isSaving}
         savingMessage="Salvando grade..."
       >
-        <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <FormField label="Nome da Grade">
-            <FormInput
-              accent={ACCENT}
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Ex: Grade 2024 - Manhã"
-            />
-          </FormField>
-
-          <FormField label="Curso Vinculado">
-            <Select
-              required
-              value={formData.courseId}
-              onChange={(e) =>
-                setFormData({ ...formData, courseId: e.target.value })
-              }
-              className={selectClassName}
-            >
-              <option value="">Selecione um curso...</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.name}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-
-          <FormField label="Status">
-            <Select
-              value={formData.active ? 'true' : 'false'}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  active: e.target.value === 'true',
-                })
-              }
-              className={selectClassName}
-            >
-              <option value="true">Ativa</option>
-              <option value="false">Inativa</option>
-            </Select>
-          </FormField>
-
-          {!isEditing && (
-            <p className="text-sm text-slate-500 bg-slate-50 rounded-xl p-3">
-              Após criar, você será direcionado para adicionar as disciplinas da
-              grade.
-            </p>
-          )}
-
-          <FormActions
-            accent={ACCENT}
-            isSaving={isSaving}
-            submitLabel={isEditing ? 'Salvar' : 'Criar e Continuar'}
-            onCancel={closeModal}
-          />
-        </form>
+        <CurriculumMetadataForm
+          formData={formData}
+          onChange={(data) => setFormData((prev) => ({ ...prev, ...data }))}
+          courses={courses}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          accent={ACCENT}
+          onSubmit={handleSave}
+          onCancel={closeModal}
+        />
       </FormModal>
 
       <ContextPanel

@@ -1,23 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { ArrowLeft, CheckCircle2, Edit2, Library, Plus, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Edit2, Library, Plus } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { AddSubjectDrawer } from '../components/Curriculum/AddSubjectDrawer';
+import { CurriculumMetadataForm } from '../components/Curriculum/CurriculumMetadataForm';
 import { ModuleSection } from '../components/Curriculum/ModuleSection';
 import { LoadingOverlay } from '../components/LoadingOverlay';
-import { Select } from '../components/Select';
+import { FormModal } from '../components/ui';
 import api from '../services/api';
+import type { CurriculumForm } from '../types/entities';
 import type { Course, Curriculum } from '../types/subject.types';
 import { alertDialog, confirmDialog } from '../utils/dialog';
 import { Role } from '../utils/roles';
-
-interface MetadataForm {
-  name: string;
-  active: boolean;
-  courseId: string;
-}
 
 export const CurriculumDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +24,7 @@ export const CurriculumDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const [isSavingMetadata, setIsSavingMetadata] = useState(false);
-  const [metadataForm, setMetadataForm] = useState<MetadataForm>({
+  const [metadataForm, setMetadataForm] = useState<CurriculumForm>({
     name: '',
     active: true,
     courseId: '',
@@ -269,99 +265,23 @@ export const CurriculumDetail: React.FC = () => {
         />
       )}
 
-      {isMetadataModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">
-                Editar Grade
-              </h2>
-              <button
-                onClick={() => setIsMetadataModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <LoadingOverlay visible={isSavingMetadata} message="Salvando..." />
-
-            <form onSubmit={handleSaveMetadata} className="flex flex-col gap-5">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Nome da Grade
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={metadataForm.name}
-                  onChange={(e) =>
-                    setMetadataForm({ ...metadataForm, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Curso Vinculado
-                </label>
-                <Select
-                  required
-                  value={metadataForm.courseId}
-                  onChange={(e) =>
-                    setMetadataForm({
-                      ...metadataForm,
-                      courseId: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800 cursor-pointer"
-                >
-                  <option value="">Selecione um curso...</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Status
-                </label>
-                <Select
-                  value={metadataForm.active ? 'true' : 'false'}
-                  onChange={(e) =>
-                    setMetadataForm({
-                      ...metadataForm,
-                      active: e.target.value === 'true',
-                    })
-                  }
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800 cursor-pointer"
-                >
-                  <option value="true">Ativa</option>
-                  <option value="false">Inativa</option>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsMetadataModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingMetadata}
-                  className="bg-menu-matriz hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-matriz/30"
-                >
-                  {isSavingMetadata ? 'Salvando...' : 'Salvar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FormModal
+        open={isMetadataModalOpen}
+        title="Editar Grade"
+        onClose={() => setIsMetadataModalOpen(false)}
+        isSaving={isSavingMetadata}
+        savingMessage="Salvando..."
+      >
+        <CurriculumMetadataForm
+          formData={metadataForm}
+          onChange={setMetadataForm}
+          courses={courses}
+          isEditing
+          isSaving={isSavingMetadata}
+          onSubmit={handleSaveMetadata}
+          onCancel={() => setIsMetadataModalOpen(false)}
+        />
+      </FormModal>
     </div>
   );
 };
