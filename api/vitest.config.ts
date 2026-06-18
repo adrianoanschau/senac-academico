@@ -29,6 +29,7 @@ export default defineConfig({
       '@/prisma/generated': path.resolve(__dirname, './prisma/generated'),
       '@/auth': path.resolve(__dirname, './src/auth'),
       '@/prisma': path.resolve(__dirname, './src/prisma'),
+      '@/common': path.resolve(__dirname, './src/common'),
     },
   },
   plugins: [

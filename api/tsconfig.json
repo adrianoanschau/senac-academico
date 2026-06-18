@@ -26,7 +26,8 @@
     "paths": {
       "@/prisma/generated": ["prisma/generated"],
       "@/auth/*": ["src/auth/*"],
-      "@/prisma/*": ["src/prisma/*"]
+      "@/prisma/*": ["src/prisma/*"],
+      "@/common/*": ["src/common/*"]
     }
   },
   "include": ["src/**/*", "prisma/generated/**/*", "vitest.config.ts"]
