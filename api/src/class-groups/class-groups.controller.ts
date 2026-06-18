@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
@@ -19,8 +20,9 @@ export class ClassGroupsController {
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
-  create(@Body() createClassGroupDto: CreateClassGroupDto) {
-    return this.classGroupsService.create(createClassGroupDto);
+  async create(@Body() createClassGroupDto: CreateClassGroupDto) {
+    const data = await this.classGroupsService.create(createClassGroupDto);
+    return { data };
   }
 
   @Get()
@@ -30,20 +32,20 @@ export class ClassGroupsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.classGroupsService.findOne(id);
     return { data };
   }
 
   @Get(':id/modules')
-  async findModules(@Param('id') id: string) {
+  async findModules(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.classGroupsService.findModules(id);
     return { data };
   }
 
   @Get(':id/modules/:moduleNumber/subjects')
   async findModuleSubjects(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Param('moduleNumber') moduleNumber: string,
   ) {
     const data = await this.classGroupsService.findModuleSubjects(
@@ -56,7 +58,7 @@ export class ClassGroupsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateClassGroupDto: UpdateClassGroupDto,
   ) {
     const data = await this.classGroupsService.update(id, updateClassGroupDto);

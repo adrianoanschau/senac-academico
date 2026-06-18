@@ -34,6 +34,19 @@ describe('ClassGroupsController', () => {
     service = module.get<ClassGroupsService>(ClassGroupsService);
   });
 
+  describe('create', () => {
+    it('deve encapsular criação no formato data', async () => {
+      const dto = { code: 'T1', curriculumId: 'curr-1' };
+      const created = { id: 'cg-1', ...dto };
+      mockClassGroupsService.create.mockResolvedValue(created);
+
+      const result = await controller.create(dto as never);
+
+      expect(mockClassGroupsService.create).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({ data: created });
+    });
+  });
+
   describe('findModules', () => {
     it('deve expor o endpoint de extração de módulos e retornar encapsulado em "data"', async () => {
       // Arrange

@@ -70,6 +70,19 @@ export class ClassGroupsService {
 
   async update(id: string, updateClassGroupDto: UpdateClassGroupDto) {
     await this.findOne(id);
+
+    if (updateClassGroupDto.curriculumId) {
+      const curriculum = await this.prisma.curriculum.findUnique({
+        where: { id: updateClassGroupDto.curriculumId },
+      });
+
+      if (!curriculum) {
+        throw new NotFoundException(
+          `Plano de curso com ID ${updateClassGroupDto.curriculumId} não encontrado.`,
+        );
+      }
+    }
+
     return this.prisma.classGroup.update({
       where: { id },
       data: updateClassGroupDto,
