@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { ScheduleConflictService } from './conflict/schedule-conflict.service';

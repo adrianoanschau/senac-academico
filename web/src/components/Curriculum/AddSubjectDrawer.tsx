@@ -33,6 +33,7 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
 
   React.useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setModule(defaultModule);
       setTab("search");
       setSelectedSubject(null);

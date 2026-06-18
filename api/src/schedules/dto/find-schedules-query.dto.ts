@@ -42,9 +42,9 @@ export class FindSchedulesQueryDto {
   subjectId?: string;
 
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => {
+  @Transform(({ value }: { value: unknown }): ClassStatus[] | undefined => {
     if (value === undefined || value === null || value === '') return undefined;
-    return Array.isArray(value) ? value : [value];
+    return (Array.isArray(value) ? value : [value]) as ClassStatus[];
   })
   @IsEnum(ClassStatus, { each: true })
   status?: ClassStatus[];

@@ -30,5 +30,11 @@
       "@/common/*": ["src/common/*"]
     }
   },
-  "include": ["src/**/*", "prisma/generated/**/*", "vitest.config.ts"]
+  "include": [
+    "src/**/*",
+    "prisma/generated/**/*",
+    "test/**/*",
+    "vitest.config.ts",
+    "vitest.e2e.config.ts"
+  ]
 }

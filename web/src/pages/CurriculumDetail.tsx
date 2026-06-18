@@ -59,7 +59,7 @@ export const CurriculumDetail: React.FC = () => {
     const load = async () => {
       setIsLoading(true);
       try {
-        const [_, coursesRes] = await Promise.all([
+        const [, coursesRes] = await Promise.all([
           fetchCurriculum(),
           api.get("/courses"),
         ]);

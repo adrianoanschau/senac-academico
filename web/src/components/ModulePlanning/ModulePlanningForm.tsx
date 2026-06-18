@@ -80,6 +80,7 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedModuleNumber = useWatch({ control, name: 'moduleNumber' });
+  const displaySubjects = selectedModuleNumber ? subjects : [];
 
   useEffect(() => {
     setValue('classGroupId', classGroupId);
@@ -132,7 +133,6 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
     let isMounted = true;
 
     if (!selectedModuleNumber) {
-      setSubjects([]);
       return () => {
         isMounted = false;
       };
@@ -279,7 +279,7 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
         <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100">
           <p className="text-slate-500 font-medium">Carregando disciplinas e precedências...</p>
         </div>
-      ) : selectedModuleNumber && subjects.length > 0 ? (
+      ) : selectedModuleNumber && displaySubjects.length > 0 ? (
         <div>
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -312,7 +312,7 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
                 register={register}
                 errors={errors}
                 removeTrack={() => removeTrack(index)}
-                subjects={subjects}
+                subjects={displaySubjects}
                 professors={professors}
                 rooms={rooms}
                 isOnlyTrack={trackFields.length === 1}

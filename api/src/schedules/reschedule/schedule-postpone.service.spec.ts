@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ConflictException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClassStatus } from '@/prisma/generated';
 import { SchedulePostponeService } from './schedule-postpone.service';
@@ -12,8 +11,6 @@ import { SCHEDULE_ERROR_ACTIONS } from '../constants/schedule-error.constants';
 
 describe('SchedulePostponeService', () => {
   let service: SchedulePostponeService;
-  let eventEmitter: EventEmitter2;
-  let conflictService: ScheduleConflictService;
 
   const mockTx = {
     schedule: {
@@ -76,10 +73,6 @@ describe('SchedulePostponeService', () => {
     }).compile();
 
     service = module.get<SchedulePostponeService>(SchedulePostponeService);
-    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
-    conflictService = module.get<ScheduleConflictService>(
-      ScheduleConflictService,
-    );
 
     mockPrisma.$transaction.mockImplementation(
       (fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx),
@@ -97,17 +90,14 @@ describe('SchedulePostponeService', () => {
       endTime: new Date('2026-09-01T12:00:00Z'),
     });
 
-    vi.spyOn(
-      service as never,
-      'postponeClassInTransaction' as never,
-    ).mockResolvedValue({
+    mockPrisma.$transaction.mockResolvedValueOnce({
       id: 'sched-new',
       ruleId: 'rule-1',
     });
 
     await service.postponeClass('sched-1', 'Feriado');
 
-    expect(eventEmitter.emit).toHaveBeenCalledWith(
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
       RULE_EVENTS.END_DATE_CHANGED,
       expect.objectContaining({
         ruleId: 'rule-1',
@@ -184,6 +174,6 @@ describe('SchedulePostponeService', () => {
       where: { id: 'sched-1' },
     });
     expect(mockTx.schedule.create).toHaveBeenCalled();
-    expect(conflictService.findPostponeConflict).toHaveBeenCalled();
+    expect(mockConflictService.findPostponeConflict).toHaveBeenCalled();
   });
 });

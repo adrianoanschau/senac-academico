@@ -49,7 +49,7 @@ describe('UsersController', () => {
       // Desabilitamos o unbound-method pois o Reflector precisa da referência original exata para ler os metadados, e não para executá-la.
       const roles = reflector.get<AppRole[]>(
         'roles',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
+
         UsersController.prototype.createUser,
       );
 

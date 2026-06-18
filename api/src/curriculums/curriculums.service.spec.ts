@@ -137,7 +137,6 @@ describe('CurriculumsService', () => {
       // Garante que tentou apagar e recriar as dependências aninhadas
       expect(vi.spyOn(prismaService.curriculum, 'update')).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
             subjects: {
               deleteMany: {},

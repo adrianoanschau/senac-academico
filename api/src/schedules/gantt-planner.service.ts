@@ -108,7 +108,7 @@ export class GanttPlannerService {
       [],
     );
 
-    const conflicts = this.detectConflicts(tasks, dto.classGroupId);
+    const conflicts = this.detectConflicts(tasks);
     return this.toBlueprintResult(dto, tasks, conflicts);
   }
 
@@ -142,7 +142,7 @@ export class GanttPlannerService {
       anchorOverrides,
     );
 
-    const conflicts = this.detectConflicts(tasks, dto.classGroupId);
+    const conflicts = this.detectConflicts(tasks);
     return this.toBlueprintResult(
       {
         classGroupId: dto.classGroupId,
@@ -184,7 +184,7 @@ export class GanttPlannerService {
       };
     });
 
-    const conflicts = this.detectConflicts(tasksInternal, dto.classGroupId);
+    const conflicts = this.detectConflicts(tasksInternal);
     if (conflicts.length > 0) {
       throw new BadRequestException({
         message:
@@ -520,10 +520,7 @@ export class GanttPlannerService {
     }));
   }
 
-  detectConflicts(
-    tasks: ScheduledTaskInternal[],
-    classGroupId: string,
-  ): GanttConflict[] {
+  detectConflicts(tasks: ScheduledTaskInternal[]): GanttConflict[] {
     const conflicts: GanttConflict[] = [];
     const entries: {
       taskId: string;
