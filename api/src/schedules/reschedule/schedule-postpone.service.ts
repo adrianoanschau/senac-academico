@@ -5,9 +5,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { ScheduleConflictService } from '../conflict/schedule-conflict.service';
 import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
 import { throwPostponeConfirmRequired } from '../constants/schedule-error.constants';
-import {
-  emitRuleEndDateChanged,
-} from '../events/rule-end-date-changed.event';
+import { emitRuleEndDateChanged } from '../events/rule-end-date-changed.event';
 import {
   dayAfterInScheduleTz,
   findFirstRuleOccurrence as findFirstRuleOccurrenceSlot,
@@ -134,9 +132,7 @@ export class SchedulePostponeService {
 
     if (conflict) {
       if (newDateStr && !force) {
-        throwPostponeConfirmRequired(
-          conflict.subject?.name || 'Desconhecida',
-        );
+        throwPostponeConfirmRequired(conflict.subject?.name || 'Desconhecida');
       }
 
       if (!conflict.rule) {

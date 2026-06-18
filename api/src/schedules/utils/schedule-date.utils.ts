@@ -70,10 +70,15 @@ function zonedWallClockToDate(parts: {
     parts.minute ?? 0,
     parts.second ?? 0,
   );
-  return new Date(utcGuess - getTimezoneOffsetMs(new Date(utcGuess), SCHEDULE_TIMEZONE));
+  return new Date(
+    utcGuess - getTimezoneOffsetMs(new Date(utcGuess), SCHEDULE_TIMEZONE),
+  );
 }
 
-export function parseTimeStr(timeStr: string): { hour: number; minute: number } {
+export function parseTimeStr(timeStr: string): {
+  hour: number;
+  minute: number;
+} {
   const [hour, minute] = timeStr.split(':').map(Number);
   return { hour, minute };
 }

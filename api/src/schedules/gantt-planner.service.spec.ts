@@ -231,7 +231,8 @@ describe('GanttPlannerService', () => {
         ],
       });
 
-      const uc2Anchor = mockGenerator.generateProjections.mock.calls[1][0] as Date;
+      const uc2Anchor = mockGenerator.generateProjections.mock
+        .calls[1][0] as Date;
       expect(uc2Anchor.getFullYear()).toBe(2026);
       expect(uc2Anchor.getMonth()).toBe(2);
       expect(uc2Anchor.getDate()).toBe(3);
@@ -313,7 +314,8 @@ describe('GanttPlannerService', () => {
         expect.any(Array),
       );
 
-      const uc3Anchor = mockGenerator.generateProjections.mock.calls[1][0] as Date;
+      const uc3Anchor = mockGenerator.generateProjections.mock
+        .calls[1][0] as Date;
       expect(uc3Anchor.getFullYear()).toBe(2026);
       expect(uc3Anchor.getMonth()).toBe(4);
       expect(uc3Anchor.getDate()).toBe(16);
@@ -373,15 +375,14 @@ describe('GanttPlannerService', () => {
         service as unknown as {
           topologicalSort: (
             nodes: Array<{ id: string; dependsOnId: string | null }>,
-            getDependsOnId: (item: { id: string; dependsOnId: string | null }) => string | null,
+            getDependsOnId: (item: {
+              id: string;
+              dependsOnId: string | null;
+            }) => string | null,
             compare?: (a: { id: string }, b: { id: string }) => number,
           ) => string[];
         }
-      ).topologicalSort(
-        items,
-        (item) => item.dependsOnId,
-        compareReady,
-      );
+      ).topologicalSort(items, (item) => item.dependsOnId, compareReady);
 
     it('deve ordenar nós por precedência', () => {
       expect(

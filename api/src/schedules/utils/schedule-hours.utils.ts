@@ -18,7 +18,8 @@ export function sumScheduleDurationMinutes(
 ): number {
   return classes.reduce(
     (total, current) =>
-      total + computeScheduleDurationMinutes(current.startTime, current.endTime),
+      total +
+      computeScheduleDurationMinutes(current.startTime, current.endTime),
     0,
   );
 }
@@ -27,7 +28,9 @@ export function computeRemainingHours(
   totalHours: number,
   consumedMinutes: number,
 ): number {
-  return minutesToHours(Math.max(0, hoursToMinutes(totalHours) - consumedMinutes));
+  return minutesToHours(
+    Math.max(0, hoursToMinutes(totalHours) - consumedMinutes),
+  );
 }
 
 export function resolveOriginalTotalHours(

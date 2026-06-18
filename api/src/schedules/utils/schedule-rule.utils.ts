@@ -37,10 +37,7 @@ export function dependentRuleWhere(
   predecessorRuleId: string,
   alternatePredecessorId?: string,
 ): Prisma.ScheduleRuleWhereInput {
-  if (
-    alternatePredecessorId &&
-    alternatePredecessorId !== predecessorRuleId
-  ) {
+  if (alternatePredecessorId && alternatePredecessorId !== predecessorRuleId) {
     return {
       OR: [
         { dependsOnRuleId: predecessorRuleId },

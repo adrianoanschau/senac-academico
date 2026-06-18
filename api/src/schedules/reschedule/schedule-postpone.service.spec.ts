@@ -77,7 +77,9 @@ describe('SchedulePostponeService', () => {
 
     service = module.get<SchedulePostponeService>(SchedulePostponeService);
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
-    conflictService = module.get<ScheduleConflictService>(ScheduleConflictService);
+    conflictService = module.get<ScheduleConflictService>(
+      ScheduleConflictService,
+    );
 
     mockPrisma.$transaction.mockImplementation(
       (fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx),
@@ -95,10 +97,13 @@ describe('SchedulePostponeService', () => {
       endTime: new Date('2026-09-01T12:00:00Z'),
     });
 
-    vi.spyOn(service as never, 'postponeClassInTransaction' as never).mockResolvedValue({
+    vi.spyOn(
+      service as never,
+      'postponeClassInTransaction' as never,
+    ).mockResolvedValue({
       id: 'sched-new',
       ruleId: 'rule-1',
-    } as never);
+    });
 
     await service.postponeClass('sched-1', 'Feriado');
 

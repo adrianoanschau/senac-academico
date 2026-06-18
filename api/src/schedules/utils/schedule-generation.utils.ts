@@ -42,8 +42,7 @@ export interface PersistPlannedSchedulesResult {
   lastClassDate: Date | null;
 }
 
-export interface PersistGeneratedScheduleBatchResult
-  extends PersistPlannedSchedulesResult {
+export interface PersistGeneratedScheduleBatchResult extends PersistPlannedSchedulesResult {
   ruleId: string;
 }
 

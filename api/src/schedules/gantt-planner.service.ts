@@ -698,12 +698,8 @@ export class GanttPlannerService {
     T extends { id: string; dependsOnId: string | null },
   >(items: T[]): T[] {
     const idSet = new Set(items.map((item) => item.id));
-    const orderedIds = this.topologicalSort(
-      items,
-      (item) =>
-        item.dependsOnId && idSet.has(item.dependsOnId)
-          ? item.dependsOnId
-          : null,
+    const orderedIds = this.topologicalSort(items, (item) =>
+      item.dependsOnId && idSet.has(item.dependsOnId) ? item.dependsOnId : null,
     );
 
     return orderedIds.map((id) => items.find((item) => item.id === id)!);

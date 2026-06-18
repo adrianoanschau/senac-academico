@@ -87,7 +87,7 @@ export function buildScheduleWhereInput(
   if (subjectId) whereCondition.subjectId = subjectId;
 
   if (status?.length) {
-    whereCondition.status = { in: status as ClassStatus[] };
+    whereCondition.status = { in: status };
   }
 
   return whereCondition;
@@ -171,8 +171,7 @@ export async function fetchOccupiedSlots(
     roomIds?: string | string[];
   },
 ): Promise<Array<{ startTime: Date; endTime: Date }>> {
-  const { from, yearsAhead = 1, classGroupId, professorIds, roomIds } =
-    params;
+  const { from, yearsAhead = 1, classGroupId, professorIds, roomIds } = params;
 
   const orConditions = buildResourceOrConditions({
     classGroupId,

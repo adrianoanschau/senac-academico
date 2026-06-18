@@ -25,10 +25,7 @@ describe('schedule-rule.utils', () => {
 
   it('deve localizar dependentes pelo predecessor e alternativa', () => {
     expect(dependentRuleWhere('root-1', 'child-1')).toEqual({
-      OR: [
-        { dependsOnRuleId: 'root-1' },
-        { dependsOnRuleId: 'child-1' },
-      ],
+      OR: [{ dependsOnRuleId: 'root-1' }, { dependsOnRuleId: 'child-1' }],
     });
   });
 

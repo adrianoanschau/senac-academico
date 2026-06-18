@@ -8,10 +8,11 @@ import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ScheduleGeneratorService } from '../schedule-generator.service';
 import { MigrateRuleDto } from '../dto/migrate-rule.dto';
+import { emitRuleEndDateChanged } from '../events/rule-end-date-changed.event';
 import {
-  emitRuleEndDateChanged,
-} from '../events/rule-end-date-changed.event';
-import { dayAfterInScheduleTz, startOfScheduleDay } from '../utils/schedule-date.utils';
+  dayAfterInScheduleTz,
+  startOfScheduleDay,
+} from '../utils/schedule-date.utils';
 import {
   computeRuleRemainingHours,
   resolveRuleRootId,

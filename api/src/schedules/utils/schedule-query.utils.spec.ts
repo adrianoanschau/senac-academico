@@ -58,15 +58,12 @@ describe('schedule-query.utils', () => {
     const from = new Date('2026-06-01T00:00:00.000Z');
     const findMany = vi.fn().mockResolvedValue([]);
 
-    await fetchOccupiedSlots(
-      { schedule: { findMany } } as never,
-      {
-        from,
-        classGroupId: 'cg-1',
-        professorIds: 'prof-1',
-        roomIds: 'room-1',
-      },
-    );
+    await fetchOccupiedSlots({ schedule: { findMany } } as never, {
+      from,
+      classGroupId: 'cg-1',
+      professorIds: 'prof-1',
+      roomIds: 'room-1',
+    });
 
     expect(findMany).toHaveBeenCalledWith({
       where: {
@@ -87,10 +84,11 @@ describe('schedule-query.utils', () => {
     const from = new Date('2026-06-01T00:00:00.000Z');
     const findMany = vi.fn().mockResolvedValue([]);
 
-    await fetchOccupiedSlots(
-      { schedule: { findMany } } as never,
-      { from, yearsAhead: 2, classGroupId: 'cg-1' },
-    );
+    await fetchOccupiedSlots({ schedule: { findMany } } as never, {
+      from,
+      yearsAhead: 2,
+      classGroupId: 'cg-1',
+    });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -68,7 +68,9 @@ describe('SchedulesService', () => {
     }).compile();
 
     service = module.get<SchedulesService>(SchedulesService);
-    conflictService = module.get<ScheduleConflictService>(ScheduleConflictService);
+    conflictService = module.get<ScheduleConflictService>(
+      ScheduleConflictService,
+    );
   });
 
   describe('create', () => {
@@ -83,7 +85,9 @@ describe('SchedulesService', () => {
 
     it('deve criar uma aula após validar conflitos', async () => {
       const mockCreated = { id: 'sched-123', ...createDto };
-      mockConflictService.assertNoScheduleConflicts.mockResolvedValue(undefined);
+      mockConflictService.assertNoScheduleConflicts.mockResolvedValue(
+        undefined,
+      );
       mockPrisma.schedule.create.mockResolvedValue(mockCreated);
 
       const result = await service.create(createDto);
@@ -104,7 +108,9 @@ describe('SchedulesService', () => {
         new ConflictException('Choque de Sala'),
       );
 
-      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
       expect(mockPrisma.schedule.create).not.toHaveBeenCalled();
     });
   });
@@ -113,7 +119,10 @@ describe('SchedulesService', () => {
     it('deve filtrar aulas que se sobrepõem ao intervalo informado', async () => {
       mockPrisma.schedule.findMany.mockResolvedValue([]);
 
-      const result = await service.findAll({ start: '2026-06-01', end: '2026-06-30' });
+      const result = await service.findAll({
+        start: '2026-06-01',
+        end: '2026-06-30',
+      });
 
       expect(mockPrisma.schedule.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -197,7 +206,10 @@ describe('SchedulesService', () => {
     };
 
     it('deve gerar aulas e retornar metadados da regra', async () => {
-      mockPrisma.subject.findUnique.mockResolvedValue({ id: 'subj-1', hours: 8 });
+      mockPrisma.subject.findUnique.mockResolvedValue({
+        id: 'subj-1',
+        hours: 8,
+      });
       mockPrisma.schedule.findMany.mockResolvedValue([]);
       mockGeneratorService.generateProjections.mockResolvedValue([
         {
@@ -213,7 +225,7 @@ describe('SchedulesService', () => {
         },
       );
 
-      const result = await service.generateBulk(dto as never);
+      const result = await service.generateBulk(dto);
 
       expect(result.ruleId).toBe('rule-1');
       expect(result.generatedCount).toBe(1);
@@ -223,7 +235,10 @@ describe('SchedulesService', () => {
     });
 
     it('deve usar resolveDependencyStartDate quando dependsOnRuleId existir', async () => {
-      mockPrisma.subject.findUnique.mockResolvedValue({ id: 'subj-1', hours: 4 });
+      mockPrisma.subject.findUnique.mockResolvedValue({
+        id: 'subj-1',
+        hours: 4,
+      });
       mockRuleLifecycleService.resolveDependencyStartDate.mockResolvedValue(
         new Date('2026-06-10T00:00:00.000Z'),
       );
@@ -245,7 +260,7 @@ describe('SchedulesService', () => {
       await service.generateBulk({
         ...dto,
         dependsOnRuleId: 'rule-1',
-      } as never);
+      });
 
       expect(
         mockRuleLifecycleService.resolveDependencyStartDate,
