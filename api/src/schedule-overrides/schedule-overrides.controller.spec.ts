@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
+import { AppRole } from '@/prisma/generated';
 import { ScheduleOverridesController } from './schedule-overrides.controller';
 import { ScheduleOverridesService } from './schedule-overrides.service';
 import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
@@ -51,6 +53,32 @@ describe('ScheduleOverridesController', () => {
       // Assert
       expect(vi.spyOn(service, 'create')).toHaveBeenCalledWith(dto);
       expect(result).toEqual({ data: mockResponse });
+    });
+  });
+
+  describe('RBAC', () => {
+    it('deve restringir mutações a ADMIN e SECRETARY', () => {
+      const reflector = new Reflector();
+      const expectedRoles = [AppRole.ADMIN, AppRole.SECRETARY];
+
+      expect(
+        reflector.get<AppRole[]>(
+          'roles',
+          ScheduleOverridesController.prototype.create,
+        ),
+      ).toEqual(expectedRoles);
+      expect(
+        reflector.get<AppRole[]>(
+          'roles',
+          ScheduleOverridesController.prototype.update,
+        ),
+      ).toEqual(expectedRoles);
+      expect(
+        reflector.get<AppRole[]>(
+          'roles',
+          ScheduleOverridesController.prototype.remove,
+        ),
+      ).toEqual(expectedRoles);
     });
   });
 });

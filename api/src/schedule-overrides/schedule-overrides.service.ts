@@ -1,9 +1,7 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { findOrThrow } from '@/common/entity.utils';
+import { assertValidTimeRange } from '@/common/validation.utils';
 import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
 import { UpdateScheduleOverrideDto } from './dto/update-schedule-override.dto';
 
@@ -13,12 +11,7 @@ export class ScheduleOverridesService {
 
   async create(createScheduleOverrideDto: CreateScheduleOverrideDto) {
     const { startTime, endTime } = createScheduleOverrideDto;
-
-    if (startTime >= endTime) {
-      throw new BadRequestException(
-        'A data/hora de início deve ser anterior à data/hora de término.',
-      );
-    }
+    assertValidTimeRange(startTime, endTime);
 
     return this.prisma.scheduleOverride.create({
       data: createScheduleOverrideDto,
@@ -36,20 +29,20 @@ export class ScheduleOverridesService {
       where: { id },
     });
 
-    if (!override) {
-      throw new NotFoundException(
-        `Regra de calendário com ID ${id} não encontrada.`,
-      );
-    }
-
-    return override;
+    return findOrThrow(
+      override,
+      `Regra de calendário com ID ${id} não encontrada.`,
+    );
   }
 
   async update(
     id: string,
     updateScheduleOverrideDto: UpdateScheduleOverrideDto,
   ) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
+    const startTime = updateScheduleOverrideDto.startTime ?? existing.startTime;
+    const endTime = updateScheduleOverrideDto.endTime ?? existing.endTime;
+    assertValidTimeRange(startTime, endTime);
 
     return this.prisma.scheduleOverride.update({
       where: { id },

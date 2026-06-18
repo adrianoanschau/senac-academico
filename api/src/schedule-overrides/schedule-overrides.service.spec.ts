@@ -73,4 +73,22 @@ describe('ScheduleOverridesService', () => {
       await expect(service.create(dto)).rejects.toThrow(BadRequestException);
     });
   });
+
+  describe('update', () => {
+    it('deve validar intervalo mesclando dados existentes com o patch', async () => {
+      mockPrisma.scheduleOverride.findUnique.mockResolvedValue({
+        ...mockOverride,
+        startTime: new Date('2026-06-15T08:00:00Z'),
+        endTime: new Date('2026-06-15T18:00:00Z'),
+      });
+
+      await expect(
+        service.update('override-1', {
+          startTime: new Date('2026-06-15T20:00:00Z'),
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(mockPrisma.scheduleOverride.update).not.toHaveBeenCalled();
+    });
+  });
 });
