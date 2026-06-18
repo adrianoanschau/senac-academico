@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  buildScheduleSlotWithDuration,
+  dailyClassDurationMinutes,
+  dayAfterInScheduleTz,
+  getScheduleWeekday,
+  startOfScheduleDay,
+} from './utils/schedule-date.utils';
+import { hoursToMinutes } from './utils/schedule-hours.utils';
 
 export interface ProjectedSchedule {
   startTime: Date;
@@ -20,13 +28,11 @@ export class ScheduleGeneratorService {
     existingSchedules: { startTime: Date; endTime: Date }[] = [],
   ): Promise<ProjectedSchedule[]> {
     const projections: ProjectedSchedule[] = [];
-    // Usa Math.round para evitar dízimas de ponto flutuante que causam criação de aulas fantasmas
-    let remainingMinutes = Math.round(totalSubjectHours * 60);
-
-    const [startHour, startMin] = startTimeStr.split(':').map(Number);
-    const [endHour, endMin] = endTimeStr.split(':').map(Number);
-    const dailyClassDuration =
-      endHour * 60 + endMin - (startHour * 60 + startMin);
+    let remainingMinutes = hoursToMinutes(totalSubjectHours);
+    const dailyClassDuration = dailyClassDurationMinutes(
+      startTimeStr,
+      endTimeStr,
+    );
 
     const overrides = await this.prisma.scheduleOverride.findMany({
       where: {
@@ -34,37 +40,37 @@ export class ScheduleGeneratorService {
       },
     });
 
-    const cursorDate = new Date(startDate);
-    cursorDate.setHours(0, 0, 0, 0);
-
+    let cursorDate = startOfScheduleDay(startDate);
     let safetyCounter = 0;
     const MAX_DAYS_PROJECTION = 730;
 
-    // 3. Função auxiliar rápida em memória para verificar conflitos
     const hasConflict = (
       targetStartTime: Date,
       targetEndTime: Date,
       schedules: { startTime: Date; endTime: Date }[],
     ) => {
       return schedules.some(
-        (s) => s.startTime < targetEndTime && s.endTime > targetStartTime,
+        (schedule) =>
+          schedule.startTime < targetEndTime &&
+          schedule.endTime > targetStartTime,
       );
     };
 
     while (remainingMinutes > 0 && safetyCounter < MAX_DAYS_PROJECTION) {
       safetyCounter++;
-      const dayOfWeek = cursorDate.getDay();
-
-      const proposedStart = new Date(cursorDate);
-      proposedStart.setHours(startHour, startMin, 0, 0);
+      const dayOfWeek = getScheduleWeekday(cursorDate);
 
       const minutesForThisClass =
         remainingMinutes < dailyClassDuration
           ? remainingMinutes
           : dailyClassDuration;
 
-      const proposedEnd = new Date(proposedStart);
-      proposedEnd.setMinutes(proposedStart.getMinutes() + minutesForThisClass);
+      const { startTime: proposedStart, endTime: proposedEnd } =
+        buildScheduleSlotWithDuration(
+          cursorDate,
+          startTimeStr,
+          minutesForThisClass,
+        );
 
       const isBlocked = overrides.some(
         (override) =>
@@ -74,7 +80,7 @@ export class ScheduleGeneratorService {
       );
 
       if (isBlocked) {
-        cursorDate.setDate(cursorDate.getDate() + 1);
+        cursorDate = dayAfterInScheduleTz(cursorDate);
         continue;
       }
 
@@ -89,9 +95,8 @@ export class ScheduleGeneratorService {
       const isAllowedDay = daysOfWeek.includes(dayOfWeek);
 
       if (isExtraDay || (!isWeekend && isAllowedDay)) {
-        // 5. Avalia se o horário alvo possui conflito com agendas existentes. Se sim, apenas avança o dia.
         if (hasConflict(proposedStart, proposedEnd, existingSchedules)) {
-          cursorDate.setDate(cursorDate.getDate() + 1);
+          cursorDate = dayAfterInScheduleTz(cursorDate);
           continue;
         }
 
@@ -104,7 +109,7 @@ export class ScheduleGeneratorService {
         remainingMinutes -= minutesForThisClass;
       }
 
-      cursorDate.setDate(cursorDate.getDate() + 1);
+      cursorDate = dayAfterInScheduleTz(cursorDate);
     }
 
     return projections;

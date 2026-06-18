@@ -14183,7 +14183,7 @@ export namespace Prisma {
     readonly daysOfWeek: FieldRef<"ScheduleRule", 'Int[]'>
     readonly startTimeStr: FieldRef<"ScheduleRule", 'String'>
     readonly endTimeStr: FieldRef<"ScheduleRule", 'String'>
-    readonly totalHours: FieldRef<"ScheduleRule", 'Int'>
+    readonly totalHours: FieldRef<"ScheduleRule", 'Float'>
     readonly classGroupId: FieldRef<"ScheduleRule", 'String'>
     readonly subjectId: FieldRef<"ScheduleRule", 'String'>
     readonly professorId: FieldRef<"ScheduleRule", 'String'>
@@ -15708,7 +15708,7 @@ export namespace Prisma {
     daysOfWeek?: IntNullableListFilter<"ScheduleRule">
     startTimeStr?: StringFilter<"ScheduleRule"> | string
     endTimeStr?: StringFilter<"ScheduleRule"> | string
-    totalHours?: IntFilter<"ScheduleRule"> | number
+    totalHours?: FloatFilter<"ScheduleRule"> | number
     classGroupId?: StringFilter<"ScheduleRule"> | string
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
@@ -15761,7 +15761,7 @@ export namespace Prisma {
     daysOfWeek?: IntNullableListFilter<"ScheduleRule">
     startTimeStr?: StringFilter<"ScheduleRule"> | string
     endTimeStr?: StringFilter<"ScheduleRule"> | string
-    totalHours?: IntFilter<"ScheduleRule"> | number
+    totalHours?: FloatFilter<"ScheduleRule"> | number
     classGroupId?: StringFilter<"ScheduleRule"> | string
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
@@ -15810,7 +15810,7 @@ export namespace Prisma {
     daysOfWeek?: IntNullableListFilter<"ScheduleRule">
     startTimeStr?: StringWithAggregatesFilter<"ScheduleRule"> | string
     endTimeStr?: StringWithAggregatesFilter<"ScheduleRule"> | string
-    totalHours?: IntWithAggregatesFilter<"ScheduleRule"> | number
+    totalHours?: FloatWithAggregatesFilter<"ScheduleRule"> | number
     classGroupId?: StringWithAggregatesFilter<"ScheduleRule"> | string
     subjectId?: StringWithAggregatesFilter<"ScheduleRule"> | string
     professorId?: StringWithAggregatesFilter<"ScheduleRule"> | string
@@ -16585,7 +16585,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -16604,7 +16604,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -16639,7 +16639,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16649,7 +16649,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -17311,6 +17311,17 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type ScheduleRuleCountOrderByAggregateInput = {
     id?: SortOrder
     daysOfWeek?: SortOrder
@@ -17365,6 +17376,22 @@ export namespace Prisma {
   export type ScheduleRuleSumOrderByAggregateInput = {
     daysOfWeek?: SortOrder
     totalHours?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type UserProfileCreaterolesInput = {
@@ -18189,6 +18216,14 @@ export namespace Prisma {
     push?: number | number[]
   }
 
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput = {
     create?: XOR<ClassGroupCreateWithoutScheduleRulesInput, ClassGroupUncheckedCreateWithoutScheduleRulesInput>
     connectOrCreate?: ClassGroupCreateOrConnectWithoutScheduleRulesInput
@@ -18558,6 +18593,22 @@ export namespace Prisma {
     _max?: NestedEnumOverrideTypeFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type ScheduleCreateWithoutProfessorInput = {
     id?: string
     startTime: Date | string
@@ -18700,7 +18751,7 @@ export namespace Prisma {
     daysOfWeek?: IntNullableListFilter<"ScheduleRule">
     startTimeStr?: StringFilter<"ScheduleRule"> | string
     endTimeStr?: StringFilter<"ScheduleRule"> | string
-    totalHours?: IntFilter<"ScheduleRule"> | number
+    totalHours?: FloatFilter<"ScheduleRule"> | number
     classGroupId?: StringFilter<"ScheduleRule"> | string
     subjectId?: StringFilter<"ScheduleRule"> | string
     professorId?: StringFilter<"ScheduleRule"> | string
@@ -19883,7 +19934,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -19901,7 +19952,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -20398,7 +20449,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -20416,7 +20467,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -20461,7 +20512,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -20479,7 +20530,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -20584,7 +20635,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -20602,7 +20653,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -20620,7 +20671,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -20706,7 +20757,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -20724,7 +20775,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -20742,7 +20793,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -20968,7 +21019,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -20986,7 +21037,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -21004,7 +21055,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -21120,7 +21171,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subject?: SubjectUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -21138,7 +21189,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -21156,7 +21207,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
     roomId?: StringFieldUpdateOperationsInput | string
@@ -21257,7 +21308,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -21275,7 +21326,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -21293,7 +21344,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -21308,7 +21359,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     classGroup?: ClassGroupUpdateOneRequiredWithoutScheduleRulesNestedInput
@@ -21326,7 +21377,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string
@@ -21344,7 +21395,7 @@ export namespace Prisma {
     daysOfWeek?: ScheduleRuleUpdatedaysOfWeekInput | number[]
     startTimeStr?: StringFieldUpdateOperationsInput | string
     endTimeStr?: StringFieldUpdateOperationsInput | string
-    totalHours?: IntFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
     classGroupId?: StringFieldUpdateOperationsInput | string
     subjectId?: StringFieldUpdateOperationsInput | string
     professorId?: StringFieldUpdateOperationsInput | string

@@ -7,6 +7,17 @@ import {
   RuleEndDateChangedEvent,
 } from '../events/rule-end-date-changed.event';
 import { SchedulesService } from '../schedules.service';
+import { dayAfterInScheduleTz } from '../utils/schedule-date.utils';
+import {
+  computeRemainingHours,
+  resolveOriginalTotalHours,
+  sumScheduleDurationMinutes,
+} from '../utils/schedule-hours.utils';
+import {
+  dependentRuleWhere,
+  resolveRuleRootId,
+  ruleFamilyWhere,
+} from '../utils/schedule-rule.utils';
 
 @Injectable()
 export class RuleDependencyListener {
@@ -20,25 +31,15 @@ export class RuleDependencyListener {
 
   @OnEvent(RULE_EVENTS.END_DATE_CHANGED)
   async handleRuleEndDateChanged(event: RuleEndDateChangedEvent) {
-    this.logger.log('[EVENT LISTENER] Evento recebido! Payload:', event);
     this.logger.log(
-      `[Efeito Dominó] Evento recebido! A regra ${event.ruleId} (Turma: ${event.classGroupId}) teve sua data final alterada para ${event.newEndDate.toISOString()}.`,
+      `[Efeito Dominó] Regra ${event.ruleId} (Turma: ${event.classGroupId}) teve data final alterada para ${event.newEndDate.toISOString()}.`,
     );
 
     try {
-      // 2. Busca no Prisma a regra dependente (Usamos findFirst pois dependsOnRuleId não é @unique)
       const dependentRule = await this.prisma.scheduleRule.findFirst({
-        where: { dependsOnRuleId: event.ruleId },
+        where: dependentRuleWhere(event.ruleId),
       });
 
-      this.logger.log(
-        '[EVENT LISTENER] Busca por dependentes da ruleId',
-        event.ruleId,
-        'retornou:',
-        dependentRule ? dependentRule.id : 'NENHUMA DEPENDÊNCIA ENCONTRADA',
-      );
-
-      // 3. Retorno precoce se for o fim da cadeia
       if (!dependentRule) {
         this.logger.log(
           `[Efeito Dominó] Fim da cadeia. Nenhuma disciplina depende da regra ${event.ruleId}.`,
@@ -46,48 +47,47 @@ export class RuleDependencyListener {
         return;
       }
 
-      // 4. Calcula a nova data de início (dia seguinte ao término da regra predecessora)
-      const newStartDate = new Date(event.newEndDate);
-      newStartDate.setDate(newStartDate.getDate() + 1);
-      newStartDate.setHours(0, 0, 0, 0);
+      const dependentRootId = resolveRuleRootId(dependentRule);
+      const newStartDate = dayAfterInScheduleTz(event.newEndDate);
 
-      // 5. A Exclusão: Limpa o calendário dessa disciplina de aulas não efetivadas (antigas ou futuras que não aconteceram)
       await this.prisma.schedule.deleteMany({
-        where: {
-          ruleId: dependentRule.id,
-          status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
-        },
+        where: ruleFamilyWhere(dependentRootId, [
+          ClassStatus.PLANNED,
+          ClassStatus.SCHEDULED,
+        ]),
       });
 
-      // 6. O Recálculo: Subtrai a carga horária de aulas que já foram concluídas no passado
+      const rootRule = dependentRule.rootRuleId
+        ? await this.prisma.scheduleRule.findUnique({
+            where: { id: dependentRule.rootRuleId },
+          })
+        : null;
+
       const completedClasses = await this.prisma.schedule.findMany({
-        where: { ruleId: dependentRule.id, status: ClassStatus.COMPLETED },
+        where: ruleFamilyWhere(dependentRootId, [ClassStatus.COMPLETED]),
       });
 
-      const consumedMinutes = completedClasses.reduce((acc, curr) => {
-        return (
-          acc +
-          Math.round(
-            (curr.endTime.getTime() - curr.startTime.getTime()) / 60000,
-          )
-        );
-      }, 0);
-
-      const originalTotalMinutes = Math.round(dependentRule.totalHours * 60);
-      const remainingHours = (originalTotalMinutes - consumedMinutes) / 60;
+      const consumedMinutes = sumScheduleDurationMinutes(completedClasses);
+      const originalTotalHours = resolveOriginalTotalHours(
+        dependentRule,
+        rootRule,
+      );
+      const remainingHours = computeRemainingHours(
+        originalTotalHours,
+        consumedMinutes,
+      );
 
       if (remainingHours <= 0) {
         this.logger.log(
-          `[Efeito Dominó] A regra dependente ${dependentRule.id} já teve toda a sua carga horária concluída. Nenhuma nova aula será gerada.`,
+          `[Efeito Dominó] A regra dependente ${dependentRule.id} já teve toda a sua carga horária concluída.`,
         );
         return;
       }
 
       this.logger.log(
-        `[Efeito Dominó] Recalculando a regra dependente ${dependentRule.id} para iniciar a partir de ${newStartDate.toISOString()} com ${remainingHours}h restantes.`,
+        `[Efeito Dominó] Recalculando ${dependentRule.id} a partir de ${newStartDate.toISOString()} com ${remainingHours}h restantes.`,
       );
 
-      // 7. Chama o motor de geração informando explicitamente a carga horária restante
       const bulkResult = await this.schedulesService.generateBulk({
         classGroupId: dependentRule.classGroupId,
         subjectId: dependentRule.subjectId,
@@ -106,7 +106,7 @@ export class RuleDependencyListener {
         this.eventEmitter.emit(
           RULE_EVENTS.END_DATE_CHANGED,
           new RuleEndDateChangedEvent(
-            dependentRule.id,
+            dependentRootId,
             bulkResult.lastClassEndDate,
             dependentRule.classGroupId,
           ),

@@ -11,6 +11,10 @@ import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
 import { GanttPublishDto } from './dto/gantt-publish.dto';
 import { GanttRecalculateDto } from './dto/gantt-recalculate.dto';
 import { GanttSubjectConfigDto } from './dto/gantt-subject-config.dto';
+import {
+  dayAfterInScheduleTz,
+  startOfScheduleDay,
+} from './utils/schedule-date.utils';
 
 export interface GanttSessionSlot {
   startTime: Date;
@@ -367,7 +371,7 @@ export class GanttPlannerService {
             `A UC ${cs.subject.code} depende de uma predecessora que ainda não foi agendada.`,
           );
         }
-        anchor = this.dayAfter(predecessor.end);
+        anchor = dayAfterInScheduleTz(predecessor.end);
       } else if (!config.startDate) {
         throw new BadRequestException(
           `Informe a data de início da UC ${cs.subject.code}.`,
@@ -376,7 +380,7 @@ export class GanttPlannerService {
         anchor = new Date(config.startDate);
       }
 
-      anchor.setHours(0, 0, 0, 0);
+      anchor = startOfScheduleDay(anchor);
 
       const blockedForProjection = virtualPool.map((s) => ({
         startTime: s.startTime,
@@ -505,8 +509,7 @@ export class GanttPlannerService {
 
     for (const config of subjectConfigs) {
       if (!config.startDate) continue;
-      const candidate = new Date(config.startDate);
-      candidate.setHours(0, 0, 0, 0);
+      const candidate = startOfScheduleDay(new Date(config.startDate));
       if (!earliest || candidate < earliest) {
         earliest = candidate;
       }
@@ -671,13 +674,6 @@ export class GanttPlannerService {
 
   private sessionsOverlap(a: GanttSessionSlot, b: GanttSessionSlot): boolean {
     return a.startTime < b.endTime && a.endTime > b.startTime;
-  }
-
-  private dayAfter(date: Date): Date {
-    const next = new Date(date);
-    next.setDate(next.getDate() + 1);
-    next.setHours(0, 0, 0, 0);
-    return next;
   }
 
   private topologicalOrder(

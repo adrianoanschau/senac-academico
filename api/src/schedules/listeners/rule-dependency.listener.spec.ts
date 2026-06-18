@@ -6,6 +6,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulesService } from '../schedules.service';
 import { RuleEndDateChangedEvent } from '../events/rule-end-date-changed.event';
 import { ClassStatus } from '@/prisma/generated';
+import { dayAfterInScheduleTz } from '../utils/schedule-date.utils';
+import { ruleFamilyWhere } from '../utils/schedule-rule.utils';
 
 describe('RuleDependencyListener', () => {
   let listener: RuleDependencyListener;
@@ -15,6 +17,7 @@ describe('RuleDependencyListener', () => {
   const mockPrisma = {
     scheduleRule: {
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
     },
     schedule: {
       deleteMany: vi.fn(),
@@ -55,13 +58,10 @@ describe('RuleDependencyListener', () => {
     );
 
     it('deve retornar precocemente se não houver regra dependente (Caminho Feliz - Fim da cadeia)', async () => {
-      // Arrange
       mockPrisma.scheduleRule.findFirst.mockResolvedValue(null);
 
-      // Act
       await listener.handleRuleEndDateChanged(event);
 
-      // Assert
       expect(
         vi.spyOn(prismaService.scheduleRule, 'findFirst'),
       ).toHaveBeenCalledWith({
@@ -74,7 +74,6 @@ describe('RuleDependencyListener', () => {
     });
 
     it('deve recalcular e gerar novas aulas quando existir regra dependente com carga horária restante (Caminho Feliz)', async () => {
-      // Arrange
       const dependentRule = {
         id: 'rule-2',
         classGroupId: 'class-1',
@@ -84,14 +83,13 @@ describe('RuleDependencyListener', () => {
         daysOfWeek: [1, 3],
         startTimeStr: '08:00',
         endTimeStr: '10:00',
-        totalHours: 10, // 600 minutos originais
+        totalHours: 10,
+        rootRuleId: null,
       };
 
       mockPrisma.scheduleRule.findFirst.mockResolvedValue(dependentRule);
+      mockPrisma.scheduleRule.findUnique.mockResolvedValue(null);
       mockPrisma.schedule.deleteMany.mockResolvedValue({ count: 2 });
-
-      // Simula 2 aulas concluídas de 2 horas (120 minutos cada) = 240 minutos consumidos (4 horas)
-      // Restam 6 horas a cumprir
       mockPrisma.schedule.findMany.mockResolvedValue([
         {
           startTime: new Date('2026-06-01T08:00:00Z'),
@@ -109,23 +107,16 @@ describe('RuleDependencyListener', () => {
         lastClassEndDate: new Date('2026-06-20T10:00:00Z'),
       });
 
-      // Act
       await listener.handleRuleEndDateChanged(event);
 
-      // Assert
       expect(
         vi.spyOn(prismaService.schedule, 'deleteMany'),
       ).toHaveBeenCalledWith({
-        where: {
-          ruleId: 'rule-2',
-          status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
-        },
+        where: ruleFamilyWhere('rule-2', [
+          ClassStatus.PLANNED,
+          ClassStatus.SCHEDULED,
+        ]),
       });
-
-      // A nova data de início deve ser o dia seguinte à data do evento, com as horas locais zeradas
-      const expectedStartDate = new Date('2026-06-15T12:00:00Z');
-      expectedStartDate.setDate(expectedStartDate.getDate() + 1);
-      expectedStartDate.setHours(0, 0, 0, 0);
 
       expect(vi.spyOn(schedulesService, 'generateBulk')).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -134,7 +125,7 @@ describe('RuleDependencyListener', () => {
           dependsOnRuleId: 'rule-1',
           existingRuleId: 'rule-2',
           remainingHours: 6,
-          startDate: expectedStartDate,
+          startDate: dayAfterInScheduleTz(event.newEndDate),
         }),
       );
 
@@ -148,13 +139,11 @@ describe('RuleDependencyListener', () => {
     });
 
     it('não deve chamar generateBulk se a regra dependente já tiver consumido toda sua carga (Caminho Triste)', async () => {
-      // Arrange
-      const dependentRule = { id: 'rule-3', totalHours: 4 }; // 4 horas = 240 minutos
+      const dependentRule = { id: 'rule-3', totalHours: 4, rootRuleId: null };
 
       mockPrisma.scheduleRule.findFirst.mockResolvedValue(dependentRule);
+      mockPrisma.scheduleRule.findUnique.mockResolvedValue(null);
       mockPrisma.schedule.deleteMany.mockResolvedValue({ count: 0 });
-
-      // Simula banco devolvendo 4 horas já feitas. Portanto remainingHours = 0.
       mockPrisma.schedule.findMany.mockResolvedValue([
         {
           startTime: new Date('2026-06-01T08:00:00Z'),
@@ -166,10 +155,8 @@ describe('RuleDependencyListener', () => {
         },
       ]);
 
-      // Act
       await listener.handleRuleEndDateChanged(event);
 
-      // Assert
       expect(vi.spyOn(schedulesService, 'generateBulk')).not.toHaveBeenCalled();
     });
   });

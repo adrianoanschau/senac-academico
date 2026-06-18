@@ -15,6 +15,22 @@ import { MigrateRuleDto } from './dto/migrate-rule.dto';
 import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { throwPostponeConfirmRequired } from './constants/schedule-error.constants';
 import {
+  dayAfterInScheduleTz,
+  findFirstRuleOccurrence as findFirstRuleOccurrenceSlot,
+  parseFixedPostponeSlot,
+  startOfScheduleDay,
+} from './utils/schedule-date.utils';
+import {
+  computeRemainingHours,
+  resolveOriginalTotalHours,
+  sumScheduleDurationMinutes,
+} from './utils/schedule-hours.utils';
+import {
+  dependentRuleWhere,
+  resolveRuleRootId,
+  ruleFamilyWhere,
+} from './utils/schedule-rule.utils';
+import {
   RULE_EVENTS,
   RuleEndDateChangedEvent,
 } from './events/rule-end-date-changed.event';
@@ -319,63 +335,45 @@ export class SchedulesService {
       );
     }
 
-    const startOfDay = new Date(dto.transitionDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
+    const startOfDay = startOfScheduleDay(new Date(dto.transitionDate));
 
-    const targetRootId: string = oldRule.rootRuleId ?? oldRule.id;
+    const targetRootId = resolveRuleRootId(oldRule);
 
     // Limpeza, criação da regra e geração das aulas numa única transação
     const { newRule, lastClassEndDate } = await this.prisma.$transaction(
       async (tx) => {
-        let originalTotalHours = oldRule.totalHours;
-        if (oldRule.rootRuleId) {
-          const rootRule = await tx.scheduleRule.findUnique({
-            where: { id: oldRule.rootRuleId },
-          });
-          if (rootRule) {
-            originalTotalHours = rootRule.totalHours;
-          }
-        }
+        const rootRule = oldRule.rootRuleId
+          ? await tx.scheduleRule.findUnique({
+              where: { id: oldRule.rootRuleId },
+            })
+          : null;
+        const originalTotalHours = resolveOriginalTotalHours(oldRule, rootRule);
 
         await tx.schedule.deleteMany({
           where: {
-            OR: [
-              { ruleId: targetRootId },
-              { rule: { is: { rootRuleId: targetRootId } } },
+            AND: [
+              ruleFamilyWhere(targetRootId, [
+                ClassStatus.PLANNED,
+                ClassStatus.SCHEDULED,
+              ]),
+              { startTime: { gte: startOfDay } },
             ],
-            startTime: { gte: startOfDay },
-            status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
           },
         });
 
         const validClasses = await tx.schedule.findMany({
-          where: {
-            OR: [
-              { ruleId: targetRootId },
-              { rule: { is: { rootRuleId: targetRootId } } },
-            ],
-            status: {
-              in: [
-                ClassStatus.COMPLETED,
-                ClassStatus.SCHEDULED,
-                ClassStatus.PLANNED,
-              ],
-            },
-          },
+          where: ruleFamilyWhere(targetRootId, [
+            ClassStatus.COMPLETED,
+            ClassStatus.SCHEDULED,
+            ClassStatus.PLANNED,
+          ]),
         });
 
-        const consumedMinutes = validClasses.reduce((acc, curr) => {
-          return (
-            acc +
-            Math.round(
-              (curr.endTime.getTime() - curr.startTime.getTime()) / 60000,
-            )
-          );
-        }, 0);
-
-        const originalTotalMinutes = Math.round(originalTotalHours * 60);
-        const remainingMinutes = originalTotalMinutes - consumedMinutes;
-        const remainingHours = remainingMinutes / 60;
+        const consumedMinutes = sumScheduleDurationMinutes(validClasses);
+        const remainingHours = computeRemainingHours(
+          originalTotalHours,
+          consumedMinutes,
+        );
 
         if (remainingHours <= 0) {
           throw new BadRequestException(
@@ -480,15 +478,11 @@ export class SchedulesService {
       );
     }
 
-    const targetRootId = rule.rootRuleId || rule.id;
+    const targetRootId = resolveRuleRootId(rule);
 
     const result = await this.prisma.schedule.updateMany({
       where: {
-        OR: [
-          { ruleId: targetRootId },
-          { rule: { is: { rootRuleId: targetRootId } } },
-        ],
-        status: ClassStatus.PLANNED,
+        ...ruleFamilyWhere(targetRootId, [ClassStatus.PLANNED]),
       },
       data: {
         status: ClassStatus.SCHEDULED,
@@ -519,7 +513,7 @@ export class SchedulesService {
       );
     }
 
-    const targetRootId = original.rule.rootRuleId || original.rule.id;
+    const targetRootId = resolveRuleRootId(original.rule);
 
     const newSchedule = await this.prisma.$transaction((tx) =>
       this.postponeClassInTransaction(
@@ -588,7 +582,7 @@ export class SchedulesService {
     }
 
     const { rule } = scheduleCtx;
-    const targetRootId = rule.rootRuleId || rule.id;
+    const targetRootId = resolveRuleRootId(rule);
     const originalStatus = classToMove.status;
 
     let slot = await this.resolvePostponeSlot(
@@ -684,7 +678,7 @@ export class SchedulesService {
     chainTarget?: { startTime: Date; endTime: Date },
   ): Promise<{ startTime: Date; endTime: Date }> {
     if (newDateStr) {
-      return this.parseFixedPostponeSlot(newDateStr, schedule.rule);
+      return parseFixedPostponeSlot(newDateStr, schedule.rule);
     }
 
     if (chainTarget) {
@@ -692,35 +686,6 @@ export class SchedulesService {
     }
 
     return this.computeEndOfRuleSlot(tx, schedule, targetRootId);
-  }
-
-  private parseFixedPostponeSlot(
-    newDateStr: string,
-    rule: { startTimeStr: string; endTimeStr: string },
-  ): { startTime: Date; endTime: Date } {
-    const [startH, startM] = rule.startTimeStr.split(':').map(Number);
-    const [endH, endM] = rule.endTimeStr.split(':').map(Number);
-    const dateString = newDateStr.includes('T')
-      ? newDateStr
-      : `${newDateStr}T12:00:00`;
-    const parsedDate = new Date(dateString);
-
-    return {
-      startTime: new Date(
-        parsedDate.getFullYear(),
-        parsedDate.getMonth(),
-        parsedDate.getDate(),
-        startH,
-        startM,
-      ),
-      endTime: new Date(
-        parsedDate.getFullYear(),
-        parsedDate.getMonth(),
-        parsedDate.getDate(),
-        endH,
-        endM,
-      ),
-    };
   }
 
   /** Primeira vaga após a última aula da disciplina (adiamento raiz). */
@@ -739,15 +704,12 @@ export class SchedulesService {
   ): Promise<{ startTime: Date; endTime: Date }> {
     const lastClass = await tx.schedule.findFirst({
       where: {
-        AND: [
-          this.ruleFamilyWhere(targetRootId),
-          { id: { not: schedule.id } },
-        ],
+        AND: [ruleFamilyWhere(targetRootId), { id: { not: schedule.id } }],
       },
       orderBy: { endTime: 'desc' },
     });
 
-    const nextDateToSearch = this.dayAfter(
+    const nextDateToSearch = dayAfterInScheduleTz(
       lastClass?.endTime ?? schedule.endTime,
     );
 
@@ -774,12 +736,10 @@ export class SchedulesService {
     },
     movingScheduleId: string,
   ): Promise<{ startTime: Date; endTime: Date }> {
-    const ruleRootId = rule.rootRuleId || rule.id;
+    const ruleRootId = resolveRuleRootId(rule);
 
     const dependentRule = await tx.scheduleRule.findFirst({
-      where: {
-        OR: [{ dependsOnRuleId: ruleRootId }, { dependsOnRuleId: rule.id }],
-      },
+      where: dependentRuleWhere(ruleRootId, rule.id),
     });
 
     if (!dependentRule) {
@@ -801,9 +761,9 @@ export class SchedulesService {
       );
     }
 
-    const dependentRootId = dependentRule.rootRuleId || dependentRule.id;
+    const dependentRootId = resolveRuleRootId(dependentRule);
     const firstDependentClass = await tx.schedule.findFirst({
-      where: this.ruleFamilyWhere(dependentRootId, [
+      where: ruleFamilyWhere(dependentRootId, [
         ClassStatus.PLANNED,
         ClassStatus.SCHEDULED,
       ]),
@@ -842,40 +802,20 @@ export class SchedulesService {
     startTimeStr: string,
     endTimeStr: string,
   ): { startTime: Date; endTime: Date } {
-    const [startH, startM] = startTimeStr.split(':').map(Number);
-    const [endH, endM] = endTimeStr.split(':').map(Number);
-    const cursor = new Date(fromDate);
-    cursor.setHours(0, 0, 0, 0);
+    const slot = findFirstRuleOccurrenceSlot(
+      fromDate,
+      daysOfWeek,
+      startTimeStr,
+      endTimeStr,
+    );
 
-    for (let safety = 0; safety < 730; safety++) {
-      const dayOfWeek = cursor.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-      if (!isWeekend && daysOfWeek.includes(dayOfWeek)) {
-        return {
-          startTime: new Date(
-            cursor.getFullYear(),
-            cursor.getMonth(),
-            cursor.getDate(),
-            startH,
-            startM,
-          ),
-          endTime: new Date(
-            cursor.getFullYear(),
-            cursor.getMonth(),
-            cursor.getDate(),
-            endH,
-            endM,
-          ),
-        };
-      }
-
-      cursor.setDate(cursor.getDate() + 1);
+    if (!slot) {
+      throw new BadRequestException(
+        'Erro ao projetar nova data: não há dias válidos no próximo ano.',
+      );
     }
 
-    throw new BadRequestException(
-      'Erro ao projetar nova data: não há dias válidos no próximo ano.',
-    );
+    return slot;
   }
 
   private async findPostponeConflict(
@@ -958,35 +898,14 @@ export class SchedulesService {
     }
   }
 
-  private ruleFamilyWhere(
-    ruleId: string,
-    statuses: ClassStatus[] = [
-      ClassStatus.SCHEDULED,
-      ClassStatus.PLANNED,
-      ClassStatus.COMPLETED,
-    ],
-  ): Prisma.ScheduleWhereInput {
-    return {
-      OR: [{ ruleId }, { rule: { rootRuleId: ruleId } }],
-      status: { in: statuses },
-    };
-  }
-
   private async findRuleFamilyLastClass(
     ruleId: string,
     client: Prisma.TransactionClient | PrismaService = this.prisma,
   ) {
     return client.schedule.findFirst({
-      where: this.ruleFamilyWhere(ruleId),
+      where: ruleFamilyWhere(ruleId),
       orderBy: { endTime: 'desc' },
     });
-  }
-
-  private dayAfter(date: Date): Date {
-    const next = new Date(date);
-    next.setDate(next.getDate() + 1);
-    next.setHours(0, 0, 0, 0);
-    return next;
   }
 
   private async resolveDependencyStartDate(
@@ -995,11 +914,11 @@ export class SchedulesService {
   ): Promise<Date> {
     const dependencyLastClass = await client.schedule.findFirst({
       where: {
-        OR: [
-          { ruleId: dependsOnRuleId },
-          { rule: { rootRuleId: dependsOnRuleId } },
-        ],
-        status: { not: ClassStatus.CANCELLED },
+        ...ruleFamilyWhere(dependsOnRuleId, [
+          ClassStatus.PLANNED,
+          ClassStatus.SCHEDULED,
+          ClassStatus.COMPLETED,
+        ]),
       },
       orderBy: { endTime: 'desc' },
     });
@@ -1010,6 +929,6 @@ export class SchedulesService {
       );
     }
 
-    return this.dayAfter(dependencyLastClass.endTime);
+    return dayAfterInScheduleTz(dependencyLastClass.endTime);
   }
 }
