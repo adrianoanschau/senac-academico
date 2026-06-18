@@ -18,6 +18,7 @@ import {
   resolveRuleRootId,
   ruleFamilyWhere,
 } from '../utils/schedule-rule.utils';
+import { formatRuleDependencyLog } from './rule-dependency.logger';
 
 @Injectable()
 export class RuleDependencyListener {
@@ -32,7 +33,11 @@ export class RuleDependencyListener {
   @OnEvent(RULE_EVENTS.END_DATE_CHANGED)
   async handleRuleEndDateChanged(event: RuleEndDateChangedEvent) {
     this.logger.log(
-      `[Efeito Dominó] Regra ${event.ruleId} (Turma: ${event.classGroupId}) teve data final alterada para ${event.newEndDate.toISOString()}.`,
+      formatRuleDependencyLog('domino.received', {
+        ruleId: event.ruleId,
+        classGroupId: event.classGroupId,
+        newEndDate: event.newEndDate.toISOString(),
+      }),
     );
 
     try {
@@ -42,7 +47,10 @@ export class RuleDependencyListener {
 
       if (!dependentRule) {
         this.logger.log(
-          `[Efeito Dominó] Fim da cadeia. Nenhuma disciplina depende da regra ${event.ruleId}.`,
+          formatRuleDependencyLog('domino.chain_end', {
+            ruleId: event.ruleId,
+            reason: 'no_dependent_rule',
+          }),
         );
         return;
       }
@@ -79,13 +87,23 @@ export class RuleDependencyListener {
 
       if (remainingHours <= 0) {
         this.logger.log(
-          `[Efeito Dominó] A regra dependente ${dependentRule.id} já teve toda a sua carga horária concluída.`,
+          formatRuleDependencyLog('domino.hours_exhausted', {
+            ruleId: event.ruleId,
+            dependentRuleId: dependentRule.id,
+            dependentRootId,
+          }),
         );
         return;
       }
 
       this.logger.log(
-        `[Efeito Dominó] Recalculando ${dependentRule.id} a partir de ${newStartDate.toISOString()} com ${remainingHours}h restantes.`,
+        formatRuleDependencyLog('domino.recalculate', {
+          ruleId: event.ruleId,
+          dependentRuleId: dependentRule.id,
+          dependentRootId,
+          newStartDate: newStartDate.toISOString(),
+          remainingHours,
+        }),
       );
 
       const bulkResult = await this.schedulesService.generateBulk({
@@ -111,10 +129,24 @@ export class RuleDependencyListener {
             dependentRule.classGroupId,
           ),
         );
+
+        this.logger.log(
+          formatRuleDependencyLog('domino.completed', {
+            ruleId: event.ruleId,
+            dependentRuleId: dependentRule.id,
+            dependentRootId,
+            generatedCount: bulkResult.generatedCount,
+            lastClassEndDate: bulkResult.lastClassEndDate.toISOString(),
+          }),
+        );
       }
     } catch (error) {
       this.logger.error(
-        `[Efeito Dominó] Erro crítico ao propagar reagendamento: ${error instanceof Error ? error.message : error}`,
+        formatRuleDependencyLog('domino.error', {
+          ruleId: event.ruleId,
+          classGroupId: event.classGroupId,
+          message: error instanceof Error ? error.message : String(error),
+        }),
         error instanceof Error ? error.stack : undefined,
       );
     }

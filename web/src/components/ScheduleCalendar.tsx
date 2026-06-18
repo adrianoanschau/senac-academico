@@ -9,6 +9,7 @@ import { Check } from "lucide-react";
 import { usePersistentState } from "../hooks/usePersistentState";
 import api from "../services/api";
 import { LoadingOverlay } from "./LoadingOverlay";
+import { buildScheduleCalendarQueryParams } from "../utils/scheduleCalendarParams";
 
 // Google Calendar-like color palette
 const subjectColors = [
@@ -180,30 +181,10 @@ export default function ScheduleCalendar({
           return [];
         }
 
-        const params = new URLSearchParams();
-        params.append("start", info.startStr);
-        params.append("end", info.endStr);
-
-        if (currentFilters?.search)
-          params.append("search", currentFilters.search);
-
-        if (currentFilters?.status) {
-          if (Array.isArray(currentFilters.status)) {
-            currentFilters.status.forEach((s) => params.append("status", s));
-          } else if (currentFilters.status !== "all") {
-            params.append("status", String(currentFilters.status));
-          }
-        }
-
-        if (currentFilters?.subjectId)
-          params.append("subjectId", currentFilters.subjectId);
-
-        if (currentFilters?.roomId)
-          params.append("roomId", currentFilters.roomId);
-        if (currentFilters?.professorId)
-          params.append("professorId", currentFilters.professorId);
-        if (currentFilters?.classGroupId)
-          params.append("classGroupId", currentFilters.classGroupId);
+        const params = buildScheduleCalendarQueryParams(
+          { startStr: info.startStr, endStr: info.endStr },
+          currentFilters ?? undefined,
+        );
 
         const response = await api.get(`/schedules?${params.toString()}`);
         const data: ScheduleResponse[] =

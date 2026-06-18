@@ -20,6 +20,14 @@ describe('SchedulesService', () => {
       findUnique: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      createMany: vi.fn(),
+    },
+    subject: {
+      findUnique: vi.fn(),
+    },
+    scheduleRule: {
+      create: vi.fn(),
+      update: vi.fn(),
     },
     $transaction: vi.fn(),
   };
@@ -173,6 +181,75 @@ describe('SchedulesService', () => {
         dto,
       );
       expect(result.newRuleId).toBe('rule-2');
+    });
+  });
+
+  describe('generateBulk', () => {
+    const dto = {
+      classGroupId: 'cg-1',
+      subjectId: 'subj-1',
+      professorId: 'prof-1',
+      roomId: 'room-1',
+      startDate: new Date('2026-06-01'),
+      daysOfWeek: [1, 3],
+      startTimeStr: '08:00',
+      endTimeStr: '10:00',
+    };
+
+    it('deve gerar aulas e retornar metadados da regra', async () => {
+      mockPrisma.subject.findUnique.mockResolvedValue({ id: 'subj-1', hours: 8 });
+      mockPrisma.schedule.findMany.mockResolvedValue([]);
+      mockGeneratorService.generateProjections.mockResolvedValue([
+        {
+          startTime: new Date('2026-06-02T11:00:00.000Z'),
+          endTime: new Date('2026-06-02T13:00:00.000Z'),
+        },
+      ]);
+      mockPrisma.$transaction.mockImplementation(
+        async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => {
+          mockPrisma.scheduleRule.create.mockResolvedValue({ id: 'rule-1' });
+          mockPrisma.schedule.createMany.mockResolvedValue({ count: 1 });
+          return fn(mockPrisma);
+        },
+      );
+
+      const result = await service.generateBulk(dto as never);
+
+      expect(result.ruleId).toBe('rule-1');
+      expect(result.generatedCount).toBe(1);
+      expect(result.lastClassEndDate).toEqual(
+        new Date('2026-06-02T13:00:00.000Z'),
+      );
+    });
+
+    it('deve usar resolveDependencyStartDate quando dependsOnRuleId existir', async () => {
+      mockPrisma.subject.findUnique.mockResolvedValue({ id: 'subj-1', hours: 4 });
+      mockRuleLifecycleService.resolveDependencyStartDate.mockResolvedValue(
+        new Date('2026-06-10T00:00:00.000Z'),
+      );
+      mockPrisma.schedule.findMany.mockResolvedValue([]);
+      mockGeneratorService.generateProjections.mockResolvedValue([
+        {
+          startTime: new Date('2026-06-11T11:00:00.000Z'),
+          endTime: new Date('2026-06-11T13:00:00.000Z'),
+        },
+      ]);
+      mockPrisma.$transaction.mockImplementation(
+        async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => {
+          mockPrisma.scheduleRule.create.mockResolvedValue({ id: 'rule-2' });
+          mockPrisma.schedule.createMany.mockResolvedValue({ count: 1 });
+          return fn(mockPrisma);
+        },
+      );
+
+      await service.generateBulk({
+        ...dto,
+        dependsOnRuleId: 'rule-1',
+      } as never);
+
+      expect(
+        mockRuleLifecycleService.resolveDependencyStartDate,
+      ).toHaveBeenCalledWith('rule-1');
     });
   });
 });
