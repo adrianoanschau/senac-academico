@@ -4,7 +4,7 @@ import { SchedulesController } from './schedules.controller';
 import { SchedulesService } from './schedules.service';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
-
+import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { GanttPlannerService } from './gantt-planner.service';
 
 describe('SchedulesController', () => {
@@ -28,7 +28,6 @@ describe('SchedulesController', () => {
   };
 
   beforeEach(async () => {
-    // Arrange
     vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -51,39 +50,30 @@ describe('SchedulesController', () => {
   });
 
   describe('findAll', () => {
-    it('deve extrair as querystrings corretamente e delegar para o service', async () => {
-      // Arrange
+    it('deve delegar o DTO de query para o service', async () => {
       const mockData = [{ id: 'sched-1' }];
       mockSchedulesService.findAll.mockResolvedValue(mockData);
 
-      // Act
-      const result = await controller.findAll(
-        'start',
-        'end',
-        'cg',
-        'prof',
-        'room',
-        'subj',
-        'PLANNED',
-      );
+      const query: FindSchedulesQueryDto = {
+        start: '2026-06-01',
+        end: '2026-06-30',
+        classGroupId: 'cg',
+        professorId: 'prof',
+        roomId: 'room',
+        subjectId: 'subj',
+        status: ['PLANNED'],
+        search: 'java',
+      };
 
-      // Assert
-      expect(vi.spyOn(service, 'findAll')).toHaveBeenCalledWith(
-        'start',
-        'end',
-        'cg',
-        'prof',
-        'room',
-        'subj',
-        'PLANNED',
-      );
+      const result = await controller.findAll(query);
+
+      expect(vi.spyOn(service, 'findAll')).toHaveBeenCalledWith(query);
       expect(result).toEqual({ data: mockData });
     });
   });
 
   describe('postponeClass', () => {
     it('deve processar o adiamento da aula desestruturando o DTO e repassando argumentos isolados', async () => {
-      // Arrange
       const dto: PostponeScheduleDto = {
         reason: 'Professor doente',
         newDate: '2026-08-01',
@@ -92,10 +82,8 @@ describe('SchedulesController', () => {
       const mockResponse = { message: 'Adiado' };
       mockSchedulesService.postponeClass.mockResolvedValue(mockResponse);
 
-      // Act
       const result = await controller.postponeClass('sched-1', dto);
 
-      // Assert
       expect(vi.spyOn(service, 'postponeClass')).toHaveBeenCalledWith(
         'sched-1',
         dto.reason,
@@ -108,10 +96,8 @@ describe('SchedulesController', () => {
 
   describe('remove', () => {
     it('deve remover a aula e retornar a mensagem correta', async () => {
-      // Act
       const result = await controller.remove('sched-1');
 
-      // Assert
       expect(result).toEqual({
         data: { message: 'Schedule removed successfully' },
       });

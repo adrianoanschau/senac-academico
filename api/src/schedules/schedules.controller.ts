@@ -8,12 +8,15 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
+import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { PlanModuleDto } from './dto/plan-module.dto';
 import { GanttPlannerService } from './gantt-planner.service';
@@ -29,6 +32,7 @@ export class SchedulesController {
     private readonly ganttPlannerService: GanttPlannerService,
   ) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   async create(@Body() createScheduleDto: CreateScheduleDto) {
     const data = await this.schedulesService.create(createScheduleDto);
@@ -36,25 +40,8 @@ export class SchedulesController {
   }
 
   @Get()
-  async findAll(
-    @Query('start') start?: string,
-    @Query('end') end?: string,
-    @Query('classGroupId') classGroupId?: string,
-    @Query('professorId') professorId?: string,
-    @Query('roomId') roomId?: string,
-    @Query('subjectId') subjectId?: string,
-    @Query('status') status?: string | string[],
-  ) {
-    const data = await this.schedulesService.findAll(
-      start,
-      end,
-      classGroupId,
-      professorId,
-      roomId,
-      subjectId,
-      status,
-    );
-
+  async findAll(@Query() query: FindSchedulesQueryDto) {
+    const data = await this.schedulesService.findAll(query);
     return { data };
   }
 
@@ -64,6 +51,7 @@ export class SchedulesController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -73,18 +61,21 @@ export class SchedulesController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.schedulesService.remove(id);
     return { data: { message: 'Schedule removed successfully' } };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('generate')
   async generateBulk(@Body() generateSchedulesDto: GenerateSchedulesDto) {
     const data = await this.schedulesService.generateBulk(generateSchedulesDto);
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('plan-module')
   async planModule(@Body() planModuleDto: PlanModuleDto) {
     const data =
@@ -92,24 +83,28 @@ export class SchedulesController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('gantt/blueprint')
   async ganttBlueprint(@Body() dto: GanttBlueprintDto) {
     const data = await this.ganttPlannerService.buildBlueprint(dto);
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('gantt/recalculate')
   async ganttRecalculate(@Body() dto: GanttRecalculateDto) {
     const data = await this.ganttPlannerService.recalculate(dto);
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('gantt/publish')
   async ganttPublish(@Body() dto: GanttPublishDto) {
     const data = await this.ganttPlannerService.publishBlueprint(dto);
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post(':id/postpone')
   async postponeClass(
     @Param('id') id: string,
@@ -125,6 +120,7 @@ export class SchedulesController {
     };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post('rules/:id/migrate-pattern')
   async migrateRulePattern(
     @Param('id') id: string,
@@ -137,6 +133,7 @@ export class SchedulesController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch('rules/:id/publish')
   async publishRule(@Param('id') id: string) {
     const data = await this.schedulesService.publishRule(id);

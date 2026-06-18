@@ -155,7 +155,7 @@ describe('SchedulesService', () => {
     it('deve filtrar aulas que se sobrepõem ao intervalo informado', async () => {
       mockPrisma.schedule.findMany.mockResolvedValue([]);
 
-      await service.findAll('2026-06-01', '2026-06-30');
+      await service.findAll({ start: '2026-06-01', end: '2026-06-30' });
 
       expect(mockPrisma.schedule.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -163,6 +163,35 @@ describe('SchedulesService', () => {
             AND: [
               { startTime: { lt: new Date('2026-06-30') } },
               { endTime: { gt: new Date('2026-06-01') } },
+            ],
+          }),
+        }),
+      );
+    });
+
+    it('deve filtrar por termo de busca em disciplina, professor, turma ou sala', async () => {
+      mockPrisma.schedule.findMany.mockResolvedValue([]);
+
+      await service.findAll({ search: 'matemática' });
+
+      expect(mockPrisma.schedule.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: [
+              {
+                OR: expect.arrayContaining([
+                  {
+                    subject: {
+                      name: { contains: 'matemática', mode: 'insensitive' },
+                    },
+                  },
+                  {
+                    professor: {
+                      name: { contains: 'matemática', mode: 'insensitive' },
+                    },
+                  },
+                ]),
+              },
             ],
           }),
         }),

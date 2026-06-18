@@ -12,6 +12,8 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
+import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
+import { throwPostponeConfirmRequired } from './constants/schedule-error.constants';
 import {
   RULE_EVENTS,
   RuleEndDateChangedEvent,
@@ -46,35 +48,70 @@ export class SchedulesService {
     });
   }
 
-  async findAll(
-    start?: string,
-    end?: string,
-    classGroupId?: string,
-    professorId?: string,
-    roomId?: string,
-    subjectId?: string,
-    status?: string | string[],
-  ) {
-    const whereCondition: Prisma.ScheduleWhereInput = {};
+  async findAll(query: FindSchedulesQueryDto) {
+    const {
+      start,
+      end,
+      classGroupId,
+      professorId,
+      roomId,
+      subjectId,
+      status,
+      search,
+    } = query;
+
+    const andConditions: Prisma.ScheduleWhereInput[] = [];
 
     if (start && end) {
-      whereCondition.AND = [
+      andConditions.push(
         { startTime: { lt: new Date(end) } },
         { endTime: { gt: new Date(start) } },
-      ];
+      );
     }
+
+    if (search) {
+      andConditions.push({
+        OR: [
+          {
+            subject: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            subject: {
+              code: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            professor: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            classGroup: {
+              code: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            room: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+        ],
+      });
+    }
+
+    const whereCondition: Prisma.ScheduleWhereInput = {
+      ...(andConditions.length > 0 && { AND: andConditions }),
+    };
 
     if (classGroupId) whereCondition.classGroupId = classGroupId;
     if (professorId) whereCondition.professorId = professorId;
     if (roomId) whereCondition.roomId = roomId;
     if (subjectId) whereCondition.subjectId = subjectId;
 
-    if (status) {
-      if (Array.isArray(status)) {
-        whereCondition.status = { in: status as ClassStatus[] };
-      } else {
-        whereCondition.status = status as ClassStatus;
-      }
+    if (status?.length) {
+      whereCondition.status = { in: status };
     }
 
     return this.prisma.schedule.findMany({
@@ -568,11 +605,9 @@ export class SchedulesService {
 
     if (conflict) {
       if (newDateStr && !force) {
-        throw new ConflictException({
-          message: `A data solicitada já possui um conflito com a disciplina ${conflict.subject?.name || 'Desconhecida'}.`,
-          action: 'CONFIRM_REQUIRED',
-          conflictingSubject: conflict.subject?.name || 'Desconhecida',
-        });
+        throwPostponeConfirmRequired(
+          conflict.subject?.name || 'Desconhecida',
+        );
       }
 
       if (!conflict.rule) {
