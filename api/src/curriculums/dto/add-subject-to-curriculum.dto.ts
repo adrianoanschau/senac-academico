@@ -1,9 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsInt,
-  IsNotEmpty,
   IsOptional,
-  IsString,
   IsUUID,
   Min,
   ValidateNested,
