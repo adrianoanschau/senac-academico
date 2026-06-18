@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -58,6 +59,7 @@ describe('RoomsService', () => {
         name: 'Laboratório 1',
         capacity: 30,
       } as CreateRoomDto;
+      mockPrisma.room.findUnique.mockResolvedValue(null);
       mockPrisma.room.create.mockResolvedValue(mockRoom);
 
       // Act
@@ -68,6 +70,17 @@ describe('RoomsService', () => {
         data: dto,
       });
       expect(result).toEqual(mockRoom);
+    });
+
+    it('deve lançar ConflictException para nome duplicado', async () => {
+      const dto: CreateRoomDto = {
+        name: 'Laboratório 1',
+        capacity: 30,
+      } as CreateRoomDto;
+      mockPrisma.room.findUnique.mockResolvedValue(mockRoom);
+
+      await expect(service.create(dto)).rejects.toThrow(ConflictException);
+      expect(mockPrisma.room.create).not.toHaveBeenCalled();
     });
   });
 

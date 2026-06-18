@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -31,21 +32,24 @@ export class RoomsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.roomsService.findOne(id);
     return { data };
   }
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRoomDto: UpdateRoomDto,
+  ) {
     const data = await this.roomsService.update(id, updateRoomDto);
     return { data };
   }
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.roomsService.remove(id);
     return { data };
   }
