@@ -14,6 +14,11 @@ import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { ScheduleConflictService } from './conflict/schedule-conflict.service';
 import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
 import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
+import {
+  buildScheduleWhereInput,
+  resolveSchedulePageLimit,
+  SchedulesFindAllResult,
+} from './utils/schedule-query.utils';
 
 @Injectable()
 export class SchedulesService {
@@ -46,73 +51,14 @@ export class SchedulesService {
     });
   }
 
-  async findAll(query: FindSchedulesQueryDto) {
-    const {
-      start,
-      end,
-      classGroupId,
-      professorId,
-      roomId,
-      subjectId,
-      status,
-      search,
-    } = query;
+  async findAll(
+    query: FindSchedulesQueryDto,
+  ): Promise<SchedulesFindAllResult<Awaited<ReturnType<PrismaService['schedule']['findMany']>>[number]>> {
+    const whereCondition = buildScheduleWhereInput(query);
+    const pageLimit = resolveSchedulePageLimit(query.limit);
+    const take = pageLimit ? pageLimit + 1 : undefined;
 
-    const andConditions: Prisma.ScheduleWhereInput[] = [];
-
-    if (start && end) {
-      andConditions.push(
-        { startTime: { lt: new Date(end) } },
-        { endTime: { gt: new Date(start) } },
-      );
-    }
-
-    if (search) {
-      andConditions.push({
-        OR: [
-          {
-            subject: {
-              name: { contains: search, mode: 'insensitive' },
-            },
-          },
-          {
-            subject: {
-              code: { contains: search, mode: 'insensitive' },
-            },
-          },
-          {
-            professor: {
-              name: { contains: search, mode: 'insensitive' },
-            },
-          },
-          {
-            classGroup: {
-              code: { contains: search, mode: 'insensitive' },
-            },
-          },
-          {
-            room: {
-              name: { contains: search, mode: 'insensitive' },
-            },
-          },
-        ],
-      });
-    }
-
-    const whereCondition: Prisma.ScheduleWhereInput = {
-      ...(andConditions.length > 0 && { AND: andConditions }),
-    };
-
-    if (classGroupId) whereCondition.classGroupId = classGroupId;
-    if (professorId) whereCondition.professorId = professorId;
-    if (roomId) whereCondition.roomId = roomId;
-    if (subjectId) whereCondition.subjectId = subjectId;
-
-    if (status?.length) {
-      whereCondition.status = { in: status };
-    }
-
-    return this.prisma.schedule.findMany({
+    const schedules = await this.prisma.schedule.findMany({
       where: whereCondition,
       include: {
         professor: true,
@@ -127,7 +73,25 @@ export class SchedulesService {
         },
       },
       orderBy: { startTime: 'asc' },
+      take,
     });
+
+    if (!pageLimit) {
+      return { data: schedules };
+    }
+
+    const hasMore = schedules.length > pageLimit;
+    const data = hasMore ? schedules.slice(0, pageLimit) : schedules;
+    const lastItem = data.at(-1);
+
+    return {
+      data,
+      meta: {
+        limit: pageLimit,
+        hasMore,
+        nextCursor: hasMore && lastItem ? lastItem.startTime.toISOString() : null,
+      },
+    };
   }
 
   async findOne(id: string) {

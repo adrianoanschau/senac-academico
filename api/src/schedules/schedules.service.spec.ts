@@ -105,7 +105,7 @@ describe('SchedulesService', () => {
     it('deve filtrar aulas que se sobrepõem ao intervalo informado', async () => {
       mockPrisma.schedule.findMany.mockResolvedValue([]);
 
-      await service.findAll({ start: '2026-06-01', end: '2026-06-30' });
+      const result = await service.findAll({ start: '2026-06-01', end: '2026-06-30' });
 
       expect(mockPrisma.schedule.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -117,6 +117,27 @@ describe('SchedulesService', () => {
           }),
         }),
       );
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('deve paginar resultados quando limit for informado', async () => {
+      mockPrisma.schedule.findMany.mockResolvedValue([
+        { id: '1', startTime: new Date('2026-06-01T08:00:00Z') },
+        { id: '2', startTime: new Date('2026-06-02T08:00:00Z') },
+        { id: '3', startTime: new Date('2026-06-03T08:00:00Z') },
+      ]);
+
+      const result = await service.findAll({ limit: 2 });
+
+      expect(mockPrisma.schedule.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 3 }),
+      );
+      expect(result.data).toHaveLength(2);
+      expect(result.meta).toEqual({
+        limit: 2,
+        hasMore: true,
+        nextCursor: new Date('2026-06-02T08:00:00Z').toISOString(),
+      });
     });
   });
 

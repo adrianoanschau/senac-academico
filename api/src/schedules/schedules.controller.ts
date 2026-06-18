@@ -41,8 +41,7 @@ export class SchedulesController {
 
   @Get()
   async findAll(@Query() query: FindSchedulesQueryDto) {
-    const data = await this.schedulesService.findAll(query);
-    return { data };
+    return this.schedulesService.findAll(query);
   }
 
   @Get(':id')

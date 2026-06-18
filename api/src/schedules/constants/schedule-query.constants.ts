@@ -1,0 +1,2 @@
+export const SCHEDULES_DEFAULT_PAGE_LIMIT = 100;
+export const SCHEDULES_MAX_PAGE_LIMIT = 500;

@@ -8,6 +8,7 @@ import {
   startOfScheduleDay,
 } from './utils/schedule-date.utils';
 import { hoursToMinutes } from './utils/schedule-hours.utils';
+import { OverrideType } from '@/prisma/generated';
 
 export interface ProjectedSchedule {
   startTime: Date;
@@ -15,8 +16,21 @@ export interface ProjectedSchedule {
   durationInMinutes: number;
 }
 
+interface CachedOverrides {
+  expiresAt: number;
+  items: Array<{
+    type: OverrideType;
+    startTime: Date;
+    endTime: Date;
+  }>;
+}
+
+const OVERRIDES_CACHE_TTL_MS = 60_000;
+
 @Injectable()
 export class ScheduleGeneratorService {
+  private overridesCache: CachedOverrides | null = null;
+
   constructor(private readonly prisma: PrismaService) {}
 
   async generateProjections(
@@ -34,11 +48,7 @@ export class ScheduleGeneratorService {
       endTimeStr,
     );
 
-    const overrides = await this.prisma.scheduleOverride.findMany({
-      where: {
-        endTime: { gte: startDate },
-      },
-    });
+    const overrides = await this.loadOverridesFrom(startDate);
 
     let cursorDate = startOfScheduleDay(startDate);
     let safetyCounter = 0;
@@ -74,7 +84,7 @@ export class ScheduleGeneratorService {
 
       const isBlocked = overrides.some(
         (override) =>
-          override.type === 'BLOCK' &&
+          override.type === OverrideType.BLOCK &&
           override.startTime < proposedEnd &&
           override.endTime > proposedStart,
       );
@@ -86,7 +96,7 @@ export class ScheduleGeneratorService {
 
       const isExtraDay = overrides.some(
         (override) =>
-          override.type === 'EXTRA_DAY' &&
+          override.type === OverrideType.EXTRA_DAY &&
           override.startTime <= proposedStart &&
           override.endTime >= proposedEnd,
       );
@@ -113,5 +123,28 @@ export class ScheduleGeneratorService {
     }
 
     return projections;
+  }
+
+  clearOverridesCache(): void {
+    this.overridesCache = null;
+  }
+
+  private async loadOverridesFrom(startDate: Date) {
+    const now = Date.now();
+
+    if (!this.overridesCache || this.overridesCache.expiresAt <= now) {
+      const items = await this.prisma.scheduleOverride.findMany({
+        orderBy: { startTime: 'asc' },
+      });
+
+      this.overridesCache = {
+        items,
+        expiresAt: now + OVERRIDES_CACHE_TTL_MS,
+      };
+    }
+
+    return this.overridesCache.items.filter(
+      (override) => override.endTime >= startDate,
+    );
   }
 }

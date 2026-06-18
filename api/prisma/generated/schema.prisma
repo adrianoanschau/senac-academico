@@ -166,6 +166,10 @@ model Schedule {
   room       Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)
   rule       ScheduleRule? @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
+  @@index([roomId, startTime, endTime])
+  @@index([professorId, startTime, endTime])
+  @@index([classGroupId, startTime])
+  @@index([startTime])
   @@map("schedules")
 }
 
@@ -179,6 +183,7 @@ model ScheduleOverride {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([endTime, startTime])
   @@map("schedule_overrides")
 }
 
@@ -211,5 +216,7 @@ model ScheduleRule {
   dependsOn      ScheduleRule?  @relation("RuleDependency", fields: [dependsOnRuleId], references: [id])
   dependentRules ScheduleRule[] @relation("RuleDependency")
 
+  @@index([dependsOnRuleId])
+  @@index([rootRuleId])
   @@map("schedule_rules")
 }

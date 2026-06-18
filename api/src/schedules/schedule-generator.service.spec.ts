@@ -87,16 +87,14 @@ describe('ScheduleGeneratorService', () => {
     });
 
     it('deve permitir agendamento em dia diferente do usual se houver override do tipo EXTRA_DAY (Caminho Feliz)', async () => {
-      // Arrange
       mockPrisma.scheduleOverride.findMany.mockResolvedValue([
         {
           type: OverrideType.EXTRA_DAY,
           startTime: new Date(2026, 5, 16, 0, 0, 0),
-          endTime: new Date(2026, 5, 16, 23, 59, 59), // Libera a Terça-feira como dia de aula!
+          endTime: new Date(2026, 5, 16, 23, 59, 59),
         },
       ]);
 
-      // Act
       const result = await service.generateProjections(
         startDate,
         daysOfWeek,
@@ -105,11 +103,30 @@ describe('ScheduleGeneratorService', () => {
         totalSubjectHours,
       );
 
-      // Assert
-      // Deve agendar normalmente no dia 15 (Segunda) e aproveitar o Extra Day no dia 16 (Terça)
       expect(result).toHaveLength(2);
       expect(result[0].startTime).toEqual(getExpectedDate(15, 8));
       expect(result[1].startTime).toEqual(getExpectedDate(16, 8));
+    });
+
+    it('deve reutilizar cache de overrides entre projeções consecutivas', async () => {
+      mockPrisma.scheduleOverride.findMany.mockResolvedValue([]);
+
+      await service.generateProjections(
+        startDate,
+        daysOfWeek,
+        startTimeStr,
+        endTimeStr,
+        4,
+      );
+      await service.generateProjections(
+        startDate,
+        daysOfWeek,
+        startTimeStr,
+        endTimeStr,
+        4,
+      );
+
+      expect(mockPrisma.scheduleOverride.findMany).toHaveBeenCalledTimes(1);
     });
   });
 });

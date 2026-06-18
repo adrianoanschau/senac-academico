@@ -1,14 +1,18 @@
 import { ClassStatus } from '@/prisma/generated';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
+  Min,
   ValidateIf,
 } from 'class-validator';
+import { SCHEDULES_MAX_PAGE_LIMIT } from '../constants/schedule-query.constants';
 
 export class FindSchedulesQueryDto {
   @ValidateIf((query: FindSchedulesQueryDto) => query.end !== undefined)
@@ -48,4 +52,15 @@ export class FindSchedulesQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(SCHEDULES_MAX_PAGE_LIMIT)
+  limit?: number;
+
+  @IsOptional()
+  @IsDateString()
+  cursor?: string;
 }

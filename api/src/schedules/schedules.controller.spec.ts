@@ -52,7 +52,7 @@ describe('SchedulesController', () => {
   describe('findAll', () => {
     it('deve delegar o DTO de query para o service', async () => {
       const mockData = [{ id: 'sched-1' }];
-      mockSchedulesService.findAll.mockResolvedValue(mockData);
+      mockSchedulesService.findAll.mockResolvedValue({ data: mockData });
 
       const query: FindSchedulesQueryDto = {
         start: '2026-06-01',
