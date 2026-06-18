@@ -181,8 +181,8 @@ export default function ScheduleCalendar({
         }
 
         const params = new URLSearchParams();
-        params.append("startDate", info.startStr);
-        params.append("endDate", info.endStr);
+        params.append("start", info.startStr);
+        params.append("end", info.endStr);
 
         if (currentFilters?.search)
           params.append("search", currentFilters.search);

@@ -4,6 +4,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, ClassStatus } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
@@ -11,55 +12,28 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
+import {
+  RULE_EVENTS,
+  RuleEndDateChangedEvent,
+} from './events/rule-end-date-changed.event';
 
 @Injectable()
 export class SchedulesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly generatorService: ScheduleGeneratorService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(createScheduleDto: CreateScheduleDto) {
     const { startTime, endTime, roomId, professorId } = createScheduleDto;
 
-    // TS Erro fix: Comparadores lógicos em TS exigem coerção clara para Date ou números
-    if (new Date(startTime) >= new Date(endTime)) {
-      throw new BadRequestException(
-        'O horário de início deve ser obrigatoriamente anterior ao horário de término.',
-      );
-    }
-
-    const roomConflict = await this.prisma.schedule.findFirst({
-      where: {
-        roomId: roomId,
-        startTime: { lt: new Date(endTime) },
-        endTime: { gt: new Date(startTime) },
-        status: { not: ClassStatus.CANCELLED },
-      },
-      include: { classGroup: true },
+    await this.assertNoScheduleConflicts({
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+      roomId,
+      professorId,
     });
-
-    if (roomConflict) {
-      throw new ConflictException(
-        `Choque de Sala: Este ambiente já está ocupado pela turma ${roomConflict.classGroup.code} neste mesmo horário.`,
-      );
-    }
-
-    const professorConflict = await this.prisma.schedule.findFirst({
-      where: {
-        professorId: professorId,
-        startTime: { lt: new Date(endTime) },
-        endTime: { gt: new Date(startTime) },
-        status: { not: ClassStatus.CANCELLED },
-      },
-      include: { classGroup: true },
-    });
-
-    if (professorConflict) {
-      throw new ConflictException(
-        `Choque de Professor: Este professor já está dando aula para a turma ${professorConflict.classGroup.code} neste mesmo horário.`,
-      );
-    }
 
     return this.prisma.schedule.create({
       data: createScheduleDto,
@@ -84,8 +58,10 @@ export class SchedulesService {
     const whereCondition: Prisma.ScheduleWhereInput = {};
 
     if (start && end) {
-      whereCondition.startTime = { gte: new Date(start) };
-      whereCondition.endTime = { lte: new Date(end) };
+      whereCondition.AND = [
+        { startTime: { lt: new Date(end) } },
+        { endTime: { gt: new Date(start) } },
+      ];
     }
 
     if (classGroupId) whereCondition.classGroupId = classGroupId;
@@ -138,7 +114,20 @@ export class SchedulesService {
   }
 
   async update(id: string, updateScheduleDto: UpdateScheduleDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
+
+    const startTime = updateScheduleDto.startTime ?? existing.startTime;
+    const endTime = updateScheduleDto.endTime ?? existing.endTime;
+    const roomId = updateScheduleDto.roomId ?? existing.roomId;
+    const professorId = updateScheduleDto.professorId ?? existing.professorId;
+
+    await this.assertNoScheduleConflicts({
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+      roomId,
+      professorId,
+      excludeId: id,
+    });
 
     return this.prisma.schedule.update({
       where: { id },
@@ -298,8 +287,8 @@ export class SchedulesService {
 
     const targetRootId: string = oldRule.rootRuleId ?? oldRule.id;
 
-    // ETAPA 1: Limpeza e criação da regra (Dentro da Transação)
-    const { newRule, remainingHours } = await this.prisma.$transaction(
+    // Limpeza, criação da regra e geração das aulas numa única transação
+    const { newRule, lastClassEndDate } = await this.prisma.$transaction(
       async (tx) => {
         let originalTotalHours = oldRule.totalHours;
         if (oldRule.rootRuleId) {
@@ -311,7 +300,6 @@ export class SchedulesService {
           }
         }
 
-        // 2. Deleta todas as aulas a partir da data de corte que não foram finalizadas
         await tx.schedule.deleteMany({
           where: {
             OR: [
@@ -323,7 +311,6 @@ export class SchedulesService {
           },
         });
 
-        // 3. Calcula a carga horária já cumprida (aulas válidas que não foram deletadas)
         const validClasses = await tx.schedule.findMany({
           where: {
             OR: [
@@ -349,7 +336,6 @@ export class SchedulesService {
           );
         }, 0);
 
-        // Trabalhamos com minutos redondos para evitar problemas de precisão ponto flutuante
         const originalTotalMinutes = Math.round(originalTotalHours * 60);
         const remainingMinutes = originalTotalMinutes - consumedMinutes;
         const remainingHours = remainingMinutes / 60;
@@ -360,7 +346,6 @@ export class SchedulesService {
           );
         }
 
-        // 4. Cria a nova regra aplicando as substituições caso existam
         const newRule = await tx.scheduleRule.create({
           data: {
             classGroupId: oldRule.classGroupId,
@@ -375,59 +360,70 @@ export class SchedulesService {
           },
         });
 
-        return { newRule, remainingHours };
+        const searchLimitDate = new Date(startOfDay);
+        searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
+
+        const orConditions: Prisma.ScheduleWhereInput[] = [];
+        if (newRule.classGroupId)
+          orConditions.push({ classGroupId: newRule.classGroupId });
+        if (newRule.professorId)
+          orConditions.push({ professorId: newRule.professorId });
+        if (newRule.roomId) orConditions.push({ roomId: newRule.roomId });
+
+        const existingSchedules = await tx.schedule.findMany({
+          where: {
+            ...(orConditions.length > 0 && { OR: orConditions }),
+            startTime: { gte: startOfDay },
+            endTime: { lte: searchLimitDate },
+            status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
+          },
+          select: { startTime: true, endTime: true },
+        });
+
+        const projections = await this.generatorService.generateProjections(
+          startOfDay,
+          newRule.daysOfWeek,
+          newRule.startTimeStr,
+          newRule.endTimeStr,
+          remainingHours,
+          existingSchedules,
+        );
+
+        if (projections.length > 0) {
+          await tx.schedule.createMany({
+            data: projections.map((proj) => ({
+              classGroupId: newRule.classGroupId,
+              subjectId: newRule.subjectId,
+              professorId: newRule.professorId,
+              roomId: newRule.roomId,
+              startTime: proj.startTime,
+              endTime: proj.endTime,
+              ruleId: newRule.id,
+              status: ClassStatus.PLANNED,
+            })),
+          });
+        }
+
+        const lastClassEndDate =
+          projections.length > 0
+            ? projections[projections.length - 1].endTime
+            : null;
+
+        return { newRule, lastClassEndDate };
       },
     );
 
-    // ETAPA 2: Geração e salvamento das novas aulas (Fora da Transação)
-    // 5. Busca aulas existentes para evitar conflito na nova geração
-    const searchLimitDate = new Date(startOfDay);
-    searchLimitDate.setFullYear(searchLimitDate.getFullYear() + 1);
-
-    const orConditions: Prisma.ScheduleWhereInput[] = [];
-    if (newRule.classGroupId)
-      orConditions.push({ classGroupId: newRule.classGroupId });
-    if (newRule.professorId)
-      orConditions.push({ professorId: newRule.professorId });
-    if (newRule.roomId) orConditions.push({ roomId: newRule.roomId });
-
-    const existingSchedules = await this.prisma.schedule.findMany({
-      where: {
-        ...(orConditions.length > 0 && { OR: orConditions }),
-        startTime: { gte: startOfDay },
-        endTime: { lte: searchLimitDate },
-        status: { in: [ClassStatus.PLANNED, ClassStatus.SCHEDULED] },
-      },
-      select: { startTime: true, endTime: true },
-    });
-
-    // 6. Agora que a exclusão foi comitada, geramos as projeções resilientes a conflitos
-    const projections = await this.generatorService.generateProjections(
-      startOfDay,
-      newRule.daysOfWeek,
-      newRule.startTimeStr,
-      newRule.endTimeStr,
-      remainingHours,
-      existingSchedules,
-    );
-
-    if (projections.length > 0) {
-      // Salvamos usando a conexão principal (this.prisma)
-      await this.prisma.schedule.createMany({
-        data: projections.map((proj) => ({
-          classGroupId: newRule.classGroupId,
-          subjectId: newRule.subjectId,
-          professorId: newRule.professorId,
-          roomId: newRule.roomId,
-          startTime: proj.startTime,
-          endTime: proj.endTime,
-          ruleId: newRule.id,
-          status: ClassStatus.PLANNED,
-        })),
-      });
+    if (lastClassEndDate) {
+      this.eventEmitter.emit(
+        RULE_EVENTS.END_DATE_CHANGED,
+        new RuleEndDateChangedEvent(
+          targetRootId,
+          lastClassEndDate,
+          oldRule.classGroupId,
+        ),
+      );
     }
 
-    // 6. Retorno de sucesso
     return {
       message: 'Padrão de aulas migrado com sucesso!',
       newRuleId: newRule.id,
@@ -475,7 +471,20 @@ export class SchedulesService {
     newDateStr?: string,
     force?: boolean,
   ) {
-    const result = await this.prisma.$transaction((tx) =>
+    const original = await this.prisma.schedule.findUnique({
+      where: { id },
+      include: { rule: true },
+    });
+
+    if (!original?.rule) {
+      throw new BadRequestException(
+        `Aula com ID ${id} não possui regra atrelada para recálculo.`,
+      );
+    }
+
+    const targetRootId = original.rule.rootRuleId || original.rule.id;
+
+    const newSchedule = await this.prisma.$transaction((tx) =>
       this.postponeClassInTransaction(
         tx,
         id,
@@ -486,9 +495,21 @@ export class SchedulesService {
       ),
     );
 
+    const lastClass = await this.findRuleFamilyLastClass(targetRootId);
+    if (lastClass) {
+      this.eventEmitter.emit(
+        RULE_EVENTS.END_DATE_CHANGED,
+        new RuleEndDateChangedEvent(
+          targetRootId,
+          lastClass.endTime,
+          original.classGroupId,
+        ),
+      );
+    }
+
     return {
       message: 'Reagendamento concluído com sucesso!',
-      newSchedule: result,
+      newSchedule,
     };
   }
 
@@ -846,6 +867,60 @@ export class SchedulesService {
       },
       include: { subject: true, rule: true },
     });
+  }
+
+  private async assertNoScheduleConflicts(params: {
+    startTime: Date;
+    endTime: Date;
+    roomId: string;
+    professorId: string;
+    excludeId?: string;
+  }): Promise<void> {
+    const { startTime, endTime, roomId, professorId, excludeId } = params;
+
+    if (startTime >= endTime) {
+      throw new BadRequestException(
+        'O horário de início deve ser obrigatoriamente anterior ao horário de término.',
+      );
+    }
+
+    const excludeFilter: Prisma.ScheduleWhereInput = excludeId
+      ? { id: { not: excludeId } }
+      : {};
+
+    const roomConflict = await this.prisma.schedule.findFirst({
+      where: {
+        roomId,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+        status: { not: ClassStatus.CANCELLED },
+        ...excludeFilter,
+      },
+      include: { classGroup: true },
+    });
+
+    if (roomConflict) {
+      throw new ConflictException(
+        `Choque de Sala: Este ambiente já está ocupado pela turma ${roomConflict.classGroup.code} neste mesmo horário.`,
+      );
+    }
+
+    const professorConflict = await this.prisma.schedule.findFirst({
+      where: {
+        professorId,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+        status: { not: ClassStatus.CANCELLED },
+        ...excludeFilter,
+      },
+      include: { classGroup: true },
+    });
+
+    if (professorConflict) {
+      throw new ConflictException(
+        `Choque de Professor: Este professor já está dando aula para a turma ${professorConflict.classGroup.code} neste mesmo horário.`,
+      );
+    }
   }
 
   private ruleFamilyWhere(

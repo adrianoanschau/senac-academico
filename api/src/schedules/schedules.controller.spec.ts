@@ -5,6 +5,8 @@ import { SchedulesService } from './schedules.service';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
 
+import { GanttPlannerService } from './gantt-planner.service';
+
 describe('SchedulesController', () => {
   let controller: SchedulesController;
   let service: SchedulesService;
@@ -19,6 +21,12 @@ describe('SchedulesController', () => {
     planModuleTracks: vi.fn(),
   };
 
+  const mockGanttPlannerService = {
+    buildBlueprint: vi.fn(),
+    recalculate: vi.fn(),
+    publishBlueprint: vi.fn(),
+  };
+
   beforeEach(async () => {
     // Arrange
     vi.clearAllMocks();
@@ -30,6 +38,10 @@ describe('SchedulesController', () => {
         {
           provide: ModuleOrchestratorService,
           useValue: mockModuleOrchestratorService,
+        },
+        {
+          provide: GanttPlannerService,
+          useValue: mockGanttPlannerService,
         },
       ],
     }).compile();
