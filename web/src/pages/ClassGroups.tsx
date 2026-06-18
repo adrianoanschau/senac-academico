@@ -1,23 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-  Calendar,
-  Edit2,
-  Layers,
-  Plus,
-  Route,
-  Search,
-  Settings2,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { Calendar, Layers, Plus, Route, Settings2 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { ContextPanel } from '../components/ContextPanel';
 import { DateSelect } from '../components/DateSelect';
-import { LoadingOverlay } from '../components/LoadingOverlay';
 import { Select } from '../components/Select';
+import {
+  ContextSummaryCard,
+  DataTable,
+  type DataTableColumn,
+  FormActions,
+  FormField,
+  FormInput,
+  FormModal,
+  getFormControlClass,
+  ListToolbar,
+  PageCard,
+  PageHeader,
+  PageLayout,
+  PrimaryButton,
+  SearchInput,
+  SegmentControl,
+  TableRowActions,
+} from '../components/ui';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
 import { alertDialog, confirmDialog } from '../utils/dialog';
@@ -38,12 +45,45 @@ interface ClassGroup {
   curriculum?: Curriculum;
 }
 
+const ACCENT = 'turmas' as const;
+
 const initialFormState: ClassGroup = {
   code: '',
   startDate: '',
   endDate: '',
   shift: 'Manhã',
   curriculumId: '',
+};
+
+const SHIFT_OPTIONS = [
+  { id: 'all', label: 'Todos' },
+  { id: 'Manhã', label: 'Manhã' },
+  { id: 'Tarde', label: 'Tarde' },
+  { id: 'Noite', label: 'Noite' },
+];
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '-';
+  try {
+    const [year, month, day] = dateStr.substring(0, 10).split('-');
+    if (year && month && day) {
+      return `${day}/${month}/${year}`;
+    }
+    return dateStr;
+  } catch {
+    return dateStr;
+  }
+};
+
+const formatDateForInput = (dateStr: string) => {
+  if (!dateStr) return '';
+  return dateStr.substring(0, 10);
+};
+
+const shiftBadgeClass = (shift: string) => {
+  if (shift === 'Manhã') return 'bg-amber-100 text-amber-700';
+  if (shift === 'Tarde') return 'bg-orange-100 text-orange-700';
+  return 'bg-indigo-100 text-indigo-700';
 };
 
 export const ClassGroups: React.FC = () => {
@@ -120,7 +160,7 @@ export const ClassGroups: React.FC = () => {
 
       const payload: Partial<ClassGroup> = { ...formData };
       if (!isEditing) delete payload.id;
-      delete payload.curriculum; // Remove propriedades não necessárias para envio da API
+      delete payload.curriculum;
 
       if (isEditing) {
         await api.patch(url, payload);
@@ -138,25 +178,6 @@ export const ClassGroups: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '-';
-    try {
-      // Ajuste simples para datas formatadas ISO YYYY-MM-DD
-      const [year, month, day] = dateStr.substring(0, 10).split('-');
-      if (year && month && day) {
-        return `${day}/${month}/${year}`;
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return '';
-    return dateStr.substring(0, 10);
-  };
-
   const filteredClassGroups = classGroups.filter((c) => {
     const matchesSearch =
       c.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -166,320 +187,230 @@ export const ClassGroups: React.FC = () => {
     return matchesSearch && matchesShift;
   });
 
-  return (
-    <div className="w-full max-w-6xl mx-auto pb-10">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-menu-turmas/10 text-menu-turmas rounded-xl">
-              <Layers size={28} />
+  const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer`;
+
+  const columns = useMemo<DataTableColumn<ClassGroup>[]>(
+    () => [
+      {
+        key: 'code',
+        header: 'Código da Turma',
+        render: (turma) => (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">
+              {turma.code?.substring(0, 2)}
             </div>
-            Turmas
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Gerencie os grupos de alunos e seus períodos letivos.
-          </p>
-        </div>
-        <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-          <button
-            onClick={handleOpenNewModal}
-            className="bg-menu-turmas hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-turmas/30"
+            <span className="font-bold text-menu-turmas">{turma.code}</span>
+          </div>
+        ),
+      },
+      {
+        key: 'curriculum',
+        header: 'Grade Curricular',
+        cellClassName: 'text-slate-500 font-medium',
+        render: (turma) => turma.curriculum?.name || '-',
+      },
+      {
+        key: 'startDate',
+        header: 'Data de Início',
+        cellClassName: 'text-slate-500 font-medium',
+        render: (turma) => formatDate(turma.startDate),
+      },
+      {
+        key: 'endDate',
+        header: 'Data de Término',
+        cellClassName: 'text-slate-500 font-medium',
+        render: (turma) => formatDate(turma.endDate),
+      },
+      {
+        key: 'shift',
+        header: 'Turno',
+        render: (turma) => (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-bold ${shiftBadgeClass(turma.shift)}`}
           >
-            <Plus size={20} />
-            Nova Turma
-          </button>
-        </CanAccess>
-      </div>
+            {turma.shift}
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
 
-      {/* Main Card */}
-      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-        <LoadingOverlay visible={isLoading} message="Buscando turmas..." />
+  return (
+    <PageLayout>
+      <PageHeader
+        accent={ACCENT}
+        icon={<Layers size={28} />}
+        title="Turmas"
+        description="Gerencie os grupos de alunos e seus períodos letivos."
+        action={
+          <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
+            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+              <Plus size={20} />
+              Nova Turma
+            </PrimaryButton>
+          </CanAccess>
+        }
+      />
 
-        {/* Toolbar */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={18} className="text-slate-400" />
-            </div>
-            <input
-              type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-turmas outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
-              placeholder="Buscar turma..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
-            <span>Turno:</span>
-            <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
-              {[
-                { id: 'all', label: 'Todos' },
-                { id: 'Manhã', label: 'Manhã' },
-                { id: 'Tarde', label: 'Tarde' },
-                { id: 'Noite', label: 'Noite' },
-              ].map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setShiftFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${shiftFilter === s.id ? 'bg-menu-turmas text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      <PageCard isLoading={isLoading} loadingMessage="Buscando turmas...">
+        <ListToolbar>
+          <SearchInput
+            accent={ACCENT}
+            placeholder="Buscar turma..."
+            value={search}
+            onChange={setSearch}
+          />
+          <SegmentControl
+            accent={ACCENT}
+            label="Turno:"
+            options={SHIFT_OPTIONS}
+            value={shiftFilter}
+            onChange={setShiftFilter}
+          />
+        </ListToolbar>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Código da Turma
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Grade Curricular
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Data de Início
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Data de Término
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Turno
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-right"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClassGroups.length === 0 && !isLoading ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="py-8 text-center text-slate-500 font-medium"
-                  >
-                    Nenhuma turma cadastrada.
-                  </td>
-                </tr>
-              ) : (
-                filteredClassGroups.map((turma) => (
-                  <tr
-                    key={turma.id}
-                    className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="py-4 px-4 font-bold text-slate-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">
-                          {turma.code?.substring(0, 2)}
-                        </div>
-                        <span className="font-bold text-menu-turmas">
-                          {turma.code}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-slate-500 font-medium">
-                      {turma.curriculum?.name || '-'}
-                    </td>
-                    <td className="py-4 px-4 text-slate-500 font-medium">
-                      {formatDate(turma.startDate)}
-                    </td>
-                    <td className="py-4 px-4 text-slate-500 font-medium">
-                      {formatDate(turma.endDate)}
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          turma.shift === 'Manhã'
-                            ? 'bg-amber-100 text-amber-700'
-                            : turma.shift === 'Tarde'
-                              ? 'bg-orange-100 text-orange-700'
-                              : 'bg-indigo-100 text-indigo-700'
-                        }`}
+        <DataTable
+          columns={columns}
+          data={filteredClassGroups}
+          rowKey={(turma) => String(turma.id)}
+          emptyMessage="Nenhuma turma cadastrada."
+          isLoading={isLoading}
+          actionsColumn={{
+            render: (turma) => (
+              <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
+                <TableRowActions
+                  accent={ACCENT}
+                  onEdit={() => handleOpenEditModal(turma)}
+                  onDelete={() => handleDelete(turma.id)}
+                  extra={
+                    <>
+                      <Link
+                        to={`/schedules/planning/${turma.id}`}
+                        className="p-2 text-slate-400 hover:text-senac-blue hover:bg-senac-blue/10 rounded-lg transition-colors"
+                        title="Planejar Módulo"
                       >
-                        {turma.shift}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            to={`/schedules/planning/${turma.id}`}
-                            className="p-2 text-slate-400 hover:text-senac-blue hover:bg-senac-blue/10 rounded-lg transition-colors"
-                            title="Planejar Módulo"
-                          >
-                            <Route size={18} />
-                          </Link>
-                          <Link
-                            to={`/schedules/operations/${turma.id}`}
-                            className="p-2 text-slate-400 hover:text-[#f37021] hover:bg-orange-50 rounded-lg transition-colors"
-                            title="Gestão Operacional"
-                          >
-                            <Settings2 size={18} />
-                          </Link>
-                          <button
-                            onClick={() => handleOpenEditModal(turma)}
-                            className="p-2 text-slate-400 hover:text-menu-turmas hover:bg-menu-turmas/10 rounded-lg transition-colors"
-                            title="Editar"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(turma.id)}
-                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Excluir"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </CanAccess>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Modal de Cadastro/Edição */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Turma</h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <LoadingOverlay visible={isSaving} message="Salvando turma..." />
-
-            <form onSubmit={handleSave} className="flex flex-col gap-5">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Código da Turma
-                </label>
-                <input
-                  required
-                  value={formData.code}
-                  onChange={(e) =>
-                    setFormData({ ...formData, code: e.target.value })
+                        <Route size={18} />
+                      </Link>
+                      <Link
+                        to={`/schedules/operations/${turma.id}`}
+                        className="p-2 text-slate-400 hover:text-[#f37021] hover:bg-orange-50 rounded-lg transition-colors"
+                        title="Gestão Operacional"
+                      >
+                        <Settings2 size={18} />
+                      </Link>
+                    </>
                   }
-                  type="text"
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-turmas outline-none transition-all text-slate-800 uppercase"
-                  placeholder="Ex: ENF24-1N3R"
                 />
-              </div>
+              </CanAccess>
+            ),
+          }}
+        />
+      </PageCard>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Grade Curricular
-                </label>
-                <Select
-                  required
-                  value={formData.curriculumId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, curriculumId: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-turmas outline-none transition-all text-slate-800 cursor-pointer"
-                >
-                  <option value="">Selecione uma grade curricular...</option>
-                  {curriculums.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
+      <FormModal
+        open={isModalOpen}
+        title="Turma"
+        onClose={() => setIsModalOpen(false)}
+        isSaving={isSaving}
+        savingMessage="Salvando turma..."
+      >
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
+          <FormField label="Código da Turma">
+            <FormInput
+              accent={ACCENT}
+              required
+              value={formData.code}
+              onChange={(e) =>
+                setFormData({ ...formData, code: e.target.value })
+              }
+              className="uppercase"
+              placeholder="Ex: ENF24-1N3R"
+            />
+          </FormField>
 
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Data de Início
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-turmas transition-colors z-10">
-                      <Calendar size={18} strokeWidth={2.5} />
-                    </div>
-                    <DateSelect
-                      value={formatDateForInput(formData.startDate)}
-                      onChange={(val) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          startDate: val,
-                          endDate:
-                            !prev.endDate || prev.endDate < val
-                              ? val
-                              : prev.endDate,
-                        }))
-                      }
-                      placeholder="DD/MM/AAAA"
-                    />
+          <FormField label="Grade Curricular">
+            <Select
+              required
+              value={formData.curriculumId}
+              onChange={(e) =>
+                setFormData({ ...formData, curriculumId: e.target.value })
+              }
+              className={selectClassName}
+            >
+              <option value="">Selecione uma grade curricular...</option>
+              {curriculums.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <FormField label="Data de Início">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-turmas transition-colors z-10">
+                    <Calendar size={18} strokeWidth={2.5} />
                   </div>
+                  <DateSelect
+                    value={formatDateForInput(formData.startDate)}
+                    onChange={(val) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        startDate: val,
+                        endDate:
+                          !prev.endDate || prev.endDate < val
+                            ? val
+                            : prev.endDate,
+                      }))
+                    }
+                    placeholder="DD/MM/AAAA"
+                  />
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Término Previsto
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-turmas transition-colors z-10">
-                      <Calendar size={18} strokeWidth={2.5} />
-                    </div>
-                    <DateSelect
-                      value={formatDateForInput(formData.endDate)}
-                      onChange={(val) =>
-                        setFormData({ ...formData, endDate: val })
-                      }
-                      placeholder="DD/MM/AAAA"
-                    />
+              </FormField>
+            </div>
+            <div className="flex-1">
+              <FormField label="Término Previsto">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-turmas transition-colors z-10">
+                    <Calendar size={18} strokeWidth={2.5} />
                   </div>
+                  <DateSelect
+                    value={formatDateForInput(formData.endDate)}
+                    onChange={(val) =>
+                      setFormData({ ...formData, endDate: val })
+                    }
+                    placeholder="DD/MM/AAAA"
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Turno
-                </label>
-                <Select
-                  value={formData.shift}
-                  onChange={(e) =>
-                    setFormData({ ...formData, shift: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-turmas outline-none transition-all text-slate-800 cursor-pointer"
-                >
-                  <option value="Manhã">Manhã</option>
-                  <option value="Tarde">Tarde</option>
-                  <option value="Noite">Noite</option>
-                  <option value="Integral">Integral</option>
-                </Select>
-              </div>
-
-              <div className="mt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="bg-menu-turmas hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-turmas/30"
-                >
-                  {isSaving ? 'Salvando...' : 'Salvar'}
-                </button>
-              </div>
-            </form>
+              </FormField>
+            </div>
           </div>
-        </div>
-      )}
+
+          <FormField label="Turno">
+            <Select
+              value={formData.shift}
+              onChange={(e) =>
+                setFormData({ ...formData, shift: e.target.value })
+              }
+              className={selectClassName}
+            >
+              <option value="Manhã">Manhã</option>
+              <option value="Tarde">Tarde</option>
+              <option value="Noite">Noite</option>
+              <option value="Integral">Integral</option>
+            </Select>
+          </FormField>
+
+          <FormActions
+            accent={ACCENT}
+            isSaving={isSaving}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </form>
+      </FormModal>
 
       <ContextPanel
         title="Gestão de Turmas"
@@ -491,34 +422,26 @@ export const ClassGroups: React.FC = () => {
           'Fique atento às datas de início e término para a correta geração de aulas.',
         ]}
       >
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
-          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <Layers size={16} className="text-menu-turmas" /> Resumo
-          </h4>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Total de Turmas:</span>
-            <span className="font-bold">{classGroups.length}</span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Turno Manhã:</span>
-            <span className="font-bold">
-              {classGroups.filter((c) => c.shift === 'Manhã').length}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Turno Tarde:</span>
-            <span className="font-bold">
-              {classGroups.filter((c) => c.shift === 'Tarde').length}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600">
-            <span>Turno Noite:</span>
-            <span className="font-bold">
-              {classGroups.filter((c) => c.shift === 'Noite').length}
-            </span>
-          </div>
-        </div>
+        <ContextSummaryCard
+          title="Resumo"
+          icon={<Layers size={16} className="text-menu-turmas" />}
+          rows={[
+            { label: 'Total de Turmas:', value: classGroups.length },
+            {
+              label: 'Turno Manhã:',
+              value: classGroups.filter((c) => c.shift === 'Manhã').length,
+            },
+            {
+              label: 'Turno Tarde:',
+              value: classGroups.filter((c) => c.shift === 'Tarde').length,
+            },
+            {
+              label: 'Turno Noite:',
+              value: classGroups.filter((c) => c.shift === 'Noite').length,
+            },
+          ]}
+        />
       </ContextPanel>
-    </div>
+    </PageLayout>
   );
 };

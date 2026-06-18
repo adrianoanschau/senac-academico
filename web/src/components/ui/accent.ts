@@ -47,6 +47,14 @@ export const accentPresets = {
     segmentActive: 'bg-senac-blue text-white shadow-md',
     actionHover: 'hover:text-senac-blue hover:bg-senac-blue/10',
   },
+  especiais: {
+    iconBadge: 'bg-menu-especiais/10 text-menu-especiais',
+    primaryButton:
+      'bg-menu-especiais hover:opacity-90 text-white shadow-md shadow-menu-especiais/30',
+    ring: 'focus:ring-menu-especiais',
+    segmentActive: 'bg-menu-especiais text-white shadow-md',
+    actionHover: 'hover:text-menu-especiais hover:bg-menu-especiais/10',
+  },
 } as const;
 
 export type AccentPreset = keyof typeof accentPresets;
