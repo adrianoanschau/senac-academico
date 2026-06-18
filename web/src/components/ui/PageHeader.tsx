@@ -6,7 +6,7 @@ import { getAccentClasses } from './accent';
 interface PageHeaderProps {
   icon: React.ReactNode;
   title: string;
-  description: string;
+  description: React.ReactNode;
   accent: AccentPreset;
   action?: React.ReactNode;
 }

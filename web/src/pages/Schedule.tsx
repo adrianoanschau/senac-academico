@@ -6,6 +6,7 @@ import { CalendarClock, Info } from 'lucide-react';
 import { ContextPanel } from '../components/ContextPanel';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { ScheduleFilterBar } from '../components/schedule/ScheduleFilterBar';
+import { PageHeader, PageLayout } from '../components/ui';
 import { useScheduleFilters } from '../hooks/useScheduleFilters';
 import api from '../services/api';
 import type { ScheduleItem } from '../types/schedule-export.types';
@@ -85,23 +86,18 @@ export const Schedule: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto pb-10">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-senac-blue/10 text-senac-blue rounded-xl">
-              <CalendarClock size={28} />
-            </div>
-            Cronograma
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Visualize o cronograma de aulas de cada turma.
-          </p>
-        </div>
-        <Suspense fallback={null}>
-          <ExportButtons fetchData={fetchReportData} />
-        </Suspense>
-      </div>
+    <PageLayout>
+      <PageHeader
+        accent="senac"
+        icon={<CalendarClock size={28} />}
+        title="Cronograma"
+        description="Visualize o cronograma de aulas de cada turma."
+        action={
+          <Suspense fallback={null}>
+            <ExportButtons fetchData={fetchReportData} />
+          </Suspense>
+        }
+      />
 
       <div
         className={
@@ -180,6 +176,6 @@ export const Schedule: React.FC = () => {
           onDateSelect={setSelectedDate}
         />
       </ContextPanel>
-    </div>
+    </PageLayout>
   );
 };

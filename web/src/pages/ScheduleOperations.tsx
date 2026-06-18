@@ -7,6 +7,7 @@ import { CanAccess } from '../components/CanAccess';
 import { ClassGroupNotFound } from '../components/class-groups/ClassGroupNotFound';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ScheduleFilterBar } from '../components/schedule/ScheduleFilterBar';
+import { PageHeader, PageLayout } from '../components/ui';
 import { useClassGroup } from '../hooks/useFetchedList';
 import { useScheduleFilters } from '../hooks/useScheduleFilters';
 import type { ClassGroupInfo } from '../types/entities';
@@ -67,32 +68,29 @@ export const ScheduleOperations: React.FC = () => {
 
   return (
     <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-      <div className="w-full max-w-6xl mx-auto pb-10">
-        <div className="mb-8">
-          <Link
-            to="/class-groups"
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-senac-blue transition-colors mb-4"
-          >
-            <ArrowLeft size={18} />
-            Voltar para Turmas
-          </Link>
+      <PageLayout>
+        <Link
+          to="/class-groups"
+          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-senac-blue transition-colors mb-4"
+        >
+          <ArrowLeft size={18} />
+          Voltar para Turmas
+        </Link>
 
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 text-[#f37021] rounded-xl">
-                  <Settings2 size={28} />
-                </div>
-                Gestão Operacional
-              </h1>
-              <p className="text-slate-500 mt-1">
-                Adie, efetive ou altere padrões de aulas da turma{' '}
-                <span className="font-bold text-slate-700">
-                  {classGroup?.code || '...'}
-                </span>
-                .
-              </p>
-            </div>
+        <PageHeader
+          accent="operacional"
+          icon={<Settings2 size={28} />}
+          title="Gestão Operacional"
+          description={
+            <>
+              Adie, efetive ou altere padrões de aulas da turma{' '}
+              <span className="font-bold text-slate-700">
+                {classGroup?.code || '...'}
+              </span>
+              .
+            </>
+          }
+          action={
             <Link
               to={`/schedule?classGroupId=${classGroupId}`}
               className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"
@@ -100,8 +98,8 @@ export const ScheduleOperations: React.FC = () => {
               <CalendarClock size={18} />
               Ver Cronograma
             </Link>
-          </div>
-        </div>
+          }
+        />
 
         <div
           className={
@@ -172,7 +170,7 @@ export const ScheduleOperations: React.FC = () => {
             />
           )}
         </Suspense>
-      </div>
+      </PageLayout>
     </CanAccess>
   );
 };
