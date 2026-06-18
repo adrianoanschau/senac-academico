@@ -7,6 +7,8 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
+import { AppRole } from '@/prisma/generated';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
@@ -16,6 +18,7 @@ import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 export class CurriculumsController {
   constructor(private readonly curriculumsService: CurriculumsService) {}
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post()
   async create(@Body() createCurriculumDto: CreateCurriculumDto) {
     const data = await this.curriculumsService.create(createCurriculumDto);
@@ -34,6 +37,7 @@ export class CurriculumsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -43,12 +47,14 @@ export class CurriculumsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.curriculumsService.remove(id);
     return { data: { message: 'Curriculum removed successfully' } };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Post(':id/subjects')
   async addSubject(
     @Param('id') id: string,
@@ -58,6 +64,7 @@ export class CurriculumsController {
     return { data };
   }
 
+  @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id/subjects/:curriculumSubjectId')
   async removeSubject(
     @Param('id') id: string,
