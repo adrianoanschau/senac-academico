@@ -5,17 +5,15 @@ import { ClassStatus } from '@/prisma/generated';
 import {
   RULE_EVENTS,
   RuleEndDateChangedEvent,
+  emitRuleEndDateChanged,
 } from '../events/rule-end-date-changed.event';
 import { SchedulesService } from '../schedules.service';
 import { dayAfterInScheduleTz } from '../utils/schedule-date.utils';
 import {
-  computeRemainingHours,
-  resolveOriginalTotalHours,
-  sumScheduleDurationMinutes,
-} from '../utils/schedule-hours.utils';
-import {
+  computeRuleRemainingHours,
   dependentRuleWhere,
   resolveRuleRootId,
+  RULE_DOMINO_CONSUMED_STATUSES,
   ruleFamilyWhere,
 } from '../utils/schedule-rule.utils';
 import { formatRuleDependencyLog } from './rule-dependency.logger';
@@ -65,24 +63,11 @@ export class RuleDependencyListener {
         ]),
       });
 
-      const rootRule = dependentRule.rootRuleId
-        ? await this.prisma.scheduleRule.findUnique({
-            where: { id: dependentRule.rootRuleId },
-          })
-        : null;
-
-      const completedClasses = await this.prisma.schedule.findMany({
-        where: ruleFamilyWhere(dependentRootId, [ClassStatus.COMPLETED]),
-      });
-
-      const consumedMinutes = sumScheduleDurationMinutes(completedClasses);
-      const originalTotalHours = resolveOriginalTotalHours(
+      const remainingHours = await computeRuleRemainingHours(
+        this.prisma,
         dependentRule,
-        rootRule,
-      );
-      const remainingHours = computeRemainingHours(
-        originalTotalHours,
-        consumedMinutes,
+        dependentRootId,
+        RULE_DOMINO_CONSUMED_STATUSES,
       );
 
       if (remainingHours <= 0) {
@@ -121,13 +106,11 @@ export class RuleDependencyListener {
       });
 
       if (bulkResult.lastClassEndDate) {
-        this.eventEmitter.emit(
-          RULE_EVENTS.END_DATE_CHANGED,
-          new RuleEndDateChangedEvent(
-            dependentRootId,
-            bulkResult.lastClassEndDate,
-            dependentRule.classGroupId,
-          ),
+        emitRuleEndDateChanged(
+          this.eventEmitter,
+          dependentRootId,
+          bulkResult.lastClassEndDate,
+          dependentRule.classGroupId,
         );
 
         this.logger.log(
