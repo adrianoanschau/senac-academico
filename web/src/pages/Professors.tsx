@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, Users, X, Info } from "lucide-react";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+import React, { useEffect, useState } from 'react';
+
+import { Edit2, Info, Plus, Search, Trash2, Users, X } from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface Professor {
   id?: string | number;
@@ -16,9 +18,9 @@ interface Professor {
 }
 
 const initialFormState: Professor = {
-  name: "",
-  email: "",
-  degree: "",
+  name: '',
+  email: '',
+  degree: '',
 };
 
 export const Professors: React.FC = () => {
@@ -28,19 +30,19 @@ export const Professors: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Professor>(initialFormState);
   const [statusFilter, setStatusFilter] = usePersistentState(
-    "professors_status",
-    "all",
+    'professors_status',
+    'all',
   );
-  const [search, setSearch] = usePersistentState("professors_search", "");
+  const [search, setSearch] = usePersistentState('professors_search', '');
 
   const fetchProfessors = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/professors");
+      const response = await api.get('/professors');
       setProfessors(response.data.data || []);
     } catch (error) {
-      console.error("Erro ao buscar professores:", error);
-      console.log("Erro ao carregar a lista de professores.");
+      console.error('Erro ao buscar professores:', error);
+      console.log('Erro ao carregar a lista de professores.');
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +65,7 @@ export const Professors: React.FC = () => {
 
   const handleDelete = async (id: string | number) => {
     if (
-      !(await confirmDialog("Tem certeza que deseja excluir este professor?"))
+      !(await confirmDialog('Tem certeza que deseja excluir este professor?'))
     )
       return;
 
@@ -72,9 +74,9 @@ export const Professors: React.FC = () => {
 
       fetchProfessors();
     } catch (error) {
-      console.error("Erro ao excluir professor:", error);
+      console.error('Erro ao excluir professor:', error);
       alertDialog(
-        "Erro ao excluir professor. Verifique se ele está vinculado a alguma turma.",
+        'Erro ao excluir professor. Verifique se ele está vinculado a alguma turma.',
       );
     }
   };
@@ -85,7 +87,7 @@ export const Professors: React.FC = () => {
 
     try {
       const isEditing = !!formData.id;
-      const url = isEditing ? `/professors/${formData.id}` : "/professors";
+      const url = isEditing ? `/professors/${formData.id}` : '/professors';
 
       const payload = { ...formData };
       if (!isEditing) delete payload.id;
@@ -99,8 +101,8 @@ export const Professors: React.FC = () => {
       setIsModalOpen(false);
       fetchProfessors();
     } catch (error) {
-      console.error("Erro ao salvar professor:", error);
-      alertDialog("Erro ao salvar os dados do professor.");
+      console.error('Erro ao salvar professor:', error);
+      alertDialog('Erro ao salvar os dados do professor.');
     } finally {
       setIsSaving(false);
     }
@@ -162,14 +164,14 @@ export const Professors: React.FC = () => {
             <span>Filtros:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
-                { id: "all", label: "Todos" },
-                { id: "ativo", label: "Ativos" },
-                { id: "inativo", label: "Inativos" },
+                { id: 'all', label: 'Todos' },
+                { id: 'ativo', label: 'Ativos' },
+                { id: 'inativo', label: 'Inativos' },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setStatusFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === s.id ? "bg-menu-professores text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === s.id ? 'bg-menu-professores text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                 >
                   {s.label}
                 </button>
@@ -214,7 +216,7 @@ export const Professors: React.FC = () => {
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">
-                          {prof.name ? prof.name.charAt(0).toUpperCase() : "P"}
+                          {prof.name ? prof.name.charAt(0).toUpperCase() : 'P'}
                         </div>
                         <span className="font-bold text-slate-800">
                           {prof.name}
@@ -353,7 +355,7 @@ export const Professors: React.FC = () => {
                   disabled={isSaving}
                   className="bg-menu-professores hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-professores/30"
                 >
-                  {isSaving ? "Salvando..." : "Salvar"}
+                  {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>
@@ -366,8 +368,8 @@ export const Professors: React.FC = () => {
         description="Mantenha as especialidades e contatos dos professores sempre atualizados. Professores inativos não poderão ser alocados no calendário."
         icon={<Info className="text-menu-professores" size={24} />}
         tips={[
-          "Garanta que as informações de contato estejam corretas.",
-          "Professores cadastrados aqui poderão ser alocados para ministrar aulas no Cronograma.",
+          'Garanta que as informações de contato estejam corretas.',
+          'Professores cadastrados aqui poderão ser alocados para ministrar aulas no Cronograma.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">

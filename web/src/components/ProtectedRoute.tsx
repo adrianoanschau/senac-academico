@@ -1,7 +1,9 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+
 import { Loader2 } from 'lucide-react';
+
+import { useAuth } from '../contexts/AuthContext';
 
 export const ProtectedRoute: React.FC = () => {
   const { user, loading } = useAuth();
@@ -20,7 +22,10 @@ export const ProtectedRoute: React.FC = () => {
   }
 
   // Interceta usuários que precisam trocar a senha (e garante que não vai entrar em loop)
-  if (user.user_metadata?.needsPasswordChange && location.pathname !== '/update-password') {
+  if (
+    user.user_metadata?.needsPasswordChange &&
+    location.pathname !== '/update-password'
+  ) {
     return <Navigate to="/update-password" replace />;
   }
 

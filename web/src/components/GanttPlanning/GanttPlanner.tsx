@@ -1,8 +1,11 @@
-import React, { useRef } from 'react';
-import { Gantt, ViewMode } from 'gantt-task-react';
-import type { Task } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
 import './ganttStyles.css';
+
+import React, { useRef } from 'react';
+
+import type { Task } from 'gantt-task-react';
+import { Gantt, ViewMode } from 'gantt-task-react';
+
 import type { GanttBlueprintResult } from '../../types/gantt.types';
 import { GanttTaskListHeader } from './GanttTaskListHeader';
 import { usePortugueseWeekLabels } from './usePortugueseWeekLabels';
@@ -96,7 +99,9 @@ export const GanttPlanner: React.FC<GanttPlannerProps> = ({
     >
       {isRecalculating && (
         <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center rounded-xl">
-          <p className="text-sm font-bold text-slate-600">Recalculando dependências...</p>
+          <p className="text-sm font-bold text-slate-600">
+            Recalculando dependências...
+          </p>
         </div>
       )}
       <Gantt

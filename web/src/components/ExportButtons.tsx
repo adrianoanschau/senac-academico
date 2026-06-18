@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { FileText, FileSpreadsheet, Loader2 } from "lucide-react";
-import { CanAccess } from "./CanAccess";
-import { alertDialog } from "../utils/dialog";
-import { type ScheduleItem } from "../utils/exportUtils";
-import { Role } from "../utils/roles";
+import React, { useState } from 'react';
+
+import { FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+
+import { alertDialog } from '../utils/dialog';
+import { type ScheduleItem } from '../utils/exportUtils';
+import { Role } from '../utils/roles';
+import { CanAccess } from './CanAccess';
 
 interface ExportButtonsProps {
   fetchData: () => Promise<ScheduleItem[]>;
@@ -19,16 +21,16 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
       const data = await fetchData();
       if (!data || data.length === 0) {
         alertDialog(
-          "Nenhum dado encontrado para exportar com os filtros atuais.",
+          'Nenhum dado encontrado para exportar com os filtros atuais.',
         );
         return;
       }
 
-      const { exportScheduleToPDF } = await import("../utils/exportUtils");
+      const { exportScheduleToPDF } = await import('../utils/exportUtils');
       await exportScheduleToPDF(data);
     } catch (error) {
       console.error(error);
-      alertDialog("Erro ao exportar o relatório em PDF. Tente novamente.");
+      alertDialog('Erro ao exportar o relatório em PDF. Tente novamente.');
     } finally {
       setIsExportingPDF(false);
     }
@@ -40,16 +42,16 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ fetchData }) => {
       const data = await fetchData();
       if (!data || data.length === 0) {
         alertDialog(
-          "Nenhum dado encontrado para exportar com os filtros atuais.",
+          'Nenhum dado encontrado para exportar com os filtros atuais.',
         );
         return;
       }
 
-      const { exportScheduleToExcel } = await import("../utils/exportUtils");
+      const { exportScheduleToExcel } = await import('../utils/exportUtils');
       await exportScheduleToExcel(data);
     } catch (error) {
       console.error(error);
-      alertDialog("Erro ao exportar o relatório em Excel. Tente novamente.");
+      alertDialog('Erro ao exportar o relatório em Excel. Tente novamente.');
     } finally {
       setIsExportingExcel(false);
     }

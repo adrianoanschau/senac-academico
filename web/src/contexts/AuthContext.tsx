@@ -1,13 +1,15 @@
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   type ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
+
 import { type User } from '@supabase/supabase-js';
-import { supabase } from '../services/supabase';
+
 import api from '../services/api';
+import { supabase } from '../services/supabase';
 
 // 1. Definição das interfaces estritas
 export type AppRole =
@@ -49,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.get('/users/profile');
       const userData = response.data;
-      
+
       setProfile({
         id: userData.id,
         email: userData.email,

@@ -1,27 +1,29 @@
-import React, { useState, lazy, Suspense } from "react";
-import axios from "axios";
+import React, { lazy, Suspense, useState } from 'react';
+
+import axios from 'axios';
 import {
-  User,
-  Settings as SettingsIcon,
-  Shield,
-  Save,
   Bell,
   Moon,
+  Save,
+  Settings as SettingsIcon,
+  Shield,
   Sun,
-} from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { CanAccess } from "../components/CanAccess";
-import api from "../services/api";
-import { Role } from "../utils/roles";
-import { alertDialog } from "../utils/dialog";
+  User,
+} from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+import { alertDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 const CreateUserForm = lazy(() =>
-  import("../components/CreateUserForm").then((m) => ({
+  import('../components/CreateUserForm').then((m) => ({
     default: m.CreateUserForm,
   })),
 );
 
-type Tab = "profile" | "preferences" | "admin";
+type Tab = 'profile' | 'preferences' | 'admin';
 
 interface ToggleProps {
   checked: boolean;
@@ -35,12 +37,12 @@ const Toggle: React.FC<ToggleProps> = ({ checked, onChange }) => (
     aria-checked={checked}
     onClick={() => onChange(!checked)}
     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-800 focus:ring-offset-2 ${
-      checked ? "bg-slate-800" : "bg-slate-200"
+      checked ? 'bg-slate-800' : 'bg-slate-200'
     }`}
   >
     <span
       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-        checked ? "translate-x-5" : "translate-x-0"
+        checked ? 'translate-x-5' : 'translate-x-0'
       }`}
     />
   </button>
@@ -48,19 +50,19 @@ const Toggle: React.FC<ToggleProps> = ({ checked, onChange }) => (
 
 export const Settings: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("profile");
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   // Estados dos formulários (simulados)
   const [displayName, setDisplayName] = useState(
-    profile?.displayName || user?.user_metadata?.displayName || "",
+    profile?.displayName || user?.user_metadata?.displayName || '',
   );
   const [phone, setPhone] = useState(() => {
     const v = (
       profile?.phoneNumber ||
       user?.user_metadata?.phoneNumber ||
-      ""
-    ).replace(/\D/g, "");
-    if (!v) return "";
+      ''
+    ).replace(/\D/g, '');
+    if (!v) return '';
     if (v.length > 7)
       return `(${v.substring(0, 2)}) ${v.substring(2, 4)} ${v.substring(4, 7)}-${v.substring(7)}`;
     if (v.length > 4)
@@ -73,15 +75,15 @@ export const Settings: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roleColors: Record<string, string> = {
-    [Role.ADMIN]: "bg-rose-100 text-rose-700 border-rose-200",
-    [Role.COORDINATOR]: "bg-amber-100 text-amber-700 border-amber-200",
-    [Role.INSTRUCTOR]: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    [Role.SECRETARY]: "bg-indigo-100 text-indigo-700 border-indigo-200",
-    [Role.MEMBER]: "bg-slate-300 text-slate-700 border-slate-400",
+    [Role.ADMIN]: 'bg-rose-100 text-rose-700 border-rose-200',
+    [Role.COORDINATOR]: 'bg-amber-100 text-amber-700 border-amber-200',
+    [Role.INSTRUCTOR]: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    [Role.SECRETARY]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    [Role.MEMBER]: 'bg-slate-300 text-slate-700 border-slate-400',
   };
 
   const getInitials = (email?: string) => {
-    if (!email) return "U";
+    if (!email) return 'U';
     return email.substring(0, 2).toUpperCase();
   };
 
@@ -91,19 +93,19 @@ export const Settings: React.FC = () => {
     try {
       const payload = {
         displayName: displayName,
-        phoneNumber: phone ? phone.replace(/\D/g, "") : "",
+        phoneNumber: phone ? phone.replace(/\D/g, '') : '',
       };
-      await api.patch("/users/profile", payload);
+      await api.patch('/users/profile', payload);
       await refreshProfile();
-      alertDialog("Perfil atualizado com sucesso!");
+      alertDialog('Perfil atualizado com sucesso!');
     } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
+      console.error('Erro ao atualizar perfil:', error);
       if (axios.isAxiosError(error) && error.response) {
         alertDialog(
-          error.response.data.message || "Falha ao atualizar o perfil.",
+          error.response.data.message || 'Falha ao atualizar o perfil.',
         );
       } else {
-        alertDialog("Ocorreu um erro ao atualizar o perfil. Tente novamente.");
+        alertDialog('Ocorreu um erro ao atualizar o perfil. Tente novamente.');
       }
     } finally {
       setIsSubmitting(false);
@@ -125,11 +127,11 @@ export const Settings: React.FC = () => {
         {/* Menu Lateral de Navegação (Sidebar) */}
         <aside className="w-full md:w-64 shrink-0 flex flex-col gap-2">
           <button
-            onClick={() => setActiveTab("profile")}
+            onClick={() => setActiveTab('profile')}
             className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-              activeTab === "profile"
-                ? "bg-slate-800 text-white shadow-md"
-                : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              activeTab === 'profile'
+                ? 'bg-slate-800 text-white shadow-md'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <User className="mr-3 h-5 w-5" />
@@ -137,11 +139,11 @@ export const Settings: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("preferences")}
+            onClick={() => setActiveTab('preferences')}
             className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-              activeTab === "preferences"
-                ? "bg-slate-800 text-white shadow-md"
-                : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              activeTab === 'preferences'
+                ? 'bg-slate-800 text-white shadow-md'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <SettingsIcon className="mr-3 h-5 w-5" />
@@ -151,11 +153,11 @@ export const Settings: React.FC = () => {
           {/* Renderização condicional protegida por RBAC */}
           <CanAccess roles={[Role.ADMIN, Role.COORDINATOR]}>
             <button
-              onClick={() => setActiveTab("admin")}
+              onClick={() => setActiveTab('admin')}
               className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                activeTab === "admin"
-                  ? "bg-slate-800 text-white shadow-md"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                activeTab === 'admin'
+                  ? 'bg-slate-800 text-white shadow-md'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <Shield className="mr-3 h-5 w-5" />
@@ -166,7 +168,7 @@ export const Settings: React.FC = () => {
 
         {/* Área Principal de Conteúdo */}
         <main className="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 min-h-100">
-          {activeTab === "profile" && (
+          {activeTab === 'profile' && (
             <div className="animate-in fade-in duration-300">
               <h2 className="text-xl font-semibold mb-6">
                 Informações Pessoais
@@ -209,7 +211,7 @@ export const Settings: React.FC = () => {
                   <input
                     type="email"
                     disabled
-                    value={profile?.email || user?.email || ""}
+                    value={profile?.email || user?.email || ''}
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
                   />
                 </div>
@@ -233,7 +235,7 @@ export const Settings: React.FC = () => {
                     type="tel"
                     value={phone}
                     onChange={(e) => {
-                      let v = e.target.value.replace(/\D/g, "");
+                      let v = e.target.value.replace(/\D/g, '');
                       if (v.length > 11) v = v.substring(0, 11);
                       let formatted = v;
                       if (v.length > 7) {
@@ -257,13 +259,13 @@ export const Settings: React.FC = () => {
                   className="mt-4 flex items-center justify-center px-6 py-2.5 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-700 disabled:opacity-70 transition-colors"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+                  {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
               </form>
             </div>
           )}
 
-          {activeTab === "preferences" && (
+          {activeTab === 'preferences' && (
             <div className="animate-in fade-in duration-300">
               <h2 className="text-xl font-semibold mb-6">
                 Preferências do Sistema
@@ -311,7 +313,7 @@ export const Settings: React.FC = () => {
             </div>
           )}
 
-          {activeTab === "admin" && (
+          {activeTab === 'admin' && (
             <div className="animate-in fade-in duration-300">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-800">

@@ -1,18 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
-import type { Control, UseFormRegister, FieldErrors, ArrayPath, Path } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import {
-  Plus, Trash2, Calendar, BookOpen, Users,
-  MapPin, ArrowRight, Clock,
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  Clock,
+  MapPin,
+  Plus,
+  Trash2,
+  Users,
 } from 'lucide-react';
-import { planModuleSchema, type PlanModuleFormData, type PlanModuleFormInput } from './schema';
-import { alertDialog } from '../../utils/dialog';
-import { Select } from '../Select';
-import { DateSelect } from '../DateSelect';
-import { TimeSelect } from '../TimeSelect';
+import type {
+  ArrayPath,
+  Control,
+  FieldErrors,
+  Path,
+  UseFormRegister,
+} from 'react-hook-form';
+
 import api from '../../services/api';
+import { alertDialog } from '../../utils/dialog';
+import { DateSelect } from '../DateSelect';
+import { Select } from '../Select';
+import { TimeSelect } from '../TimeSelect';
+import {
+  type PlanModuleFormData,
+  type PlanModuleFormInput,
+  planModuleSchema,
+} from './schema';
 
 const DAYS_OF_WEEK = [
   { label: 'Dom', value: 0 },
@@ -24,9 +42,20 @@ const DAYS_OF_WEEK = [
   { label: 'Sáb', value: 6 },
 ];
 
-export interface Subject { id: string; name: string; hours: number; code?: string; }
-export interface Professor { id: string; name: string }
-export interface Room { id: string; name: string }
+export interface Subject {
+  id: string;
+  name: string;
+  hours: number;
+  code?: string;
+}
+export interface Professor {
+  id: string;
+  name: string;
+}
+export interface Room {
+  id: string;
+  name: string;
+}
 
 interface ModuleSubjectResponse {
   subjectId: string;
@@ -159,9 +188,10 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
           setValue('tracks', [
             {
               ...defaultTrack,
-              sequence: autoSequence.length > 0
-                ? autoSequence
-                : [{ subjectId: '', professorId: '', roomId: '' }],
+              sequence:
+                autoSequence.length > 0
+                  ? autoSequence
+                  : [{ subjectId: '', professorId: '', roomId: '' }],
             },
           ]);
         }
@@ -215,8 +245,12 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
     } catch (error) {
       console.error('Erro ao planejar módulo:', error);
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao planejar o módulo.';
-        alertDialog(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
+        const errorMessage =
+          error.response?.data?.message ||
+          'Ocorreu um erro ao planejar o módulo.';
+        alertDialog(
+          Array.isArray(errorMessage) ? errorMessage[0] : errorMessage,
+        );
       } else {
         alertDialog('Ocorreu um erro inesperado ao planejar o módulo.');
       }
@@ -226,12 +260,18 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
   };
 
   return (
-    <form id="module-planning-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      id="module-planning-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8"
+    >
       <input type="hidden" {...register('classGroupId')} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Módulo</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Módulo
+          </label>
           <Select
             {...register('moduleNumber')}
             disabled={isLoadingOptions || isLoadingModules}
@@ -241,16 +281,22 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
               {isLoadingModules ? 'Carregando...' : 'Selecione o módulo...'}
             </option>
             {availableModules.map((m) => (
-              <option key={m} value={m}>Módulo {m}</option>
+              <option key={m} value={m}>
+                Módulo {m}
+              </option>
             ))}
           </Select>
           {errors.moduleNumber && (
-            <span className="text-rose-500 text-xs font-bold mt-1 block">{errors.moduleNumber.message}</span>
+            <span className="text-rose-500 text-xs font-bold mt-1 block">
+              {errors.moduleNumber.message}
+            </span>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início do Módulo</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Data de Início do Módulo
+          </label>
           <Controller
             name="startDate"
             control={control}
@@ -268,7 +314,9 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
             )}
           />
           {errors.startDate && (
-            <span className="text-rose-500 text-xs font-bold mt-1 block">{errors.startDate.message}</span>
+            <span className="text-rose-500 text-xs font-bold mt-1 block">
+              {errors.startDate.message}
+            </span>
           )}
         </div>
       </div>
@@ -277,15 +325,20 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
 
       {selectedModuleNumber && isLoadingSubjects ? (
         <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100">
-          <p className="text-slate-500 font-medium">Carregando disciplinas e precedências...</p>
+          <p className="text-slate-500 font-medium">
+            Carregando disciplinas e precedências...
+          </p>
         </div>
       ) : selectedModuleNumber && displaySubjects.length > 0 ? (
         <div>
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Trilhas de Execução (Tracks)</h3>
+              <h3 className="text-lg font-bold text-slate-800">
+                Trilhas de Execução (Tracks)
+              </h3>
               <p className="text-xs text-slate-500 mt-1">
-                A sequência da trilha principal foi preenchida automaticamente conforme as precedências da matriz.
+                A sequência da trilha principal foi preenchida automaticamente
+                conforme as precedências da matriz.
               </p>
             </div>
             <button
@@ -336,7 +389,8 @@ export const ModulePlanningForm: React.FC<ModulePlanningFormProps> = ({
           disabled={isSubmitting}
           className="bg-senac-blue hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-senac-blue/30 flex items-center gap-2"
         >
-          {isSubmitting ? 'Simulando...' : 'Simular Calendário'} {!isSubmitting && <ArrowRight size={20} />}
+          {isSubmitting ? 'Simulando...' : 'Simular Calendário'}{' '}
+          {!isSubmitting && <ArrowRight size={20} />}
         </button>
       </div>
     </form>
@@ -356,8 +410,15 @@ interface TrackCardProps {
 }
 
 const TrackCard = ({
-  trackIndex, control, register, errors, removeTrack,
-  subjects, professors, rooms, isOnlyTrack,
+  trackIndex,
+  control,
+  register,
+  errors,
+  removeTrack,
+  subjects,
+  professors,
+  rooms,
+  isOnlyTrack,
 }: TrackCardProps) => {
   const {
     fields: sequenceFields,
@@ -380,7 +441,9 @@ const TrackCard = ({
             </div>
             Trilha {String.fromCharCode(65 + trackIndex)}
           </h4>
-          <p className="text-xs text-slate-500 mt-1">As disciplinas desta trilha ocorrerão nestes dias:</p>
+          <p className="text-xs text-slate-500 mt-1">
+            As disciplinas desta trilha ocorrerão nestes dias:
+          </p>
         </div>
 
         {!isOnlyTrack && (
@@ -397,14 +460,20 @@ const TrackCard = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Dias da Semana</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Dias da Semana
+          </label>
           <Controller
-            name={`tracks.${trackIndex}.daysOfWeek` as Path<PlanModuleFormInput>}
+            name={
+              `tracks.${trackIndex}.daysOfWeek` as Path<PlanModuleFormInput>
+            }
             control={control}
             render={({ field }) => (
               <div className="flex flex-wrap gap-2">
                 {DAYS_OF_WEEK.map((day) => {
-                  const currentValues = (Array.isArray(field.value) ? field.value : []) as number[];
+                  const currentValues = (
+                    Array.isArray(field.value) ? field.value : []
+                  ) as number[];
                   const isSelected = currentValues.includes(day.value);
                   return (
                     <button
@@ -430,15 +499,21 @@ const TrackCard = ({
             )}
           />
           {trackError?.daysOfWeek && (
-            <span className="text-rose-500 text-xs font-bold mt-2 block">{trackError.daysOfWeek.message}</span>
+            <span className="text-rose-500 text-xs font-bold mt-2 block">
+              {trackError.daysOfWeek.message}
+            </span>
           )}
         </div>
 
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Início</label>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              Início
+            </label>
             <Controller
-              name={`tracks.${trackIndex}.startTimeStr` as Path<PlanModuleFormInput>}
+              name={
+                `tracks.${trackIndex}.startTimeStr` as Path<PlanModuleFormInput>
+              }
               control={control}
               render={({ field }) => (
                 <div className="relative group">
@@ -456,14 +531,20 @@ const TrackCard = ({
               )}
             />
             {trackError?.startTimeStr && (
-              <span className="text-rose-500 text-[10px] font-bold mt-1 block">{trackError.startTimeStr.message}</span>
+              <span className="text-rose-500 text-[10px] font-bold mt-1 block">
+                {trackError.startTimeStr.message}
+              </span>
             )}
           </div>
 
           <div className="flex-1">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Término</label>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              Término
+            </label>
             <Controller
-              name={`tracks.${trackIndex}.endTimeStr` as Path<PlanModuleFormInput>}
+              name={
+                `tracks.${trackIndex}.endTimeStr` as Path<PlanModuleFormInput>
+              }
               control={control}
               render={({ field }) => (
                 <div className="relative group">
@@ -481,7 +562,9 @@ const TrackCard = ({
               )}
             />
             {trackError?.endTimeStr && (
-              <span className="text-rose-500 text-[10px] font-bold mt-1 block">{trackError.endTimeStr.message}</span>
+              <span className="text-rose-500 text-[10px] font-bold mt-1 block">
+                {trackError.endTimeStr.message}
+              </span>
             )}
           </div>
         </div>
@@ -492,17 +575,25 @@ const TrackCard = ({
           <label className="flex items-center gap-3 cursor-pointer group/priority">
             <input
               type="checkbox"
-              {...register(`tracks.${trackIndex}.isPriority` as Path<PlanModuleFormInput>)}
+              {...register(
+                `tracks.${trackIndex}.isPriority` as Path<PlanModuleFormInput>,
+              )}
               className="w-5 h-5 text-senac-blue border-slate-300 rounded focus:ring-senac-blue transition-all cursor-pointer"
             />
             <div>
-              <span className="block text-sm font-bold text-slate-700 group-hover/priority:text-senac-blue transition-colors">Prioridade Alta</span>
-              <span className="block text-xs text-slate-500 mt-0.5">Esta trilha será alocada primeiro, sobrepondo outras.</span>
+              <span className="block text-sm font-bold text-slate-700 group-hover/priority:text-senac-blue transition-colors">
+                Prioridade Alta
+              </span>
+              <span className="block text-xs text-slate-500 mt-0.5">
+                Esta trilha será alocada primeiro, sobrepondo outras.
+              </span>
             </div>
           </label>
         </div>
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Data de Início Específica (Opcional)</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Data de Início Específica (Opcional)
+          </label>
           <Controller
             name={`tracks.${trackIndex}.startDate` as Path<PlanModuleFormInput>}
             control={control}
@@ -524,10 +615,14 @@ const TrackCard = ({
 
       <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
         <div className="flex justify-between items-center mb-4">
-          <h5 className="text-sm font-bold text-slate-700">Sequência de Disciplinas</h5>
+          <h5 className="text-sm font-bold text-slate-700">
+            Sequência de Disciplinas
+          </h5>
           <button
             type="button"
-            onClick={() => appendSequence({ subjectId: '', professorId: '', roomId: '' })}
+            onClick={() =>
+              appendSequence({ subjectId: '', professorId: '', roomId: '' })
+            }
             className="text-xs bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-100 transition-colors flex items-center gap-1"
           >
             <Plus size={14} /> Adicionar UC
@@ -535,58 +630,88 @@ const TrackCard = ({
         </div>
 
         {trackError?.sequence?.message && (
-          <span className="text-rose-500 text-xs font-bold mb-3 block">{trackError.sequence.message}</span>
+          <span className="text-rose-500 text-xs font-bold mb-3 block">
+            {trackError.sequence.message}
+          </span>
         )}
 
         <div className="space-y-3">
           {sequenceFields.map((seqField, seqIndex) => (
-            <div key={seqField.id} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-white p-3 rounded-xl border border-slate-200">
+            <div
+              key={seqField.id}
+              className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-white p-3 rounded-xl border border-slate-200"
+            >
               <div className="w-6 h-6 shrink-0 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-bold">
                 {seqIndex + 1}
               </div>
 
               <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
                 <div className="relative">
-                  <BookOpen size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
+                  <BookOpen
+                    size={14}
+                    className="absolute left-3 top-3 text-slate-400 z-10"
+                  />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.subjectId` as Path<PlanModuleFormInput>)}
+                    {...register(
+                      `tracks.${trackIndex}.sequence.${seqIndex}.subjectId` as Path<PlanModuleFormInput>,
+                    )}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Disciplina...</option>
                     {subjects.map((s) => (
-                      <option key={s.id} value={s.id}>{s.code ? `${s.code}: ${s.name}` : s.name}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.code ? `${s.code}: ${s.name}` : s.name}
+                      </option>
                     ))}
                   </Select>
                   {trackError?.sequence?.[seqIndex]?.subjectId && (
-                    <span className="text-rose-500 text-[10px] font-bold mt-1 block">{trackError.sequence[seqIndex].subjectId.message}</span>
+                    <span className="text-rose-500 text-[10px] font-bold mt-1 block">
+                      {trackError.sequence[seqIndex].subjectId.message}
+                    </span>
                   )}
                 </div>
 
                 <div className="relative">
-                  <Users size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
+                  <Users
+                    size={14}
+                    className="absolute left-3 top-3 text-slate-400 z-10"
+                  />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.professorId` as Path<PlanModuleFormInput>)}
+                    {...register(
+                      `tracks.${trackIndex}.sequence.${seqIndex}.professorId` as Path<PlanModuleFormInput>,
+                    )}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Professor...</option>
                     {professors.map((p) => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
                     ))}
                   </Select>
                   {trackError?.sequence?.[seqIndex]?.professorId && (
-                    <span className="text-rose-500 text-[10px] font-bold mt-1 block">{trackError.sequence[seqIndex].professorId.message}</span>
+                    <span className="text-rose-500 text-[10px] font-bold mt-1 block">
+                      {trackError.sequence[seqIndex].professorId.message}
+                    </span>
                   )}
                 </div>
 
                 <div className="relative">
-                  <MapPin size={14} className="absolute left-3 top-3 text-slate-400 z-10" />
+                  <MapPin
+                    size={14}
+                    className="absolute left-3 top-3 text-slate-400 z-10"
+                  />
                   <Select
-                    {...register(`tracks.${trackIndex}.sequence.${seqIndex}.roomId` as Path<PlanModuleFormInput>)}
+                    {...register(
+                      `tracks.${trackIndex}.sequence.${seqIndex}.roomId` as Path<PlanModuleFormInput>,
+                    )}
                     className="w-full pl-9 pr-3 py-2 bg-[#f8f9fc] border-none rounded-lg focus:ring-2 focus:ring-senac-blue outline-none text-slate-800 text-sm font-medium cursor-pointer"
                   >
                     <option value="">Sala (Opcional)...</option>
                     {rooms.map((r) => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
                     ))}
                   </Select>
                 </div>

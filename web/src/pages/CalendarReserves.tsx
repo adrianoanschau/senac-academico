@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
+
+import axios from 'axios';
 import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  CalendarDays,
-  X,
   Calendar,
-  Clock,
+  CalendarDays,
   Check,
+  Clock,
+  Edit2,
   Info,
-} from "lucide-react";
-import axios from "axios";
-import { Select } from "../components/Select";
-import { DateSelect } from "../components/DateSelect";
-import { TimeSelect } from "../components/TimeSelect";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { DateSelect } from '../components/DateSelect';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { TimeSelect } from '../components/TimeSelect';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface ScheduleOverride {
   id: string;
@@ -38,27 +40,27 @@ export const CalendarReserves: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [yearFilter, setYearFilter] = usePersistentState(
-    "reserves_year",
-    "2026",
+    'reserves_year',
+    '2026',
   );
-  const [search, setSearch] = usePersistentState("reserves_search", "");
+  const [search, setSearch] = usePersistentState('reserves_search', '');
 
   const [formData, setFormData] = useState({
-    title: "",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-    type: "BLOCK",
+    title: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    type: 'BLOCK',
   });
 
   const fetchOverrides = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/schedule-overrides");
+      const response = await api.get('/schedule-overrides');
       setFeriados(response.data.data || response.data);
     } catch (error) {
-      console.error("Erro ao buscar feriados/reservas:", error);
+      console.error('Erro ao buscar feriados/reservas:', error);
     } finally {
       setIsLoading(false);
     }
@@ -81,8 +83,8 @@ export const CalendarReserves: React.FC = () => {
 
     setIsSaving(true);
 
-    const finalStartTime = isAllDay ? "00:00" : formData.startTime;
-    const finalEndTime = isAllDay ? "23:59" : formData.endTime;
+    const finalStartTime = isAllDay ? '00:00' : formData.startTime;
+    const finalEndTime = isAllDay ? '23:59' : formData.endTime;
 
     if (
       !formData.startDate ||
@@ -90,7 +92,7 @@ export const CalendarReserves: React.FC = () => {
       !formData.endDate ||
       !finalEndTime
     ) {
-      alertDialog("Preencha as datas e horários corretamente.");
+      alertDialog('Preencha as datas e horários corretamente.');
       return;
     }
 
@@ -104,15 +106,15 @@ export const CalendarReserves: React.FC = () => {
     };
 
     try {
-      await api.post("/schedule-overrides", payload);
-      alertDialog("Período Especial salvo com sucesso!");
+      await api.post('/schedule-overrides', payload);
+      alertDialog('Período Especial salvo com sucesso!');
       setFormData({
-        title: "",
-        startDate: "",
-        startTime: "",
-        endDate: "",
-        endTime: "",
-        type: "BLOCK",
+        title: '',
+        startDate: '',
+        startTime: '',
+        endDate: '',
+        endTime: '',
+        type: 'BLOCK',
       });
       setIsAllDay(true);
       setIsModalOpen(false);
@@ -122,10 +124,10 @@ export const CalendarReserves: React.FC = () => {
       if (axios.isAxiosError(error)) {
         const errorMessage =
           error.response?.data?.message ||
-          "Ocorreu um erro ao conectar com a API.";
+          'Ocorreu um erro ao conectar com a API.';
         alertDialog(`Erro ao criar a reserva: ${errorMessage}`);
       } else {
-        alertDialog("Ocorreu um erro inesperado ao salvar a reserva.");
+        alertDialog('Ocorreu um erro inesperado ao salvar a reserva.');
       }
     } finally {
       setIsSaving(false);
@@ -135,24 +137,24 @@ export const CalendarReserves: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (
       !(await confirmDialog(
-        "Tem certeza que deseja remover esta reserva/bloqueio?",
+        'Tem certeza que deseja remover esta reserva/bloqueio?',
       ))
     )
       return;
     try {
       await api.delete(`/schedule-overrides/${id}`);
-      alertDialog("Removido com sucesso!");
+      alertDialog('Removido com sucesso!');
       fetchOverrides();
     } catch (error) {
       console.error(error);
-      alertDialog("Erro ao remover.");
+      alertDialog('Erro ao remover.');
     }
   };
 
   const filteredFeriados = feriados.filter((f) => {
     const matchesSearch = f.title.toLowerCase().includes(search.toLowerCase());
     const matchesYear =
-      yearFilter === "all" ||
+      yearFilter === 'all' ||
       new Date(f.startTime).getFullYear().toString() === yearFilter;
     return matchesSearch && matchesYear;
   });
@@ -177,12 +179,12 @@ export const CalendarReserves: React.FC = () => {
           <button
             onClick={() => {
               setFormData({
-                title: "",
-                startDate: "",
-                startTime: "",
-                endDate: "",
-                endTime: "",
-                type: "BLOCK",
+                title: '',
+                startDate: '',
+                startTime: '',
+                endDate: '',
+                endTime: '',
+                type: 'BLOCK',
               });
               setIsAllDay(true);
               setIsModalOpen(true);
@@ -217,14 +219,14 @@ export const CalendarReserves: React.FC = () => {
             <span>Ano Base:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
-                { id: "all", label: "Todos" },
-                { id: "2026", label: "2026" },
-                { id: "2025", label: "2025" },
+                { id: 'all', label: 'Todos' },
+                { id: '2026', label: '2026' },
+                { id: '2025', label: '2025' },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setYearFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${yearFilter === s.id ? "bg-menu-especiais text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${yearFilter === s.id ? 'bg-menu-especiais text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                 >
                   {s.label}
                 </button>
@@ -351,7 +353,7 @@ export const CalendarReserves: React.FC = () => {
                     className="peer sr-only"
                   />
                   <div
-                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-menu-especiais peer-focus-visible:ring-offset-2 ${isAllDay ? "bg-menu-especiais border-menu-especiais" : "bg-[#f8f9fc] border-slate-300"}`}
+                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-menu-especiais peer-focus-visible:ring-offset-2 ${isAllDay ? 'bg-menu-especiais border-menu-especiais' : 'bg-[#f8f9fc] border-slate-300'}`}
                   >
                     {isAllDay && (
                       <Check size={14} className="text-white" strokeWidth={3} />
@@ -388,13 +390,13 @@ export const CalendarReserves: React.FC = () => {
                     />
                   </div>
                   <div
-                    className={`relative group w-36 transition-opacity ${isAllDay ? "opacity-50 pointer-events-none" : ""}`}
+                    className={`relative group w-36 transition-opacity ${isAllDay ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
                       <Clock size={18} strokeWidth={2.5} />
                     </div>
                     <TimeSelect
-                      value={isAllDay ? "00:00" : formData.startTime}
+                      value={isAllDay ? '00:00' : formData.startTime}
                       onChange={(val) =>
                         setFormData({ ...formData, startTime: val })
                       }
@@ -422,13 +424,13 @@ export const CalendarReserves: React.FC = () => {
                     />
                   </div>
                   <div
-                    className={`relative group w-36 transition-opacity ${isAllDay ? "opacity-50 pointer-events-none" : ""}`}
+                    className={`relative group w-36 transition-opacity ${isAllDay ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-menu-especiais transition-colors z-10">
                       <Clock size={18} strokeWidth={2.5} />
                     </div>
                     <TimeSelect
-                      value={isAllDay ? "23:59" : formData.endTime}
+                      value={isAllDay ? '23:59' : formData.endTime}
                       onChange={(val) =>
                         setFormData({ ...formData, endTime: val })
                       }
@@ -480,9 +482,9 @@ export const CalendarReserves: React.FC = () => {
         description="Configure feriados e dias não letivos. Eles influenciam a geração automática, impedindo que aulas caiam em datas bloqueadas."
         icon={<Info className="text-menu-especiais" size={24} />}
         tips={[
-          "Dias configurados como bloqueios evitam o agendamento automático de aulas.",
-          "Você pode configurar bloqueios de dia inteiro ou para horários muito específicos.",
-          "Mantenha o calendário escolar atualizado para maior precisão do Cronograma.",
+          'Dias configurados como bloqueios evitam o agendamento automático de aulas.',
+          'Você pode configurar bloqueios de dia inteiro ou para horários muito específicos.',
+          'Mantenha o calendário escolar atualizado para maior precisão do Cronograma.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
@@ -496,7 +498,7 @@ export const CalendarReserves: React.FC = () => {
           <div className="flex justify-between items-center text-xs text-slate-600">
             <span>Feriados/Bloqueios:</span>
             <span className="font-bold text-rose-500">
-              {feriados.filter((f) => f.type === "BLOCK").length}
+              {feriados.filter((f) => f.type === 'BLOCK').length}
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
-import { useEffect, type RefObject } from 'react';
+import { type RefObject, useEffect } from 'react';
+
 import { ViewMode } from 'gantt-task-react';
 
 /** A lib gantt-task-react renderiza semanas como "W12" — substituímos por "Sem. 12". */
@@ -25,7 +26,11 @@ export function usePortugueseWeekLabels(
     localize();
 
     const observer = new MutationObserver(localize);
-    observer.observe(root, { childList: true, subtree: true, characterData: true });
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
 
     return () => observer.disconnect();
   }, [containerRef, viewMode]);

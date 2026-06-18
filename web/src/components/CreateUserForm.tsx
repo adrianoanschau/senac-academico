@@ -1,12 +1,14 @@
-import React from "react";
-import { useForm, Controller, type SubmitHandler } from "react-hook-form";
-import { UserPlus, Loader2 } from "lucide-react";
-import axios from "axios";
-import { CanAccess } from "./CanAccess";
-import { type AppRole } from "../contexts/AuthContext";
-import { alertDialog } from "../utils/dialog";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+import React from 'react';
+import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
+
+import axios from 'axios';
+import { Loader2, UserPlus } from 'lucide-react';
+
+import { type AppRole } from '../contexts/AuthContext';
+import api from '../services/api';
+import { alertDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
+import { CanAccess } from './CanAccess';
 
 interface CreateUserFormData {
   email: string;
@@ -15,7 +17,7 @@ interface CreateUserFormData {
   phoneNumber?: string;
   roles: Extract<
     AppRole,
-    "INSTRUCTOR" | "COORDINATOR" | "ADMIN" | "SECRETARY" | "MEMBER"
+    'INSTRUCTOR' | 'COORDINATOR' | 'ADMIN' | 'SECRETARY' | 'MEMBER'
   >[];
 }
 
@@ -29,7 +31,7 @@ export const CreateUserForm: React.FC = () => {
     formState: { errors, isSubmitting },
   } = useForm<CreateUserFormData>({
     defaultValues: {
-      roles: ["MEMBER"],
+      roles: ['MEMBER'],
     },
   });
 
@@ -38,22 +40,22 @@ export const CreateUserForm: React.FC = () => {
       const payload = {
         ...data,
         phoneNumber: data.phoneNumber
-          ? data.phoneNumber.replace(/\D/g, "")
+          ? data.phoneNumber.replace(/\D/g, '')
           : undefined,
       };
 
-      await api.post("/users", payload);
-      alertDialog("Usuário criado com sucesso!");
+      await api.post('/users', payload);
+      alertDialog('Usuário criado com sucesso!');
       reset();
     } catch (error) {
-      console.error("Erro ao criar usuário:", error);
+      console.error('Erro ao criar usuário:', error);
       if (axios.isAxiosError(error) && error.response) {
         alertDialog(
-          error.response.data.message || "Falha ao criar o usuário na API.",
+          error.response.data.message || 'Falha ao criar o usuário na API.',
         );
       } else {
         alertDialog(
-          "Ocorreu um erro ao tentar criar o usuário. Verifique os dados e tente novamente.",
+          'Ocorreu um erro ao tentar criar o usuário. Verifique os dados e tente novamente.',
         );
       }
     }
@@ -79,7 +81,7 @@ export const CreateUserForm: React.FC = () => {
               </label>
               <input
                 type="text"
-                {...register("displayName")}
+                {...register('displayName')}
                 className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
                 placeholder="Nome do usuário"
               />
@@ -91,9 +93,9 @@ export const CreateUserForm: React.FC = () => {
               </label>
               <input
                 type="tel"
-                {...register("phoneNumber", {
+                {...register('phoneNumber', {
                   onChange: (e) => {
-                    let v = e.target.value.replace(/\D/g, "");
+                    let v = e.target.value.replace(/\D/g, '');
                     if (v.length > 11) v = v.substring(0, 11);
                     if (v.length > 7) {
                       e.target.value = `(${v.substring(0, 2)}) ${v.substring(2, 4)} ${v.substring(4, 7)}-${v.substring(7)}`;
@@ -104,7 +106,7 @@ export const CreateUserForm: React.FC = () => {
                     } else if (v.length > 0) {
                       e.target.value = `(${v.substring(0)}`;
                     }
-                    setValue("phoneNumber", e.target.value);
+                    setValue('phoneNumber', e.target.value);
                   },
                 })}
                 className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
@@ -118,7 +120,7 @@ export const CreateUserForm: React.FC = () => {
               </label>
               <input
                 type="email"
-                {...register("email", { required: "O e-mail é obrigatório." })}
+                {...register('email', { required: 'O e-mail é obrigatório.' })}
                 className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
                 placeholder="exemplo@senac.br"
               />
@@ -135,11 +137,11 @@ export const CreateUserForm: React.FC = () => {
               </label>
               <input
                 type="password"
-                {...register("password", {
-                  required: "A senha é obrigatória.",
+                {...register('password', {
+                  required: 'A senha é obrigatória.',
                   minLength: {
                     value: 6,
-                    message: "A senha deve ter no mínimo 6 caracteres.",
+                    message: 'A senha deve ter no mínimo 6 caracteres.',
                   },
                 })}
                 className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition-all text-slate-800 placeholder-slate-400"
@@ -159,16 +161,16 @@ export const CreateUserForm: React.FC = () => {
               <Controller
                 control={control}
                 name="roles"
-                rules={{ required: "Selecione pelo menos um papel." }}
+                rules={{ required: 'Selecione pelo menos um papel.' }}
                 render={({ field: { onChange, value } }) => (
                   <div className="flex flex-wrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1 border border-slate-100">
                     {(
                       [
-                        { value: Role.INSTRUCTOR, label: "Professor(a)" },
-                        { value: Role.COORDINATOR, label: "Coordenador(a)" },
-                        { value: Role.ADMIN, label: "Administrador(a)" },
-                        { value: Role.SECRETARY, label: "Secretário(a)" },
-                        { value: Role.MEMBER, label: "Membro(a)" },
+                        { value: Role.INSTRUCTOR, label: 'Professor(a)' },
+                        { value: Role.COORDINATOR, label: 'Coordenador(a)' },
+                        { value: Role.ADMIN, label: 'Administrador(a)' },
+                        { value: Role.SECRETARY, label: 'Secretário(a)' },
+                        { value: Role.MEMBER, label: 'Membro(a)' },
                       ] as const
                     ).map((role) => {
                       const isSelected = value?.includes(role.value);
@@ -184,8 +186,8 @@ export const CreateUserForm: React.FC = () => {
                           }}
                           className={`flex-1 min-w-30 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
                             isSelected
-                              ? "bg-slate-800 text-white shadow-md"
-                              : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                              ? 'bg-slate-800 text-white shadow-md'
+                              : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'
                           }`}
                         >
                           {role.label}
@@ -215,7 +217,7 @@ export const CreateUserForm: React.FC = () => {
                   Salvando...
                 </>
               ) : (
-                "Criar Usuário"
+                'Criar Usuário'
               )}
             </button>
           </div>

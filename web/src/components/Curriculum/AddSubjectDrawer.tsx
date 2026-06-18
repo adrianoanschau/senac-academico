@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import { X } from "lucide-react";
-import { LoadingOverlay } from "../LoadingOverlay";
-import { SubjectAutocomplete } from "./SubjectAutocomplete";
-import { alertDialog } from "../../utils/dialog";
-import api from "../../services/api";
-import type { Curriculum, Subject } from "../../types/subject.types";
+import React, { useState } from 'react';
 
-type DrawerTab = "search" | "create";
+import { X } from 'lucide-react';
+
+import api from '../../services/api';
+import type { Curriculum, Subject } from '../../types/subject.types';
+import { alertDialog } from '../../utils/dialog';
+import { LoadingOverlay } from '../LoadingOverlay';
+import { SubjectAutocomplete } from './SubjectAutocomplete';
+
+type DrawerTab = 'search' | 'create';
 
 interface AddSubjectDrawerProps {
   isOpen: boolean;
@@ -16,7 +18,7 @@ interface AddSubjectDrawerProps {
   onSuccess: (message: string) => void;
 }
 
-const initialCreateForm = { name: "", code: "", hours: 0 };
+const initialCreateForm = { name: '', code: '', hours: 0 };
 
 export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
   isOpen,
@@ -25,7 +27,7 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
   defaultModule,
   onSuccess,
 }) => {
-  const [tab, setTab] = useState<DrawerTab>("search");
+  const [tab, setTab] = useState<DrawerTab>('search');
   const [module, setModule] = useState(defaultModule);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [createForm, setCreateForm] = useState(initialCreateForm);
@@ -35,7 +37,7 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setModule(defaultModule);
-      setTab("search");
+      setTab('search');
       setSelectedSubject(null);
       setCreateForm(initialCreateForm);
     }
@@ -47,28 +49,28 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
 
     try {
       const payload =
-        tab === "search"
+        tab === 'search'
           ? { subjectId: selectedSubject?.id, module }
           : { createSubject: createForm, module };
 
-      if (tab === "search" && !selectedSubject?.id) {
-        alertDialog("Selecione uma disciplina da lista.");
+      if (tab === 'search' && !selectedSubject?.id) {
+        alertDialog('Selecione uma disciplina da lista.');
         return;
       }
 
       await api.post(`/curriculums/${curriculum.id}/subjects`, payload);
 
       const subjectName =
-        tab === "search" ? selectedSubject!.name : createForm.name;
+        tab === 'search' ? selectedSubject!.name : createForm.name;
       onSuccess(`${subjectName} adicionada ao Módulo ${module}`);
       onClose();
     } catch (error: unknown) {
-      console.error("Erro ao adicionar disciplina:", error);
+      console.error('Erro ao adicionar disciplina:', error);
       const message =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ?? "Erro ao adicionar a disciplina.";
+          ?.data?.message ?? 'Erro ao adicionar a disciplina.';
       alertDialog(
-        Array.isArray(message) ? message.join(", ") : String(message),
+        Array.isArray(message) ? message.join(', ') : String(message),
       );
     } finally {
       setIsSaving(false);
@@ -104,12 +106,14 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
 
           <div className="mb-6 space-y-1">
             <p className="text-sm text-slate-500">
-              Grade:{" "}
-              <span className="font-bold text-slate-700">{curriculum.name}</span>
+              Grade:{' '}
+              <span className="font-bold text-slate-700">
+                {curriculum.name}
+              </span>
             </p>
             {curriculum.course?.name && (
               <p className="text-sm text-slate-500">
-                Curso:{" "}
+                Curso:{' '}
                 <span className="font-bold text-slate-700">
                   {curriculum.course.name}
                 </span>
@@ -135,8 +139,8 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {(
                 [
-                  { id: "search" as const, label: "Buscar UC" },
-                  { id: "create" as const, label: "Criar nova UC" },
+                  { id: 'search' as const, label: 'Buscar UC' },
+                  { id: 'create' as const, label: 'Criar nova UC' },
                 ] as const
               ).map((item) => (
                 <button
@@ -145,8 +149,8 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
                   onClick={() => setTab(item.id)}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                     tab === item.id
-                      ? "bg-menu-matriz text-white shadow-md"
-                      : "text-slate-500 hover:bg-slate-200"
+                      ? 'bg-menu-matriz text-white shadow-md'
+                      : 'text-slate-500 hover:bg-slate-200'
                   }`}
                 >
                   {item.label}
@@ -154,7 +158,7 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
               ))}
             </div>
 
-            {tab === "search" ? (
+            {tab === 'search' ? (
               <div className="space-y-3">
                 <SubjectAutocomplete
                   curriculumId={curriculum.id}
@@ -212,7 +216,7 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
                     required
                     type="number"
                     min={1}
-                    value={createForm.hours || ""}
+                    value={createForm.hours || ''}
                     onChange={(e) =>
                       setCreateForm({
                         ...createForm,
@@ -236,10 +240,10 @@ export const AddSubjectDrawer: React.FC<AddSubjectDrawerProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={isSaving || (tab === "search" && !selectedSubject)}
+                disabled={isSaving || (tab === 'search' && !selectedSubject)}
                 className="bg-menu-matriz hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-matriz/30"
               >
-                {isSaving ? "Adicionando..." : "Adicionar à Grade"}
+                {isSaving ? 'Adicionando...' : 'Adicionar à Grade'}
               </button>
             </div>
           </form>

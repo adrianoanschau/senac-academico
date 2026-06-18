@@ -1,31 +1,33 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Search, BookOpen, Info, Library } from "lucide-react";
-import { Select } from "../components/Select";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { SubjectCurriculumBadges } from "../components/Curriculum/SubjectCurriculumBadges";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import type { Subject, Course } from "../types/subject.types";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-type LinkFilter = "all" | "linked" | "orphan";
+import { BookOpen, Info, Library, Search } from 'lucide-react';
+
+import { ContextPanel } from '../components/ContextPanel';
+import { SubjectCurriculumBadges } from '../components/Curriculum/SubjectCurriculumBadges';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import type { Course, Subject } from '../types/subject.types';
+
+type LinkFilter = 'all' | 'linked' | 'orphan';
 
 export const Subjects: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = usePersistentState("subjects_search", "");
+  const [search, setSearch] = usePersistentState('subjects_search', '');
   const [linkFilter, setLinkFilter] = usePersistentState<LinkFilter>(
-    "subjects_link_filter",
-    "linked",
+    'subjects_link_filter',
+    'linked',
   );
   const [courseFilter, setCourseFilter] = usePersistentState(
-    "subjects_course_filter",
-    "all",
+    'subjects_course_filter',
+    'all',
   );
   const [showOrphans, setShowOrphans] = usePersistentState(
-    "subjects_show_orphans",
+    'subjects_show_orphans',
     false,
   );
 
@@ -33,13 +35,13 @@ export const Subjects: React.FC = () => {
     setIsLoading(true);
     try {
       const [subjectsRes, coursesRes] = await Promise.all([
-        api.get("/subjects", { params: { includeCurriculums: true } }),
-        api.get("/courses"),
+        api.get('/subjects', { params: { includeCurriculums: true } }),
+        api.get('/courses'),
       ]);
       setSubjects(subjectsRes.data.data || []);
       setCourses(coursesRes.data.data || coursesRes.data || []);
     } catch (error) {
-      console.error("Erro ao buscar unidades curriculares:", error);
+      console.error('Erro ao buscar unidades curriculares:', error);
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +52,11 @@ export const Subjects: React.FC = () => {
     fetchSubjects();
   }, []);
 
-  const effectiveLinkFilter = showOrphans ? linkFilter : linkFilter === "orphan" ? "linked" : linkFilter;
+  const effectiveLinkFilter = showOrphans
+    ? linkFilter
+    : linkFilter === 'orphan'
+      ? 'linked'
+      : linkFilter;
 
   const filteredSubjects = useMemo(() => {
     return subjects.filter((s) => {
@@ -64,12 +70,12 @@ export const Subjects: React.FC = () => {
       if (!showOrphans && isOrphan) return false;
 
       const matchesLink =
-        effectiveLinkFilter === "all" ||
-        (effectiveLinkFilter === "linked" && !isOrphan) ||
-        (effectiveLinkFilter === "orphan" && isOrphan);
+        effectiveLinkFilter === 'all' ||
+        (effectiveLinkFilter === 'linked' && !isOrphan) ||
+        (effectiveLinkFilter === 'orphan' && isOrphan);
 
       const matchesCourse =
-        courseFilter === "all" ||
+        courseFilter === 'all' ||
         (s.curriculums?.some(
           (l) => l.curriculum?.course?.id === courseFilter,
         ) ??
@@ -109,10 +115,7 @@ export const Subjects: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-        <LoadingOverlay
-          visible={isLoading}
-          message="Buscando disciplinas..."
-        />
+        <LoadingOverlay visible={isLoading} message="Buscando disciplinas..." />
 
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div className="relative w-72">
@@ -150,9 +153,9 @@ export const Subjects: React.FC = () => {
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {(
                 [
-                  { id: "all" as const, label: "Todas" },
-                  { id: "linked" as const, label: "Vinculadas" },
-                  { id: "orphan" as const, label: "Sem vínculo" },
+                  { id: 'all' as const, label: 'Todas' },
+                  { id: 'linked' as const, label: 'Vinculadas' },
+                  { id: 'orphan' as const, label: 'Sem vínculo' },
                 ] as const
               ).map((f) => (
                 <button
@@ -160,8 +163,8 @@ export const Subjects: React.FC = () => {
                   onClick={() => setLinkFilter(f.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     effectiveLinkFilter === f.id
-                      ? "bg-menu-uc text-white shadow-md"
-                      : "text-slate-500 hover:bg-slate-200"
+                      ? 'bg-menu-uc text-white shadow-md'
+                      : 'text-slate-500 hover:bg-slate-200'
                   }`}
                 >
                   {f.label}
@@ -174,13 +177,13 @@ export const Subjects: React.FC = () => {
         {!showOrphans && orphanCount > 0 && (
           <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm">
             <span className="text-amber-800">
-              {orphanCount} UC{orphanCount !== 1 ? "s" : ""} sem vínculo
-              oculta{orphanCount !== 1 ? "s" : ""}.
+              {orphanCount} UC{orphanCount !== 1 ? 's' : ''} sem vínculo oculta
+              {orphanCount !== 1 ? 's' : ''}.
             </span>
             <button
               onClick={() => {
                 setShowOrphans(true);
-                setLinkFilter("all");
+                setLinkFilter('all');
               }}
               className="font-bold text-amber-700 hover:text-amber-900 underline"
             >
@@ -197,7 +200,7 @@ export const Subjects: React.FC = () => {
             <button
               onClick={() => {
                 setShowOrphans(false);
-                if (linkFilter === "orphan") setLinkFilter("linked");
+                if (linkFilter === 'orphan') setLinkFilter('linked');
               }}
               className="font-bold text-slate-600 hover:text-slate-800 underline"
             >
@@ -283,9 +286,9 @@ export const Subjects: React.FC = () => {
         description="Catálogo global de referência. A gestão de disciplinas acontece dentro de cada Matriz Curricular."
         icon={<Info className="text-menu-uc" size={24} />}
         tips={[
-          "Uma mesma UC pode aparecer em múltiplas grades (reutilização).",
-          "UCs sem vínculo foram criadas mas ainda não associadas a uma grade.",
-          "Para adicionar disciplinas, acesse a Matriz Curricular e abra a grade desejada.",
+          'Uma mesma UC pode aparecer em múltiplas grades (reutilização).',
+          'UCs sem vínculo foram criadas mas ainda não associadas a uma grade.',
+          'Para adicionar disciplinas, acesse a Matriz Curricular e abra a grade desejada.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">

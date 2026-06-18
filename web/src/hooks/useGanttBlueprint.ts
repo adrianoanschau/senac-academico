@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
+
 import axios from 'axios';
+
 import api from '../services/api';
-import { alertDialog } from '../utils/dialog';
 import type {
   GanttBlueprintResult,
   GanttSubjectPayload,
   ModuleSubject,
   SubjectConfig,
 } from '../types/gantt.types';
+import { alertDialog } from '../utils/dialog';
 
 const DEFAULT_START = '08:00';
 const DEFAULT_END = '10:00';
@@ -76,7 +78,9 @@ export function useGanttBlueprint(classGroupId: string) {
       curriculumSubjectId: cfg.curriculumSubjectId,
       subjectId: cfg.subjectId,
       daysOfWeek: cfg.daysOfWeek,
-      ...(cfg.dependsOnId || !cfg.startDate ? {} : { startDate: cfg.startDate }),
+      ...(cfg.dependsOnId || !cfg.startDate
+        ? {}
+        : { startDate: cfg.startDate }),
       dependsOnId: cfg.dependsOnId || null,
       ...(cfg.isPriority ? { isPriority: true } : {}),
       professorId: cfg.professorId || undefined,

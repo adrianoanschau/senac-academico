@@ -9,7 +9,13 @@ interface ContextPanelProps {
   children?: React.ReactNode;
 }
 
-export const ContextPanel: React.FC<ContextPanelProps> = ({ title, description, icon, tips, children }) => {
+export const ContextPanel: React.FC<ContextPanelProps> = ({
+  title,
+  description,
+  icon,
+  tips,
+  children,
+}) => {
   const [target, setTarget] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -27,19 +33,22 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({ title, description, 
         </div>
         <h3 className="text-lg font-bold text-slate-800">{title}</h3>
       </div>
-      <p className="text-slate-500 text-sm leading-relaxed">
-        {description}
-      </p>
+      <p className="text-slate-500 text-sm leading-relaxed">{description}</p>
 
       {/* Renderiza o widget customizado (resumo, calendário) injetado pela rota atual */}
       {children}
 
       {tips && tips.length > 0 && (
         <div className="mt-2 bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-          <h4 className="text-xs font-bold text-[#004a8d] uppercase mb-2">Dicas e Próximos Passos</h4>
+          <h4 className="text-xs font-bold text-[#004a8d] uppercase mb-2">
+            Dicas e Próximos Passos
+          </h4>
           <ul className="flex flex-col gap-2">
             {tips.map((tip, idx) => (
-              <li key={idx} className="text-xs text-slate-600 flex items-start gap-2 leading-relaxed">
+              <li
+                key={idx}
+                className="text-xs text-slate-600 flex items-start gap-2 leading-relaxed"
+              >
                 <span className="text-[#f37021] mt-0.5 font-bold">•</span>
                 {tip}
               </li>
@@ -48,6 +57,6 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({ title, description, 
         </div>
       )}
     </div>,
-    target
+    target,
   );
 };

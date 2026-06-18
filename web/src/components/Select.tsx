@@ -1,4 +1,11 @@
-import React, { type SelectHTMLAttributes, forwardRef, useState, useRef, useEffect } from 'react';
+import React, {
+  forwardRef,
+  type SelectHTMLAttributes,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
 import { ChevronDown } from 'lucide-react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -6,17 +13,31 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, className = '', wrapperClassName = '', value, defaultValue, ...props }, ref) => {
+  (
+    {
+      children,
+      className = '',
+      wrapperClassName = '',
+      value,
+      defaultValue,
+      ...props
+    },
+    ref,
+  ) => {
     const hasWFull = className.includes('w-full');
     const hasFlex1 = className.includes('flex-1');
-    
+
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const nativeSelectRef = useRef<HTMLSelectElement | null>(null);
 
     // Mantém a sincronização interna do valor selecionado para renderização
     const [internalValue, setInternalValue] = useState<string>(
-      value !== undefined ? String(value) : (defaultValue !== undefined ? String(defaultValue) : '')
+      value !== undefined
+        ? String(value)
+        : defaultValue !== undefined
+          ? String(defaultValue)
+          : '',
     );
 
     useEffect(() => {
@@ -37,22 +58,32 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     // Clique fora do componente para fechar o dropdown
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(e.target as Node)
+        ) {
           setIsOpen(false);
         }
       };
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     // Extrair opções renderizadas como `children` do Select
     const options: { value: string; label: React.ReactNode }[] = [];
     React.Children.forEach(children, (child) => {
       if (React.isValidElement(child) && child.type === 'option') {
-        const optProps = child.props as React.OptionHTMLAttributes<HTMLOptionElement> & { children?: React.ReactNode };
+        const optProps =
+          child.props as React.OptionHTMLAttributes<HTMLOptionElement> & {
+            children?: React.ReactNode;
+          };
         options.push({
-          value: optProps.value !== undefined ? String(optProps.value) : String(optProps.children ?? ''),
-          label: optProps.children ?? ''
+          value:
+            optProps.value !== undefined
+              ? String(optProps.value)
+              : String(optProps.children ?? ''),
+          label: optProps.children ?? '',
         });
       }
     });
@@ -62,10 +93,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         setInternalValue(optValue);
       }
       setIsOpen(false);
-      
+
       // Aciona silenciosamente o evento nativo para que o react-hook-form capture a alteração
       if (nativeSelectRef.current) {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value")?.set;
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLSelectElement.prototype,
+          'value',
+        )?.set;
         nativeInputValueSetter?.call(nativeSelectRef.current, optValue);
         const event = new Event('change', { bubbles: true });
         nativeSelectRef.current.dispatchEvent(event);
@@ -81,15 +115,21 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       }
     };
 
-    const selectedOption = options.find(opt => opt.value === internalValue);
-    const displayLabel = selectedOption ? selectedOption.label : (options.length > 0 ? options[0].label : '');
+    const selectedOption = options.find((opt) => opt.value === internalValue);
+    const displayLabel = selectedOption
+      ? selectedOption.label
+      : options.length > 0
+        ? options[0].label
+        : '';
 
     const derivedWrapperClass = [
       'relative inline-block',
       hasWFull ? 'w-full' : '',
       hasFlex1 ? 'flex-1' : '',
-      wrapperClassName
-    ].filter(Boolean).join(' ');
+      wrapperClassName,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return (
       <div className={derivedWrapperClass} ref={containerRef}>
@@ -104,15 +144,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         >
           {children}
         </select>
-        
+
         {/* Interface Visual */}
         <div
-          onClick={() => { if (!props.disabled) setIsOpen(!isOpen); }}
+          onClick={() => {
+            if (!props.disabled) setIsOpen(!isOpen);
+          }}
           className={`${className} flex items-center justify-between select-none appearance-none ${isOpen ? 'ring-2' : ''} ${props.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           tabIndex={props.disabled ? -1 : 0}
         >
           <span className="truncate">{displayLabel}</span>
-          <ChevronDown size={18} className={`text-slate-400 transition-transform flex-shrink-0 ml-4 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={18}
+            className={`text-slate-400 transition-transform flex-shrink-0 ml-4 ${isOpen ? 'rotate-180' : ''}`}
+          />
         </div>
 
         {/* Opções do Dropdown */}
@@ -131,7 +176,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = 'Select';

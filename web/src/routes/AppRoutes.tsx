@@ -1,79 +1,80 @@
-import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ServerWakeup } from "../components/ServerWakeup";
-import { AuthProvider } from "../contexts/AuthContext";
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
+import { ServerWakeup } from '../components/ServerWakeup';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const MainLayout = lazy(() =>
-  import("../layouts/MainLayout").then((m) => ({ default: m.MainLayout })),
+  import('../layouts/MainLayout').then((m) => ({ default: m.MainLayout })),
 );
 const ProtectedRoute = lazy(() =>
-  import("../components/ProtectedRoute").then((m) => ({
+  import('../components/ProtectedRoute').then((m) => ({
     default: m.ProtectedRoute,
   })),
 );
 
 const Home = lazy(() =>
-  import("../pages/Home").then((m) => ({ default: m.Home })),
+  import('../pages/Home').then((m) => ({ default: m.Home })),
 );
 const Placeholder = lazy(() =>
-  import("../pages/Placeholder").then((m) => ({ default: m.Placeholder })),
+  import('../pages/Placeholder').then((m) => ({ default: m.Placeholder })),
 );
 const Login = lazy(() =>
-  import("../pages/Login").then((m) => ({ default: m.Login })),
+  import('../pages/Login').then((m) => ({ default: m.Login })),
 );
 const ForgotPassword = lazy(() =>
-  import("../pages/ForgotPassword").then((m) => ({
+  import('../pages/ForgotPassword').then((m) => ({
     default: m.ForgotPassword,
   })),
 );
 const UpdatePassword = lazy(() =>
-  import("../pages/UpdatePassword").then((m) => ({
+  import('../pages/UpdatePassword').then((m) => ({
     default: m.UpdatePassword,
   })),
 );
 const Professors = lazy(() =>
-  import("../pages/Professors").then((m) => ({ default: m.Professors })),
+  import('../pages/Professors').then((m) => ({ default: m.Professors })),
 );
 const Rooms = lazy(() =>
-  import("../pages/Rooms").then((m) => ({ default: m.Rooms })),
+  import('../pages/Rooms').then((m) => ({ default: m.Rooms })),
 );
 const CalendarReserves = lazy(() =>
-  import("../pages/CalendarReserves").then((m) => ({
+  import('../pages/CalendarReserves').then((m) => ({
     default: m.CalendarReserves,
   })),
 );
 const Subjects = lazy(() =>
-  import("../pages/Subjects").then((m) => ({ default: m.Subjects })),
+  import('../pages/Subjects').then((m) => ({ default: m.Subjects })),
 );
 const ClassGroups = lazy(() =>
-  import("../pages/ClassGroups").then((m) => ({ default: m.ClassGroups })),
+  import('../pages/ClassGroups').then((m) => ({ default: m.ClassGroups })),
 );
 const Curriculums = lazy(() =>
-  import("../pages/Curriculums").then((m) => ({ default: m.Curriculums })),
+  import('../pages/Curriculums').then((m) => ({ default: m.Curriculums })),
 );
 const CurriculumDetail = lazy(() =>
-  import("../pages/CurriculumDetail").then((m) => ({
+  import('../pages/CurriculumDetail').then((m) => ({
     default: m.CurriculumDetail,
   })),
 );
 const Schedule = lazy(() =>
-  import("../pages/Schedule").then((m) => ({ default: m.Schedule })),
+  import('../pages/Schedule').then((m) => ({ default: m.Schedule })),
 );
 const SchedulePlanning = lazy(() =>
-  import("../pages/SchedulePlanning").then((m) => ({
+  import('../pages/SchedulePlanning').then((m) => ({
     default: m.SchedulePlanning,
   })),
 );
 const ScheduleOperations = lazy(() =>
-  import("../pages/ScheduleOperations").then((m) => ({
+  import('../pages/ScheduleOperations').then((m) => ({
     default: m.ScheduleOperations,
   })),
 );
 const Courses = lazy(() =>
-  import("../pages/Courses").then((m) => ({ default: m.Courses })),
+  import('../pages/Courses').then((m) => ({ default: m.Courses })),
 );
 const Settings = lazy(() =>
-  import("../pages/Settings").then((m) => ({ default: m.Settings })),
+  import('../pages/Settings').then((m) => ({ default: m.Settings })),
 );
 
 export const AppRoutes: React.FC = () => {
@@ -108,7 +109,10 @@ export const AppRoutes: React.FC = () => {
                     element={<ScheduleOperations />}
                   />
                   <Route path="curriculums" element={<Curriculums />} />
-                  <Route path="curriculums/:id" element={<CurriculumDetail />} />
+                  <Route
+                    path="curriculums/:id"
+                    element={<CurriculumDetail />}
+                  />
                   <Route path="enrollments" element={<Placeholder />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="professors" element={<Professors />} />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+
 import { UserProfileCard } from '../components/UserProfileCard';
 import { Sidebar } from './Sidebar';
 
@@ -15,9 +16,15 @@ export const MainLayout: React.FC = () => {
       <aside className="w-96 bg-white shrink-0 overflow-y-auto shadow-[-4px_0_24px_rgb(0,0,0,0.02)] z-10 hidden xl:block">
         <div className="p-8">
           <div className="flex justify-between items-center mb-10 text-sm font-semibold">
-            <span className="text-slate-800 border-b-2 border-slate-800 pb-1 cursor-pointer">Perfil</span>
-            <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">Ajuda e Dicas</span>
-            <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">Avisos</span>
+            <span className="text-slate-800 border-b-2 border-slate-800 pb-1 cursor-pointer">
+              Perfil
+            </span>
+            <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">
+              Ajuda e Dicas
+            </span>
+            <span className="text-slate-400 hover:text-slate-600 cursor-pointer pb-1">
+              Avisos
+            </span>
           </div>
 
           <UserProfileCard />
@@ -26,7 +33,6 @@ export const MainLayout: React.FC = () => {
 
           {/* Container "alvo" para as páginas renderizarem seus painéis contextuais */}
           <div id="context-panel-root"></div>
-          
         </div>
       </aside>
     </div>

@@ -1,22 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  Library,
-  Plus,
-  Edit2,
-  X,
-  CheckCircle2,
-} from "lucide-react";
-import { Select } from "../components/Select";
-import { CanAccess } from "../components/CanAccess";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { ModuleSection } from "../components/Curriculum/ModuleSection";
-import { AddSubjectDrawer } from "../components/Curriculum/AddSubjectDrawer";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import api from "../services/api";
-import { Role } from "../utils/roles";
-import type { Curriculum, Course } from "../types/subject.types";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+
+import { ArrowLeft, CheckCircle2, Edit2, Library, Plus, X } from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { AddSubjectDrawer } from '../components/Curriculum/AddSubjectDrawer';
+import { ModuleSection } from '../components/Curriculum/ModuleSection';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import api from '../services/api';
+import type { Course, Curriculum } from '../types/subject.types';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface MetadataForm {
   name: string;
@@ -34,9 +29,9 @@ export const CurriculumDetail: React.FC = () => {
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const [isSavingMetadata, setIsSavingMetadata] = useState(false);
   const [metadataForm, setMetadataForm] = useState<MetadataForm>({
-    name: "",
+    name: '',
     active: true,
-    courseId: "",
+    courseId: '',
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerModule, setDrawerModule] = useState(1);
@@ -49,9 +44,9 @@ export const CurriculumDetail: React.FC = () => {
       const data = response.data.data || response.data;
       setCurriculum(data);
     } catch (error) {
-      console.error("Erro ao buscar grade:", error);
-      alertDialog("Grade não encontrada.");
-      navigate("/curriculums");
+      console.error('Erro ao buscar grade:', error);
+      alertDialog('Grade não encontrada.');
+      navigate('/curriculums');
     }
   }, [id, navigate]);
 
@@ -61,7 +56,7 @@ export const CurriculumDetail: React.FC = () => {
       try {
         const [, coursesRes] = await Promise.all([
           fetchCurriculum(),
-          api.get("/courses"),
+          api.get('/courses'),
         ]);
         setCourses(coursesRes.data.data || coursesRes.data || []);
       } finally {
@@ -88,7 +83,8 @@ export const CurriculumDetail: React.FC = () => {
     }));
   }, [curriculum]);
 
-  const maxModule = modules.length > 0 ? Math.max(...modules.map((m) => m.number)) : 0;
+  const maxModule =
+    modules.length > 0 ? Math.max(...modules.map((m) => m.number)) : 0;
 
   const handleOpenDrawer = (module: number) => {
     setDrawerModule(module);
@@ -99,18 +95,18 @@ export const CurriculumDetail: React.FC = () => {
     if (!id) return;
     if (
       !(await confirmDialog(
-        "Remover esta disciplina da grade? A UC permanecerá no dicionário global.",
+        'Remover esta disciplina da grade? A UC permanecerá no dicionário global.',
       ))
     )
       return;
 
     try {
       await api.delete(`/curriculums/${id}/subjects/${curriculumSubjectId}`);
-      setSuccessMessage("Disciplina removida da grade.");
+      setSuccessMessage('Disciplina removida da grade.');
       await fetchCurriculum();
     } catch (error) {
-      console.error("Erro ao remover disciplina:", error);
-      alertDialog("Erro ao remover a disciplina.");
+      console.error('Erro ao remover disciplina:', error);
+      alertDialog('Erro ao remover a disciplina.');
     }
   };
 
@@ -132,10 +128,10 @@ export const CurriculumDetail: React.FC = () => {
       await api.patch(`/curriculums/${id}`, metadataForm);
       setIsMetadataModalOpen(false);
       await fetchCurriculum();
-      setSuccessMessage("Dados da grade atualizados.");
+      setSuccessMessage('Dados da grade atualizados.');
     } catch (error) {
-      console.error("Erro ao salvar metadados:", error);
-      alertDialog("Erro ao salvar os dados.");
+      console.error('Erro ao salvar metadados:', error);
+      alertDialog('Erro ao salvar os dados.');
     } finally {
       setIsSavingMetadata(false);
     }
@@ -180,9 +176,9 @@ export const CurriculumDetail: React.FC = () => {
             {curriculum.name}
           </h1>
           <p className="text-slate-500 mt-2">
-            Curso:{" "}
+            Curso:{' '}
             <span className="font-bold text-slate-700">
-              {curriculum.course?.name ?? "—"}
+              {curriculum.course?.name ?? '—'}
             </span>
           </p>
         </div>
@@ -190,11 +186,11 @@ export const CurriculumDetail: React.FC = () => {
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold ${
               curriculum.active
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-slate-100 text-slate-500"
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-slate-100 text-slate-500'
             }`}
           >
-            {curriculum.active ? "Ativa" : "Inativa"}
+            {curriculum.active ? 'Ativa' : 'Inativa'}
           </span>
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
             <button
@@ -288,10 +284,7 @@ export const CurriculumDetail: React.FC = () => {
               </button>
             </div>
 
-            <LoadingOverlay
-              visible={isSavingMetadata}
-              message="Salvando..."
-            />
+            <LoadingOverlay visible={isSavingMetadata} message="Salvando..." />
 
             <form onSubmit={handleSaveMetadata} className="flex flex-col gap-5">
               <div>
@@ -336,11 +329,11 @@ export const CurriculumDetail: React.FC = () => {
                   Status
                 </label>
                 <Select
-                  value={metadataForm.active ? "true" : "false"}
+                  value={metadataForm.active ? 'true' : 'false'}
                   onChange={(e) =>
                     setMetadataForm({
                       ...metadataForm,
-                      active: e.target.value === "true",
+                      active: e.target.value === 'true',
                     })
                   }
                   className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800 cursor-pointer"
@@ -362,7 +355,7 @@ export const CurriculumDetail: React.FC = () => {
                   disabled={isSavingMetadata}
                   className="bg-menu-matriz hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-matriz/30"
                 >
-                  {isSavingMetadata ? "Salvando..." : "Salvar"}
+                  {isSavingMetadata ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>

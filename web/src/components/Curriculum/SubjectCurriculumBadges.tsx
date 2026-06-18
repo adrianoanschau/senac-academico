@@ -1,6 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import type { CurriculumSubjectLink } from "../../types/subject.types";
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import type { CurriculumSubjectLink } from '../../types/subject.types';
 
 interface SubjectCurriculumBadgesProps {
   links: CurriculumSubjectLink[];
@@ -27,8 +28,8 @@ export const SubjectCurriculumBadges: React.FC<
   return (
     <div className="flex flex-col gap-1.5">
       {visible.map((link) => {
-        const courseName = link.curriculum?.course?.name ?? "Curso";
-        const gradeName = link.curriculum?.name ?? "Grade";
+        const courseName = link.curriculum?.course?.name ?? 'Curso';
+        const gradeName = link.curriculum?.name ?? 'Grade';
         const label = `${courseName} · ${gradeName}`;
 
         if (link.curriculum?.id) {
@@ -59,11 +60,11 @@ export const SubjectCurriculumBadges: React.FC<
           title={links
             .slice(maxVisible)
             .map((l) => {
-              const course = l.curriculum?.course?.name ?? "Curso";
-              const grade = l.curriculum?.name ?? "Grade";
+              const course = l.curriculum?.course?.name ?? 'Curso';
+              const grade = l.curriculum?.name ?? 'Grade';
               return `${course} · ${grade}`;
             })
-            .join("\n")}
+            .join('\n')}
         >
           +{hiddenCount}
         </span>

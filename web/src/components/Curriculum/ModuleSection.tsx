@@ -1,8 +1,10 @@
-import React from "react";
-import { Plus, Trash2 } from "lucide-react";
-import { CanAccess } from "../CanAccess";
-import { Role } from "../../utils/roles";
-import type { CurriculumSubject } from "../../types/subject.types";
+import React from 'react';
+
+import { Plus, Trash2 } from 'lucide-react';
+
+import type { CurriculumSubject } from '../../types/subject.types';
+import { Role } from '../../utils/roles';
+import { CanAccess } from '../CanAccess';
 
 interface ModuleSectionProps {
   moduleNumber: number;
@@ -30,8 +32,8 @@ export const ModuleSection: React.FC<ModuleSectionProps> = ({
             Módulo {moduleNumber}
           </h3>
           <p className="text-sm text-slate-500">
-            {subjects.length} UC{subjects.length !== 1 ? "s" : ""} · {totalHours}
-            h
+            {subjects.length} UC{subjects.length !== 1 ? 's' : ''} ·{' '}
+            {totalHours}h
           </p>
         </div>
         <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
@@ -57,8 +59,8 @@ export const ModuleSection: React.FC<ModuleSectionProps> = ({
             >
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-slate-800 truncate">
-                  {cs.subject?.code ? `${cs.subject.code} · ` : ""}
-                  {cs.subject?.name ?? "Disciplina"}
+                  {cs.subject?.code ? `${cs.subject.code} · ` : ''}
+                  {cs.subject?.name ?? 'Disciplina'}
                 </p>
               </div>
               <span className="text-sm font-bold text-menu-matriz shrink-0">

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { X, AlertTriangle, Loader2 } from "lucide-react";
-import axios from "axios";
-import { alertDialog } from "../utils/dialog";
-import { LoadingOverlay } from "./LoadingOverlay";
-import api from "../services/api";
+import React, { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+
+import axios from 'axios';
+import { AlertTriangle, Loader2, X } from 'lucide-react';
+
+import api from '../services/api';
+import { alertDialog } from '../utils/dialog';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface Professor {
   id: string;
@@ -52,8 +54,8 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
     defaultValues: {
       transitionDate: initialDate,
       newDaysOfWeek: [],
-      newProfessorId: "",
-      newRoomId: "",
+      newProfessorId: '',
+      newRoomId: '',
     },
   });
 
@@ -62,8 +64,8 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
       reset({
         transitionDate: initialDate,
         newDaysOfWeek: [],
-        newProfessorId: "",
-        newRoomId: "",
+        newProfessorId: '',
+        newRoomId: '',
       });
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setApiError(null);
@@ -72,14 +74,14 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
         setIsLoadingData(true);
         try {
           const [professorsRes, roomsRes] = await Promise.all([
-            api.get("/professors"),
-            api.get("/rooms"),
+            api.get('/professors'),
+            api.get('/rooms'),
           ]);
           setProfessors(professorsRes.data?.data || professorsRes.data || []);
           setRooms(roomsRes.data?.data || roomsRes.data || []);
         } catch (error) {
-          console.error("Erro ao carregar dependências:", error);
-          setApiError("Falha ao carregar listas de salas e professores.");
+          console.error('Erro ao carregar dependências:', error);
+          setApiError('Falha ao carregar listas de salas e professores.');
         } finally {
           setIsLoadingData(false);
         }
@@ -105,18 +107,18 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
       };
 
       await api.post(`/schedules/rules/${ruleId}/migrate-pattern`, payload);
-      alertDialog("Padrão de aulas alterado com sucesso!");
+      alertDialog('Padrão de aulas alterado com sucesso!');
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Erro ao alterar padrão de aulas:", error);
+      console.error('Erro ao alterar padrão de aulas:', error);
       if (axios.isAxiosError(error) && error.response) {
         setApiError(
           error.response.data.message ||
-            "Ocorreu um erro ao conectar com a API.",
+            'Ocorreu um erro ao conectar com a API.',
         );
       } else {
-        setApiError("Ocorreu um erro inesperado ao alterar o padrão de aulas.");
+        setApiError('Ocorreu um erro inesperado ao alterar o padrão de aulas.');
       }
     }
   };
@@ -128,7 +130,7 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[95vh] overflow-hidden relative">
         <LoadingOverlay
           visible={isLoadingData || isSubmitting}
-          message={isSubmitting ? "Processando..." : "Carregando formulário..."}
+          message={isSubmitting ? 'Processando...' : 'Carregando formulário...'}
         />
 
         <div className="p-6 shrink-0 flex justify-between items-center border-b border-slate-100">
@@ -170,7 +172,7 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
               <input
                 type="date"
                 readOnly
-                {...register("transitionDate")}
+                {...register('transitionDate')}
                 className="w-full px-4 py-3 bg-slate-100 border-none rounded-xl text-slate-600 font-medium outline-none cursor-not-allowed"
               />
             </div>
@@ -182,17 +184,17 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
               <Controller
                 control={control}
                 name="newDaysOfWeek"
-                rules={{ required: "Selecione pelo menos um dia da semana." }}
+                rules={{ required: 'Selecione pelo menos um dia da semana.' }}
                 render={({ field: { onChange, value } }) => (
                   <div className="flex flex-wrap sm:flex-nowrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1 border border-slate-100">
                     {[
-                      { label: "Dom", value: "0" },
-                      { label: "Seg", value: "1" },
-                      { label: "Ter", value: "2" },
-                      { label: "Qua", value: "3" },
-                      { label: "Qui", value: "4" },
-                      { label: "Sex", value: "5" },
-                      { label: "Sáb", value: "6" },
+                      { label: 'Dom', value: '0' },
+                      { label: 'Seg', value: '1' },
+                      { label: 'Ter', value: '2' },
+                      { label: 'Qua', value: '3' },
+                      { label: 'Qui', value: '4' },
+                      { label: 'Sex', value: '5' },
+                      { label: 'Sáb', value: '6' },
                     ].map((day) => {
                       const isSelected = value?.includes(day.value);
                       return (
@@ -207,8 +209,8 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
                           }}
                           className={`flex-1 px-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
                             isSelected
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'
                           }`}
                         >
                           {day.label}
@@ -228,11 +230,11 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Novo Professor{" "}
+                  Novo Professor{' '}
                   <span className="text-slate-400 font-normal">(Opcional)</span>
                 </label>
                 <select
-                  {...register("newProfessorId")}
+                  {...register('newProfessorId')}
                   className="w-full px-4 py-3 bg-[#f8f9fc] border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all text-slate-800 cursor-pointer disabled:opacity-50"
                   disabled={isLoadingData}
                 >
@@ -247,11 +249,11 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Nova Sala{" "}
+                  Nova Sala{' '}
                   <span className="text-slate-400 font-normal">(Opcional)</span>
                 </label>
                 <select
-                  {...register("newRoomId")}
+                  {...register('newRoomId')}
                   className="w-full px-4 py-3 bg-[#f8f9fc] border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all text-slate-800 cursor-pointer disabled:opacity-50"
                   disabled={isLoadingData}
                 >
@@ -285,7 +287,7 @@ export const MigrateRuleModal: React.FC<MigrateRuleModalProps> = ({
                   <Loader2 size={18} className="animate-spin" /> Processando...
                 </>
               ) : (
-                "Confirmar Alteração"
+                'Confirmar Alteração'
               )}
             </button>
           </div>

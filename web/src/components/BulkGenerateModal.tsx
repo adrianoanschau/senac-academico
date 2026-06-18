@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+
+import axios from 'axios';
 import {
-  X,
   AlertCircle,
-  Loader2,
-  CalendarClock,
   Calendar,
+  CalendarClock,
   Clock,
-} from "lucide-react";
-import axios from "axios";
-import { DateSelect } from "./DateSelect";
-import { TimeSelect } from "./TimeSelect";
-import { Select } from "./Select";
-import { alertDialog } from "../utils/dialog";
-import { LoadingOverlay } from "./LoadingOverlay";
-import api from "../services/api";
+  Loader2,
+  X,
+} from 'lucide-react';
+
+import api from '../services/api';
+import { alertDialog } from '../utils/dialog';
+import { DateSelect } from './DateSelect';
+import { LoadingOverlay } from './LoadingOverlay';
+import { Select } from './Select';
+import { TimeSelect } from './TimeSelect';
 
 interface ClassGroup {
   id: string;
@@ -72,7 +74,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
     reset,
     control,
   } = useForm<FormData>({
-    defaultValues: { daysOfWeek: ["1", "2", "3", "4", "5"] },
+    defaultValues: { daysOfWeek: ['1', '2', '3', '4', '5'] },
   });
 
   useEffect(() => {
@@ -82,19 +84,19 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
         try {
           const [classGroupsRes, subjectsRes, professorsRes, roomsRes] =
             await Promise.all([
-              api.get("/class-groups"),
-              api.get("/subjects"),
-              api.get("/professors"),
-              api.get("/rooms"),
+              api.get('/class-groups'),
+              api.get('/subjects'),
+              api.get('/professors'),
+              api.get('/rooms'),
             ]);
           setClassGroups(classGroupsRes.data.data || classGroupsRes.data);
           setSubjects(subjectsRes.data.data || subjectsRes.data);
           setProfessors(professorsRes.data.data || professorsRes.data);
           setRooms(roomsRes.data.data || roomsRes.data);
         } catch (error) {
-          console.error("Erro ao carregar listas do formulário:", error);
+          console.error('Erro ao carregar listas do formulário:', error);
           setApiError(
-            "Falha ao carregar dependências. Tente abrir o modal novamente.",
+            'Falha ao carregar dependências. Tente abrir o modal novamente.',
           );
         } finally {
           setIsLoadingData(false);
@@ -119,19 +121,19 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
     };
 
     try {
-      await api.post("/schedules/generate", payload);
-      alertDialog("Grade gerada com sucesso!");
+      await api.post('/schedules/generate', payload);
+      alertDialog('Grade gerada com sucesso!');
       onSuccess();
     } catch (error) {
-      console.error("Erro na geração da grade:", error);
+      console.error('Erro na geração da grade:', error);
       if (axios.isAxiosError(error) && error.response) {
         // Captura o erro 409 Conflict ou outros da API
         setApiError(
           error.response.data.message ||
-            "Ocorreu um erro ao conectar com a API.",
+            'Ocorreu um erro ao conectar com a API.',
         );
       } else {
-        setApiError("Ocorreu um erro inesperado ao gerar a grade.");
+        setApiError('Ocorreu um erro inesperado ao gerar a grade.');
       }
     }
   };
@@ -144,7 +146,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
         <LoadingOverlay
           visible={isLoadingData || isSubmitting}
           message={
-            isSubmitting ? "Gerando cronograma..." : "Carregando formulário..."
+            isSubmitting ? 'Gerando cronograma...' : 'Carregando formulário...'
           }
         />
 
@@ -186,7 +188,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                       Turma
                     </label>
                     <Select
-                      {...register("classGroupId", { required: true })}
+                      {...register('classGroupId', { required: true })}
                       className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer"
                     >
                       <option value="">Selecione a turma...</option>
@@ -202,7 +204,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                       Disciplina
                     </label>
                     <Select
-                      {...register("subjectId", { required: true })}
+                      {...register('subjectId', { required: true })}
                       className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer"
                     >
                       <option value="">Selecione a disciplina...</option>
@@ -218,7 +220,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                       Professor
                     </label>
                     <Select
-                      {...register("professorId", { required: true })}
+                      {...register('professorId', { required: true })}
                       className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer"
                     >
                       <option value="">Selecione o professor...</option>
@@ -234,7 +236,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                       Sala/Ambiente
                     </label>
                     <Select
-                      {...register("roomId", { required: true })}
+                      {...register('roomId', { required: true })}
                       className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-[#004a8d] outline-none transition-all text-slate-800 cursor-pointer"
                     >
                       <option value="">Selecione a sala...</option>
@@ -256,7 +258,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                       <Controller
                         control={control}
                         name="startDate"
-                        rules={{ required: "Data de início é obrigatória" }}
+                        rules={{ required: 'Data de início é obrigatória' }}
                         render={({ field: { onChange, value } }) => (
                           <DateSelect
                             value={value}
@@ -285,7 +287,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                         <Controller
                           control={control}
                           name="startTimeStr"
-                          rules={{ required: "Hora inicial é obrigatória" }}
+                          rules={{ required: 'Hora inicial é obrigatória' }}
                           render={({ field: { onChange, value } }) => (
                             <TimeSelect
                               value={value}
@@ -315,7 +317,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                         <Controller
                           control={control}
                           name="endTimeStr"
-                          rules={{ required: "Hora final é obrigatória" }}
+                          rules={{ required: 'Hora final é obrigatória' }}
                           render={({ field: { onChange, value } }) => (
                             <TimeSelect
                               value={value}
@@ -348,13 +350,13 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                     render={({ field: { onChange, value } }) => (
                       <div className="flex flex-wrap sm:flex-nowrap bg-[#f8f9fc] rounded-xl p-1.5 gap-1">
                         {[
-                          { label: "Dom", value: "0" },
-                          { label: "Seg", value: "1" },
-                          { label: "Ter", value: "2" },
-                          { label: "Qua", value: "3" },
-                          { label: "Qui", value: "4" },
-                          { label: "Sex", value: "5" },
-                          { label: "Sáb", value: "6" },
+                          { label: 'Dom', value: '0' },
+                          { label: 'Seg', value: '1' },
+                          { label: 'Ter', value: '2' },
+                          { label: 'Qua', value: '3' },
+                          { label: 'Qui', value: '4' },
+                          { label: 'Sex', value: '5' },
+                          { label: 'Sáb', value: '6' },
                         ].map((day) => {
                           const isSelected = value?.includes(day.value);
                           return (
@@ -369,8 +371,8 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                               }}
                               className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
                                 isSelected
-                                  ? "bg-[#004a8d] text-white shadow-md"
-                                  : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                                  ? 'bg-[#004a8d] text-white shadow-md'
+                                  : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'
                               }`}
                             >
                               {day.label}
@@ -409,7 +411,7 @@ export const BulkGenerateModal: React.FC<BulkGenerateModalProps> = ({
                   <Loader2 size={18} className="animate-spin" /> Gerando...
                 </>
               ) : (
-                "Gerar Cronograma"
+                'Gerar Cronograma'
               )}
             </button>
           </div>

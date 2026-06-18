@@ -1,5 +1,6 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
+import React from 'react';
+
+import { Loader2 } from 'lucide-react';
 
 interface LoadingOverlayProps {
   visible: boolean;
@@ -10,11 +11,11 @@ interface LoadingOverlayProps {
 export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   visible,
   global = false,
-  message = "Carregando...",
+  message = 'Carregando...',
 }) => {
   if (!visible) return null;
 
-  const positionClasses = global ? "fixed z-[9999]" : "absolute z-50";
+  const positionClasses = global ? 'fixed z-[9999]' : 'absolute z-50';
 
   return (
     <div

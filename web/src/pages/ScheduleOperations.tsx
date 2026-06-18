@@ -1,23 +1,25 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+
 import {
-  Search,
+  ArrowLeft,
   CalendarClock,
   Maximize,
   Minimize,
+  Search,
   Settings2,
-  ArrowLeft,
-} from "lucide-react";
-import { CanAccess } from "../components/CanAccess";
-import { Select } from "../components/Select";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import { Role } from "../utils/roles";
-import api from "../services/api";
+} from 'lucide-react';
 
-const ScheduleCalendar = lazy(() => import("../components/ScheduleCalendar"));
+import { CanAccess } from '../components/CanAccess';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { Role } from '../utils/roles';
+
+const ScheduleCalendar = lazy(() => import('../components/ScheduleCalendar'));
 const ScheduleDetailsModal = lazy(() =>
-  import("../components/ScheduleDetailsModal").then((m) => ({
+  import('../components/ScheduleDetailsModal').then((m) => ({
     default: m.ScheduleDetailsModal,
   })),
 );
@@ -42,31 +44,35 @@ export const ScheduleOperations: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
 
   const [isFullscreen, setIsFullscreen] = usePersistentState(
-    "schedule_ops_fullscreen",
+    'schedule_ops_fullscreen',
     false,
   );
-  const [search, setSearch] = usePersistentState("schedule_ops_search", "");
-  const [status, setStatus] = usePersistentState<string[]>("schedule_ops_status", [
-    "PLANNED",
-    "SCHEDULED",
-    "COMPLETED",
-  ]);
-  const [subjectId, setSubjectId] = usePersistentState<string>(
-    "schedule_ops_subjectId",
-    "",
+  const [search, setSearch] = usePersistentState('schedule_ops_search', '');
+  const [status, setStatus] = usePersistentState<string[]>(
+    'schedule_ops_status',
+    ['PLANNED', 'SCHEDULED', 'COMPLETED'],
   );
-  const [roomId, setRoomId] = usePersistentState<string>("schedule_ops_roomId", "");
+  const [subjectId, setSubjectId] = usePersistentState<string>(
+    'schedule_ops_subjectId',
+    '',
+  );
+  const [roomId, setRoomId] = usePersistentState<string>(
+    'schedule_ops_roomId',
+    '',
+  );
   const [professorId, setProfessorId] = usePersistentState<string>(
-    "schedule_ops_professorId",
-    "",
+    'schedule_ops_professorId',
+    '',
   );
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
-  const [professors, setProfessors] = useState<{ id: string; name: string }[]>([]);
+  const [professors, setProfessors] = useState<{ id: string; name: string }[]>(
+    [],
+  );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedDateStr, setSelectedDateStr] = usePersistentState<string>(
-    "schedule_ops_selected_date",
+    'schedule_ops_selected_date',
     new Date().toISOString(),
   );
   const selectedDate = !isNaN(new Date(selectedDateStr).getTime())
@@ -96,15 +102,15 @@ export const ScheduleOperations: React.FC = () => {
     const fetchFiltersData = async () => {
       try {
         const [subjectsRes, roomsRes, professorsRes] = await Promise.all([
-          api.get("/subjects", { params: { classGroupId } }),
-          api.get("/rooms"),
-          api.get("/professors"),
+          api.get('/subjects', { params: { classGroupId } }),
+          api.get('/rooms'),
+          api.get('/professors'),
         ]);
         setSubjects(subjectsRes.data?.data || subjectsRes.data || []);
         setRooms(roomsRes.data?.data || roomsRes.data || []);
         setProfessors(professorsRes.data?.data || professorsRes.data || []);
       } catch (error) {
-        console.error("Erro ao buscar dados para os filtros:", error);
+        console.error('Erro ao buscar dados para os filtros:', error);
       }
     };
     if (classGroupId) fetchFiltersData();
@@ -140,8 +146,11 @@ export const ScheduleOperations: React.FC = () => {
                 Gestão Operacional
               </h1>
               <p className="text-slate-500 mt-1">
-                Adie, efetive ou altere padrões de aulas da turma{" "}
-                <span className="font-bold text-slate-700">{classGroup?.code || "..."}</span>.
+                Adie, efetive ou altere padrões de aulas da turma{' '}
+                <span className="font-bold text-slate-700">
+                  {classGroup?.code || '...'}
+                </span>
+                .
               </p>
             </div>
             <Link
@@ -157,16 +166,24 @@ export const ScheduleOperations: React.FC = () => {
         <div
           className={
             isFullscreen
-              ? "fixed inset-0 z-50 bg-white p-8 overflow-y-auto"
-              : "bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden"
+              ? 'fixed inset-0 z-50 bg-white p-8 overflow-y-auto'
+              : 'bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden'
           }
         >
-          <LoadingOverlay visible={isLoadingClassGroup} message="Carregando turma..." />
+          <LoadingOverlay
+            visible={isLoadingClassGroup}
+            message="Carregando turma..."
+          />
 
           {notFound ? (
             <div className="text-center py-12">
-              <p className="text-slate-600 font-medium mb-4">Turma não encontrada.</p>
-              <Link to="/class-groups" className="text-senac-blue font-bold hover:underline">
+              <p className="text-slate-600 font-medium mb-4">
+                Turma não encontrada.
+              </p>
+              <Link
+                to="/class-groups"
+                className="text-senac-blue font-bold hover:underline"
+              >
                 Retornar para a lista de turmas
               </Link>
             </div>
@@ -191,10 +208,10 @@ export const ScheduleOperations: React.FC = () => {
                     <span>Status:</span>
                     <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
                       {[
-                        { id: "PLANNED", label: "Planejados" },
-                        { id: "SCHEDULED", label: "Agendados" },
-                        { id: "COMPLETED", label: "Concluídos" },
-                        { id: "CANCELLED", label: "Cancelados" },
+                        { id: 'PLANNED', label: 'Planejados' },
+                        { id: 'SCHEDULED', label: 'Agendados' },
+                        { id: 'COMPLETED', label: 'Concluídos' },
+                        { id: 'CANCELLED', label: 'Cancelados' },
                       ].map((s) => (
                         <button
                           key={s.id}
@@ -205,7 +222,7 @@ export const ScheduleOperations: React.FC = () => {
                                 : [...prev, s.id],
                             );
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status.includes(s.id) ? "bg-[#f37021] text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status.includes(s.id) ? 'bg-[#f37021] text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                         >
                           {s.label}
                         </button>
@@ -214,9 +231,13 @@ export const ScheduleOperations: React.FC = () => {
                     <button
                       onClick={() => setIsFullscreen(!isFullscreen)}
                       className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors ml-2"
-                      title={isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia"}
+                      title={isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
                     >
-                      {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                      {isFullscreen ? (
+                        <Minimize size={20} />
+                      ) : (
+                        <Maximize size={20} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -287,7 +308,9 @@ export const ScheduleOperations: React.FC = () => {
                   onEventClick={handleEventClick}
                   isFullscreen={isFullscreen}
                   selectedDate={selectedDate}
-                  onDateChange={(date) => setSelectedDateStr(date.toISOString())}
+                  onDateChange={(date) =>
+                    setSelectedDateStr(date.toISOString())
+                  }
                 />
               </Suspense>
             </>

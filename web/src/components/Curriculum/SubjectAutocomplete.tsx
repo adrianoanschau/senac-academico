@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Search } from "lucide-react";
-import api from "../../services/api";
-import type { Subject } from "../../types/subject.types";
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Search } from 'lucide-react';
+
+import api from '../../services/api';
+import type { Subject } from '../../types/subject.types';
 
 interface SubjectAutocompleteProps {
   curriculumId: string;
@@ -14,7 +16,7 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
   onSelect,
   selectedSubjectId,
 }) => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [results, setResults] = useState<Subject[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -30,8 +32,8 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -45,11 +47,11 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
         };
         if (search.trim()) params.search = search.trim();
 
-        const response = await api.get("/subjects", { params });
+        const response = await api.get('/subjects', { params });
         setResults(response.data.data || []);
         setIsOpen(true);
       } catch (error) {
-        console.error("Erro ao buscar disciplinas:", error);
+        console.error('Erro ao buscar disciplinas:', error);
         setResults([]);
       } finally {
         setIsSearching(false);
@@ -63,7 +65,7 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
 
   const handleSelect = (subject: Subject) => {
     onSelect(subject);
-    setSearch("");
+    setSearch('');
     setIsOpen(false);
   };
 
@@ -92,8 +94,8 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
           ) : results.length === 0 ? (
             <p className="px-4 py-3 text-sm text-slate-400">
               {search.trim()
-                ? "Nenhuma disciplina encontrada."
-                : "Digite para buscar ou veja as disponíveis."}
+                ? 'Nenhuma disciplina encontrada.'
+                : 'Digite para buscar ou veja as disponíveis.'}
             </p>
           ) : (
             results.map((subject) => {
@@ -108,8 +110,8 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
                   disabled={isSelected}
                   className={`w-full text-left px-4 py-3 transition-colors ${
                     isSelected
-                      ? "bg-slate-50 text-slate-400 cursor-not-allowed"
-                      : "hover:bg-slate-50 text-slate-800"
+                      ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
+                      : 'hover:bg-slate-50 text-slate-800'
                   }`}
                 >
                   <div className="font-bold text-sm">
@@ -118,7 +120,7 @@ export const SubjectAutocomplete: React.FC<SubjectAutocompleteProps> = ({
                   <div className="text-xs text-slate-500 mt-0.5">
                     {subject.hours}h
                     {linkCount > 0 && ` · usada em ${linkCount} grade(s)`}
-                    {isSelected && " · já vinculada"}
+                    {isSelected && ' · já vinculada'}
                   </div>
                 </button>
               );

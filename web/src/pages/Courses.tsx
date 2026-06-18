@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
+
 import {
-  Search,
-  Plus,
   Edit2,
-  Trash2,
   GraduationCap,
-  X,
   Info,
-} from "lucide-react";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface Course {
   id?: string | number;
@@ -23,8 +25,8 @@ interface Course {
 }
 
 const initialFormState: Course = {
-  name: "",
-  code: "",
+  name: '',
+  code: '',
 };
 
 export const Courses: React.FC = () => {
@@ -34,18 +36,18 @@ export const Courses: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Course>(initialFormState);
   const [modalityFilter, setModalityFilter] = usePersistentState(
-    "courses_modality",
-    "all",
+    'courses_modality',
+    'all',
   );
-  const [search, setSearch] = usePersistentState("courses_search", "");
+  const [search, setSearch] = usePersistentState('courses_search', '');
 
   const fetchCourses = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/courses");
+      const response = await api.get('/courses');
       setCourses(response.data.data || []);
     } catch (error) {
-      console.error("Erro ao buscar cursos:", error);
+      console.error('Erro ao buscar cursos:', error);
     } finally {
       setIsLoading(false);
     }
@@ -69,16 +71,16 @@ export const Courses: React.FC = () => {
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return;
-    if (!(await confirmDialog("Tem certeza que deseja excluir este curso?")))
+    if (!(await confirmDialog('Tem certeza que deseja excluir este curso?')))
       return;
 
     try {
       await api.delete(`/courses/${id}`);
       fetchCourses();
     } catch (error) {
-      console.error("Erro ao excluir curso:", error);
+      console.error('Erro ao excluir curso:', error);
       alertDialog(
-        "Erro ao excluir o curso. Verifique dependências (ex: turmas ativas).",
+        'Erro ao excluir o curso. Verifique dependências (ex: turmas ativas).',
       );
     }
   };
@@ -89,7 +91,7 @@ export const Courses: React.FC = () => {
 
     try {
       const isEditing = !!formData.id;
-      const url = isEditing ? `/courses/${formData.id}` : "/courses";
+      const url = isEditing ? `/courses/${formData.id}` : '/courses';
 
       const payload: Partial<Course> = { ...formData };
       if (!isEditing) delete payload.id;
@@ -103,8 +105,8 @@ export const Courses: React.FC = () => {
       setIsModalOpen(false);
       fetchCourses();
     } catch (error) {
-      console.error("Erro ao salvar curso:", error);
-      alertDialog("Erro ao salvar os dados do curso.");
+      console.error('Erro ao salvar curso:', error);
+      alertDialog('Erro ao salvar os dados do curso.');
     } finally {
       setIsSaving(false);
     }
@@ -165,16 +167,16 @@ export const Courses: React.FC = () => {
             <span>Modalidade:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
-                { id: "all", label: "Todas" },
-                { id: "Técnico", label: "Técnico" },
-                { id: "Livre", label: "Livre" },
-                { id: "Graduação", label: "Graduação" },
-                { id: "Pós-graduação", label: "Pós-graduação" },
+                { id: 'all', label: 'Todas' },
+                { id: 'Técnico', label: 'Técnico' },
+                { id: 'Livre', label: 'Livre' },
+                { id: 'Graduação', label: 'Graduação' },
+                { id: 'Pós-graduação', label: 'Pós-graduação' },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setModalityFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${modalityFilter === s.id ? "bg-menu-cursos text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${modalityFilter === s.id ? 'bg-menu-cursos text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                 >
                   {s.label}
                 </button>
@@ -329,7 +331,7 @@ export const Courses: React.FC = () => {
                   disabled={isSaving}
                   className="bg-menu-cursos hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-cursos/30"
                 >
-                  {isSaving ? "Salvando..." : "Salvar"}
+                  {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>
@@ -342,7 +344,7 @@ export const Courses: React.FC = () => {
         description="Cadastre os cursos oferecidos. A criação de cursos é o primeiro passo para poder estruturar as grades curriculares do semestre."
         icon={<Info className="text-menu-cursos" size={24} />}
         tips={[
-          "O cadastro de cursos é a base para organizar as formações da instituição.",
+          'O cadastro de cursos é a base para organizar as formações da instituição.',
           'Após criar um curso, o próximo passo é acessar "Matriz Curricular" para montar a grade de disciplinas.',
         ]}
       >

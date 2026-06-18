@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Plus, Edit2, Trash2, Library, X, Info, ExternalLink } from "lucide-react";
-import { Select } from "../components/Select";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
-import type { Curriculum, Course } from "../types/subject.types";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  Edit2,
+  ExternalLink,
+  Info,
+  Library,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import type { Course, Curriculum } from '../types/subject.types';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 const initialFormState = {
-  name: "",
+  name: '',
   active: true,
-  courseId: "",
+  courseId: '',
 };
 
 export const Curriculums: React.FC = () => {
@@ -26,23 +37,23 @@ export const Curriculums: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormState);
-  const [search, setSearch] = usePersistentState("curriculums_search", "");
+  const [search, setSearch] = usePersistentState('curriculums_search', '');
 
   const fetchCurriculums = async () => {
     try {
-      const response = await api.get("/curriculums");
+      const response = await api.get('/curriculums');
       setCurriculums(response.data.data || response.data || []);
     } catch (error) {
-      console.error("Erro ao buscar grades curriculares:", error);
+      console.error('Erro ao buscar grades curriculares:', error);
     }
   };
 
   const fetchCourses = async () => {
     try {
-      const response = await api.get("/courses");
+      const response = await api.get('/courses');
       setCourses(response.data.data || response.data || []);
     } catch (error) {
-      console.error("Erro ao buscar cursos:", error);
+      console.error('Erro ao buscar cursos:', error);
     }
   };
 
@@ -75,7 +86,7 @@ export const Curriculums: React.FC = () => {
     if (!id) return;
     if (
       !(await confirmDialog(
-        "Tem certeza que deseja excluir esta grade curricular?",
+        'Tem certeza que deseja excluir esta grade curricular?',
       ))
     )
       return;
@@ -84,9 +95,9 @@ export const Curriculums: React.FC = () => {
       await api.delete(`/curriculums/${id}`);
       fetchCurriculums();
     } catch (error) {
-      console.error("Erro ao excluir grade curricular:", error);
+      console.error('Erro ao excluir grade curricular:', error);
       alertDialog(
-        "Erro ao excluir. Verifique se existem turmas vinculadas a ela.",
+        'Erro ao excluir. Verifique se existem turmas vinculadas a ela.',
       );
     }
   };
@@ -107,14 +118,14 @@ export const Curriculums: React.FC = () => {
         setIsModalOpen(false);
         fetchCurriculums();
       } else {
-        const response = await api.post("/curriculums", payload);
+        const response = await api.post('/curriculums', payload);
         const created = response.data.data || response.data;
         setIsModalOpen(false);
         navigate(`/curriculums/${created.id}`);
       }
     } catch (error) {
-      console.error("Erro ao salvar grade curricular:", error);
-      alertDialog("Erro ao salvar os dados.");
+      console.error('Erro ao salvar grade curricular:', error);
+      alertDialog('Erro ao salvar os dados.');
     } finally {
       setIsSaving(false);
     }
@@ -138,7 +149,8 @@ export const Curriculums: React.FC = () => {
             Grades Curriculares
           </h1>
           <p className="text-slate-500 mt-1">
-            Gerencie as grades e adicione disciplinas diretamente em cada matriz.
+            Gerencie as grades e adicione disciplinas diretamente em cada
+            matriz.
           </p>
         </div>
         <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
@@ -207,29 +219,33 @@ export const Curriculums: React.FC = () => {
                   >
                     <td className="py-4 px-4">
                       <button
-                        onClick={() => navigate(`/curriculums/${curriculum.id}`)}
+                        onClick={() =>
+                          navigate(`/curriculums/${curriculum.id}`)
+                        }
                         className="font-bold text-slate-800 hover:text-menu-matriz transition-colors text-left"
                       >
                         {curriculum.name}
                       </button>
                     </td>
                     <td className="py-4 px-4 text-slate-500 font-medium">
-                      {curriculum.course?.name || "-"}
+                      {curriculum.course?.name || '-'}
                     </td>
                     <td className="py-4 px-4 text-center font-bold text-menu-matriz">
                       {curriculum.subjects?.length || 0} UCs
                     </td>
                     <td className="py-4 px-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${curriculum.active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${curriculum.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}
                       >
-                        {curriculum.active ? "Ativa" : "Inativa"}
+                        {curriculum.active ? 'Ativa' : 'Inativa'}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => navigate(`/curriculums/${curriculum.id}`)}
+                          onClick={() =>
+                            navigate(`/curriculums/${curriculum.id}`)
+                          }
                           className="p-2 text-slate-400 hover:text-menu-matriz hover:bg-menu-matriz/10 rounded-lg transition-colors"
                           title="Abrir grade"
                         >
@@ -266,7 +282,7 @@ export const Curriculums: React.FC = () => {
           <div className="bg-white rounded-4xl p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">
-                {editingId ? "Editar Grade" : "Nova Grade"}
+                {editingId ? 'Editar Grade' : 'Nova Grade'}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -321,11 +337,11 @@ export const Curriculums: React.FC = () => {
                   Status
                 </label>
                 <Select
-                  value={formData.active ? "true" : "false"}
+                  value={formData.active ? 'true' : 'false'}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      active: e.target.value === "true",
+                      active: e.target.value === 'true',
                     })
                   }
                   className="w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-matriz outline-none transition-all text-slate-800 cursor-pointer"
@@ -356,10 +372,10 @@ export const Curriculums: React.FC = () => {
                   className="bg-menu-matriz hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-matriz/30"
                 >
                   {isSaving
-                    ? "Salvando..."
+                    ? 'Salvando...'
                     : editingId
-                      ? "Salvar"
-                      : "Criar e Continuar"}
+                      ? 'Salvar'
+                      : 'Criar e Continuar'}
                 </button>
               </div>
             </form>
@@ -372,9 +388,9 @@ export const Curriculums: React.FC = () => {
         description="A matriz vincula um curso às suas disciplinas. Adicione UCs diretamente dentro de cada grade — o sistema as cadastra no dicionário global automaticamente."
         icon={<Info className="text-menu-matriz" size={24} />}
         tips={[
-          "Abra uma grade para gerenciar suas disciplinas por módulo.",
+          'Abra uma grade para gerenciar suas disciplinas por módulo.',
           'Uma matriz precisa estar "Ativa" para que você possa vinculá-la a uma nova turma.',
-          "Consulte o Dicionário de UCs para ver em quais grades cada disciplina está vinculada.",
+          'Consulte o Dicionário de UCs para ver em quais grades cada disciplina está vinculada.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">

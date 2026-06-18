@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { ChevronDown } from 'lucide-react';
 
 interface TimeSelectProps {
@@ -10,7 +11,14 @@ interface TimeSelectProps {
   maxHour?: number;
 }
 
-export const TimeSelect: React.FC<TimeSelectProps> = ({ value, onChange, placeholder, hasError, minHour = 0, maxHour = 23 }) => {
+export const TimeSelect: React.FC<TimeSelectProps> = ({
+  value,
+  onChange,
+  placeholder,
+  hasError,
+  minHour = 0,
+  maxHour = 23,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +36,11 @@ export const TimeSelect: React.FC<TimeSelectProps> = ({ value, onChange, placeho
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      )
+        setIsOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -41,10 +53,15 @@ export const TimeSelect: React.FC<TimeSelectProps> = ({ value, onChange, placeho
         className={`w-full pl-11 pr-4 py-3 bg-[#f8f9fc] border hover:border-slate-200 rounded-xl focus-within:bg-white focus-within:ring-2 outline-none transition-all cursor-pointer flex justify-between items-center ${hasError ? 'border-rose-300 focus-within:border-rose-500 focus-within:ring-rose-500/20' : 'border-transparent focus-within:border-[#004a8d] focus-within:ring-[#004a8d]/20'}`}
         tabIndex={0}
       >
-        <span className={value ? "text-slate-800 font-medium" : "text-slate-400"}>
+        <span
+          className={value ? 'text-slate-800 font-medium' : 'text-slate-400'}
+        >
           {value || placeholder}
         </span>
-        <ChevronDown size={18} className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          size={18}
+          className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </div>
 
       {isOpen && (

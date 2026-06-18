@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+
 import {
-  ArrowLeft,
-  Route,
-  CalendarClock,
   AlertTriangle,
+  ArrowLeft,
+  CalendarClock,
   ChevronDown,
   ChevronUp,
   Maximize,
   Minimize,
   PanelLeftClose,
   PanelLeftOpen,
+  Route,
 } from 'lucide-react';
+
 import { CanAccess } from '../components/CanAccess';
-import { LoadingOverlay } from '../components/LoadingOverlay';
 import { GanttPlanner } from '../components/GanttPlanning/GanttPlanner';
 import { SubjectConfigPanel } from '../components/GanttPlanning/SubjectConfigPanel';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ModulePlanningForm } from '../components/ModulePlanning/ModulePlanningForm';
 import { useGanttBlueprint } from '../hooks/useGanttBlueprint';
 import { usePersistentState } from '../hooks/usePersistentState';
-import { Role } from '../utils/roles';
 import api from '../services/api';
+import { Role } from '../utils/roles';
 
 interface ClassGroupInfo {
   id: string;
@@ -85,9 +87,12 @@ export const SchedulePlanning: React.FC = () => {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Turma
             </p>
-            <p className="text-xl font-bold text-slate-800">{classGroup.code}</p>
+            <p className="text-xl font-bold text-slate-800">
+              {classGroup.code}
+            </p>
             <p className="text-sm text-slate-500">
-              {classGroup.curriculum?.name || 'Sem grade'} · Turno {classGroup.shift}
+              {classGroup.curriculum?.name || 'Sem grade'} · Turno{' '}
+              {classGroup.shift}
             </p>
           </div>
           <button
@@ -172,8 +177,8 @@ export const SchedulePlanning: React.FC = () => {
           {!gantt.blueprint ? (
             <div className="flex-1 flex items-center justify-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
               <p className="text-slate-500 font-medium text-center px-6">
-                Configure o módulo e clique em &quot;Gerar Rascunho&quot; para visualizar as barras
-                no Gantt.
+                Configure o módulo e clique em &quot;Gerar Rascunho&quot; para
+                visualizar as barras no Gantt.
               </p>
             </div>
           ) : (
@@ -183,7 +188,8 @@ export const SchedulePlanning: React.FC = () => {
                   <AlertTriangle className="text-rose-500 shrink-0" size={20} />
                   <div>
                     <p className="font-bold text-rose-700 text-sm">
-                      {gantt.blueprint.conflicts.length} conflito(s) — publicação bloqueada
+                      {gantt.blueprint.conflicts.length} conflito(s) —
+                      publicação bloqueada
                     </p>
                     <ul className="mt-1 text-xs text-rose-600 space-y-1">
                       {gantt.blueprint.conflicts.slice(0, 5).map((c, i) => (
@@ -227,14 +233,20 @@ export const SchedulePlanning: React.FC = () => {
             onClick={() => setShowLegacyForm((v) => !v)}
             className="text-xs font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1"
           >
-            {showLegacyForm ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {showLegacyForm ? (
+              <ChevronUp size={14} />
+            ) : (
+              <ChevronDown size={14} />
+            )}
             Planejamento legado (trilhas) — fallback temporário
           </button>
           {showLegacyForm && (
             <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
               <ModulePlanningForm
                 classGroupId={classGroupId}
-                onSuccess={() => navigate(`/schedule?classGroupId=${classGroupId}`)}
+                onSuccess={() =>
+                  navigate(`/schedule?classGroupId=${classGroupId}`)
+                }
               />
             </div>
           )}
@@ -245,7 +257,9 @@ export const SchedulePlanning: React.FC = () => {
 
   return (
     <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-      <div className={`w-full mx-auto pb-10 px-4 ${isFullscreen ? '' : 'max-w-[1600px]'}`}>
+      <div
+        className={`w-full mx-auto pb-10 px-4 ${isFullscreen ? '' : 'max-w-[1600px]'}`}
+      >
         {!isFullscreen && (
           <div className="mb-6">
             <Link
@@ -265,12 +279,15 @@ export const SchedulePlanning: React.FC = () => {
                   Planejador Gantt
                 </h1>
                 <p className="text-slate-500 mt-1">
-                  Configure dias por UC, gere o rascunho e publique quando estiver sem conflitos.
+                  Configure dias por UC, gere o rascunho e publique quando
+                  estiver sem conflitos.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => navigate(`/schedule?classGroupId=${classGroupId}`)}
+                onClick={() =>
+                  navigate(`/schedule?classGroupId=${classGroupId}`)
+                }
                 className="shrink-0 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"
               >
                 <CalendarClock size={18} />
@@ -291,8 +308,13 @@ export const SchedulePlanning: React.FC = () => {
 
           {notFound ? (
             <div className="text-center py-12">
-              <p className="text-slate-600 font-medium mb-4">Turma não encontrada.</p>
-              <Link to="/class-groups" className="text-senac-blue font-bold hover:underline">
+              <p className="text-slate-600 font-medium mb-4">
+                Turma não encontrada.
+              </p>
+              <Link
+                to="/class-groups"
+                className="text-senac-blue font-bold hover:underline"
+              >
                 Retornar para a lista de turmas
               </Link>
             </div>

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+
 import { Loader2, Sparkles } from 'lucide-react';
-import { Select } from '../Select';
-import { DateSelect } from '../DateSelect';
-import { TimeSelect } from '../TimeSelect';
+
 import api from '../../services/api';
 import type { SubjectConfig } from '../../types/gantt.types';
+import { DateSelect } from '../DateSelect';
+import { Select } from '../Select';
+import { TimeSelect } from '../TimeSelect';
 
 const DAYS_OF_WEEK = [
   { label: 'Dom', value: 0 },
@@ -35,7 +37,9 @@ interface SubjectConfigPanelProps {
   endTimeStr: string;
   setEndTimeStr: (value: string) => void;
   subjectConfigs: SubjectConfig[];
-  initSubjectConfigs: (subjects: import('../../types/gantt.types').ModuleSubject[]) => void;
+  initSubjectConfigs: (
+    subjects: import('../../types/gantt.types').ModuleSubject[],
+  ) => void;
   updateSubjectConfig: (id: string, patch: Partial<SubjectConfig>) => void;
   toggleDay: (id: string, day: number) => void;
   onGenerate: () => void;
@@ -119,7 +123,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
   return (
     <div className="flex flex-col gap-5 h-full">
       <div>
-        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Módulo</label>
+        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+          Módulo
+        </label>
         <Select
           value={moduleNumber === '' ? '' : String(moduleNumber)}
           onChange={(e) =>
@@ -141,12 +147,28 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Início</label>
-          <TimeSelect value={startTimeStr} onChange={setStartTimeStr} placeholder="08:00" minHour={7} maxHour={22} />
+          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+            Início
+          </label>
+          <TimeSelect
+            value={startTimeStr}
+            onChange={setStartTimeStr}
+            placeholder="08:00"
+            minHour={7}
+            maxHour={22}
+          />
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Término</label>
-          <TimeSelect value={endTimeStr} onChange={setEndTimeStr} placeholder="10:00" minHour={7} maxHour={22} />
+          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+            Término
+          </label>
+          <TimeSelect
+            value={endTimeStr}
+            onChange={setEndTimeStr}
+            placeholder="10:00"
+            minHour={7}
+            maxHour={22}
+          />
         </div>
       </div>
 
@@ -159,7 +181,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
             Carregando disciplinas...
           </div>
         ) : subjectConfigs.length === 0 ? (
-          <p className="text-sm text-slate-500">Selecione um módulo para configurar as UCs.</p>
+          <p className="text-sm text-slate-500">
+            Selecione um módulo para configurar as UCs.
+          </p>
         ) : (
           subjectConfigs.map((cfg) => (
             <div
@@ -174,7 +198,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-600 mb-2">Dias da semana</p>
+                <p className="text-xs font-bold text-slate-600 mb-2">
+                  Dias da semana
+                </p>
                 <div className="flex flex-wrap gap-1">
                   {DAYS_OF_WEEK.map((day) => {
                     const selected = cfg.daysOfWeek.includes(day.value);
@@ -182,7 +208,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
                       <button
                         key={day.value}
                         type="button"
-                        onClick={() => toggleDay(cfg.curriculumSubjectId, day.value)}
+                        onClick={() =>
+                          toggleDay(cfg.curriculumSubjectId, day.value)
+                        }
                         className={`px-2 py-1 rounded-lg text-xs font-bold border transition-all ${
                           selected
                             ? 'bg-senac-blue border-senac-blue text-white'
@@ -197,7 +225,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-600 mb-2">Iniciar após</p>
+                <p className="text-xs font-bold text-slate-600 mb-2">
+                  Iniciar após
+                </p>
                 <Select
                   value={cfg.dependsOnId || ''}
                   onChange={(e) => {
@@ -226,19 +256,23 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
                 </Select>
                 {cfg.dependsOnId ? (
                   <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                    O início será calculado automaticamente no dia seguinte ao término
-                    da UC predecessora.
+                    O início será calculado automaticamente no dia seguinte ao
+                    término da UC predecessora.
                   </p>
                 ) : null}
               </div>
 
               {!cfg.dependsOnId ? (
                 <div>
-                  <p className="text-xs font-bold text-slate-600 mb-2">Data de início</p>
+                  <p className="text-xs font-bold text-slate-600 mb-2">
+                    Data de início
+                  </p>
                   <DateSelect
                     value={cfg.startDate}
                     onChange={(val) =>
-                      updateSubjectConfig(cfg.curriculumSubjectId, { startDate: val })
+                      updateSubjectConfig(cfg.curriculumSubjectId, {
+                        startDate: val,
+                      })
                     }
                     placeholder="DD/MM/AAAA"
                   />
@@ -262,8 +296,8 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
               </label>
               {cfg.isPriority ? (
                 <p className="text-[11px] text-slate-500 leading-snug">
-                  Agendada antes das demais: em datas sobrepostas, esta UC ocupa o
-                  horário e as outras pulam apenas aquela ocorrência.
+                  Agendada antes das demais: em datas sobrepostas, esta UC ocupa
+                  o horário e as outras pulam apenas aquela ocorrência.
                 </p>
               ) : null}
 
@@ -287,7 +321,9 @@ export const SubjectConfigPanel: React.FC<SubjectConfigPanelProps> = ({
               <Select
                 value={cfg.roomId}
                 onChange={(e) =>
-                  updateSubjectConfig(cfg.curriculumSubjectId, { roomId: e.target.value })
+                  updateSubjectConfig(cfg.curriculumSubjectId, {
+                    roomId: e.target.value,
+                  })
                 }
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs cursor-pointer"
               >

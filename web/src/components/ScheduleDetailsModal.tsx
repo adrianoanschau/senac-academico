@@ -1,26 +1,28 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+
+import axios from 'axios';
 import {
-  X,
-  Calendar,
-  MapPin,
-  User,
-  BookOpen,
-  Layers,
-  Clock,
-  Loader2,
   AlertCircle,
+  BookOpen,
+  Calendar,
+  Clock,
+  Layers,
+  Loader2,
+  MapPin,
   Shuffle,
-} from "lucide-react";
-import axios from "axios";
-import { LoadingOverlay } from "./LoadingOverlay";
-import { alertDialog, confirmDialog } from "../utils/dialog";
-import { DateSelect } from "./DateSelect";
-import { CanAccess } from "./CanAccess";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+  User,
+  X,
+} from 'lucide-react';
+
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
+import { CanAccess } from './CanAccess';
+import { DateSelect } from './DateSelect';
+import { LoadingOverlay } from './LoadingOverlay';
 
 const MigrateRuleModal = lazy(() =>
-  import("./MigrateRuleModal").then((m) => ({ default: m.MigrateRuleModal })),
+  import('./MigrateRuleModal').then((m) => ({ default: m.MigrateRuleModal })),
 );
 
 interface ScheduleDetailsModalProps {
@@ -56,8 +58,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
   const [isPostponing, setIsPostponing] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showPostponeForm, setShowPostponeForm] = useState(false);
-  const [postponeReason, setPostponeReason] = useState("");
-  const [postponeNewDate, setPostponeNewDate] = useState("");
+  const [postponeReason, setPostponeReason] = useState('');
+  const [postponeNewDate, setPostponeNewDate] = useState('');
   const [isMigrateModalOpen, setIsMigrateModalOpen] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +76,9 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
           setDetails(response.data.data);
         }
       } catch (error) {
-        console.error("Erro ao buscar detalhes:", error);
+        console.error('Erro ao buscar detalhes:', error);
         if (isMounted) {
-          setError("Não foi possível carregar os detalhes da aula.");
+          setError('Não foi possível carregar os detalhes da aula.');
         }
       } finally {
         if (isMounted) {
@@ -91,8 +93,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDetails(null);
       setShowPostponeForm(false);
-      setPostponeReason("");
-      setPostponeNewDate("");
+      setPostponeReason('');
+      setPostponeNewDate('');
       setError(null);
       setIsMigrateModalOpen(false);
       setIsPublishing(false);
@@ -118,16 +120,16 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
 
     try {
       await api.post(`/schedules/${eventId}/postpone`, payload);
-      alertDialog("Aula adiada com sucesso!");
+      alertDialog('Aula adiada com sucesso!');
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Erro ao adiar:", error);
+      console.error('Erro ao adiar:', error);
       if (axios.isAxiosError(error) && error.response) {
         const { status, data } = error.response;
 
-        if (status === 409 && data?.action === "CONFIRM_REQUIRED") {
-          const conflictingSubject = data.conflictingSubject || "Desconhecida";
+        if (status === 409 && data?.action === 'CONFIRM_REQUIRED') {
+          const conflictingSubject = data.conflictingSubject || 'Desconhecida';
 
           const isConfirmed = await confirmDialog(
             `Atenção: A data já está ocupada pela disciplina de ${conflictingSubject}.\n\nDeseja confirmar? A aula ocupante e as dependentes em sequência serão adiadas automaticamente para o fim de cada disciplina.`,
@@ -140,7 +142,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                 force: true,
               });
               alertDialog(
-                "Aula adiada com sucesso! As aulas em conflito foram empurradas em cascata.",
+                'Aula adiada com sucesso! As aulas em conflito foram empurradas em cascata.',
               );
               onSuccess();
               onClose();
@@ -148,18 +150,18 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
               if (axios.isAxiosError(forceError) && forceError.response) {
                 setError(
                   forceError.response.data.message ||
-                    "Ocorreu um erro ao sobrepor a aula.",
+                    'Ocorreu um erro ao sobrepor a aula.',
                 );
               } else {
-                setError("Ocorreu um erro inesperado.");
+                setError('Ocorreu um erro inesperado.');
               }
             }
           }
         } else {
-          setError(data.message || "Ocorreu um erro ao adiar a aula.");
+          setError(data.message || 'Ocorreu um erro ao adiar a aula.');
         }
       } else {
-        setError("Ocorreu um erro inesperado.");
+        setError('Ocorreu um erro inesperado.');
       }
     } finally {
       setIsPostponing(false);
@@ -173,18 +175,18 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
     setError(null);
     try {
       await api.patch(`/schedules/rules/${details.ruleId}/publish`);
-      alertDialog("Cronograma efetivado com sucesso!");
+      alertDialog('Cronograma efetivado com sucesso!');
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Erro ao efetivar cronograma:", error);
+      console.error('Erro ao efetivar cronograma:', error);
       if (axios.isAxiosError(error) && error.response) {
         setError(
           error.response.data.message ||
-            "Ocorreu um erro ao efetivar as aulas.",
+            'Ocorreu um erro ao efetivar as aulas.',
         );
       } else {
-        setError("Ocorreu um erro inesperado.");
+        setError('Ocorreu um erro inesperado.');
       }
     } finally {
       setIsPublishing(false);
@@ -200,10 +202,10 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
           visible={isLoading || isPostponing || isPublishing}
           message={
             isLoading
-              ? "Carregando detalhes..."
+              ? 'Carregando detalhes...'
               : isPostponing
-                ? "Adiando aula..."
-                : "Efetivando cronograma..."
+                ? 'Adiando aula...'
+                : 'Efetivando cronograma...'
           }
         />
 
@@ -235,7 +237,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                   Disciplina
                 </p>
                 <p className="font-bold text-slate-800">
-                  {details.subject?.name}{" "}
+                  {details.subject?.name}{' '}
                   <span className="text-slate-400 font-normal">
                     ({details.subject?.code})
                   </span>
@@ -287,8 +289,8 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                   Horário
                 </p>
                 <p className="font-bold text-slate-800">
-                  {new Date(details.startTime).toLocaleString("pt-BR")} até{" "}
-                  {new Date(details.endTime).toLocaleTimeString("pt-BR")}
+                  {new Date(details.startTime).toLocaleString('pt-BR')} até{' '}
+                  {new Date(details.endTime).toLocaleTimeString('pt-BR')}
                 </p>
               </div>
             </div>
@@ -300,20 +302,20 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                   Status
                 </p>
                 <p className="font-bold text-slate-800">
-                  {details.status === "PLANNED" && (
+                  {details.status === 'PLANNED' && (
                     <span className="text-purple-600">Planejada</span>
                   )}
-                  {details.status === "SCHEDULED" && (
+                  {details.status === 'SCHEDULED' && (
                     <span className="text-blue-600">Agendada</span>
                   )}
-                  {details.status === "COMPLETED" && (
+                  {details.status === 'COMPLETED' && (
                     <span className="text-emerald-600">Concluída</span>
                   )}
-                  {details.status === "CANCELLED" && (
+                  {details.status === 'CANCELLED' && (
                     <span className="text-rose-600">Cancelada</span>
                   )}
                 </p>
-                {details.status === "CANCELLED" && details.cancelReason && (
+                {details.status === 'CANCELLED' && details.cancelReason && (
                   <p className="text-sm text-rose-500 mt-1 italic">
                     Motivo: {details.cancelReason}
                   </p>
@@ -321,7 +323,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
               </div>
             </div>
 
-            {(details.status === "SCHEDULED" || details.status === "PLANNED") &&
+            {(details.status === 'SCHEDULED' || details.status === 'PLANNED') &&
               !showPostponeForm &&
               !readOnly && (
                 <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
@@ -346,7 +348,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                       </button>
                     )}
 
-                    {details.ruleId && details.status === "PLANNED" && (
+                    {details.ruleId && details.status === 'PLANNED' && (
                       <button
                         onClick={handlePublishRule}
                         disabled={isPublishing}
@@ -354,11 +356,11 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                       >
                         {isPublishing ? (
                           <>
-                            <Loader2 size={18} className="animate-spin" />{" "}
+                            <Loader2 size={18} className="animate-spin" />{' '}
                             Efetivando...
                           </>
                         ) : (
-                          "Efetivar Cronograma"
+                          'Efetivar Cronograma'
                         )}
                       </button>
                     )}
@@ -428,11 +430,11 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
                   >
                     {isPostponing ? (
                       <>
-                        <Loader2 size={16} className="animate-spin" />{" "}
+                        <Loader2 size={16} className="animate-spin" />{' '}
                         Processando...
                       </>
                     ) : (
-                      "Confirmar Adiamento"
+                      'Confirmar Adiamento'
                     )}
                   </button>
                 </div>
@@ -449,7 +451,7 @@ export const ScheduleDetailsModal: React.FC<ScheduleDetailsModalProps> = ({
               isOpen={isMigrateModalOpen}
               onClose={() => setIsMigrateModalOpen(false)}
               ruleId={details.ruleId}
-              initialDate={details.startTime.split("T")[0]}
+              initialDate={details.startTime.split('T')[0]}
               onSuccess={() => {
                 setIsMigrateModalOpen(false);
                 onSuccess();

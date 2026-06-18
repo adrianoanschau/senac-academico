@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Search, Plus, Edit2, Trash2, Layers, X, Calendar, Route, Settings2 } from "lucide-react";
-import { Select } from "../components/Select";
-import { DateSelect } from "../components/DateSelect";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import {
+  Calendar,
+  Edit2,
+  Layers,
+  Plus,
+  Route,
+  Search,
+  Settings2,
+  Trash2,
+  X,
+} from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { DateSelect } from '../components/DateSelect';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface Curriculum {
   id: string;
@@ -27,11 +39,11 @@ interface ClassGroup {
 }
 
 const initialFormState: ClassGroup = {
-  code: "",
-  startDate: "",
-  endDate: "",
-  shift: "Manhã",
-  curriculumId: "",
+  code: '',
+  startDate: '',
+  endDate: '',
+  shift: 'Manhã',
+  curriculumId: '',
 };
 
 export const ClassGroups: React.FC = () => {
@@ -42,18 +54,18 @@ export const ClassGroups: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<ClassGroup>(initialFormState);
   const [shiftFilter, setShiftFilter] = usePersistentState(
-    "classGroups_shift",
-    "all",
+    'classGroups_shift',
+    'all',
   );
-  const [search, setSearch] = usePersistentState("classGroups_search", "");
+  const [search, setSearch] = usePersistentState('classGroups_search', '');
 
   const fetchClassGroups = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/class-groups");
+      const response = await api.get('/class-groups');
       setClassGroups(response.data.data || response.data || []);
     } catch (error) {
-      console.error("Erro ao buscar turmas:", error);
+      console.error('Erro ao buscar turmas:', error);
     } finally {
       setIsLoading(false);
     }
@@ -61,10 +73,10 @@ export const ClassGroups: React.FC = () => {
 
   const fetchCurriculums = async () => {
     try {
-      const response = await api.get("/curriculums");
+      const response = await api.get('/curriculums');
       setCurriculums(response.data.data || response.data || []);
     } catch (error) {
-      console.error("Erro ao buscar grades curriculares:", error);
+      console.error('Erro ao buscar grades curriculares:', error);
     }
   };
 
@@ -86,15 +98,15 @@ export const ClassGroups: React.FC = () => {
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return;
-    if (!(await confirmDialog("Tem certeza que deseja excluir esta turma?")))
+    if (!(await confirmDialog('Tem certeza que deseja excluir esta turma?')))
       return;
 
     try {
       await api.delete(`/class-groups/${id}`);
       fetchClassGroups();
     } catch (error) {
-      console.error("Erro ao excluir turma:", error);
-      alertDialog("Erro ao excluir a turma. Verifique dependências.");
+      console.error('Erro ao excluir turma:', error);
+      alertDialog('Erro ao excluir a turma. Verifique dependências.');
     }
   };
 
@@ -104,7 +116,7 @@ export const ClassGroups: React.FC = () => {
 
     try {
       const isEditing = !!formData.id;
-      const url = isEditing ? `/class-groups/${formData.id}` : "/class-groups";
+      const url = isEditing ? `/class-groups/${formData.id}` : '/class-groups';
 
       const payload: Partial<ClassGroup> = { ...formData };
       if (!isEditing) delete payload.id;
@@ -119,18 +131,18 @@ export const ClassGroups: React.FC = () => {
       setIsModalOpen(false);
       fetchClassGroups();
     } catch (error) {
-      console.error("Erro ao salvar turma:", error);
-      alertDialog("Erro ao salvar os dados da turma.");
+      console.error('Erro ao salvar turma:', error);
+      alertDialog('Erro ao salvar os dados da turma.');
     } finally {
       setIsSaving(false);
     }
   };
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return "-";
+    if (!dateStr) return '-';
     try {
       // Ajuste simples para datas formatadas ISO YYYY-MM-DD
-      const [year, month, day] = dateStr.substring(0, 10).split("-");
+      const [year, month, day] = dateStr.substring(0, 10).split('-');
       if (year && month && day) {
         return `${day}/${month}/${year}`;
       }
@@ -141,7 +153,7 @@ export const ClassGroups: React.FC = () => {
   };
 
   const formatDateForInput = (dateStr: string) => {
-    if (!dateStr) return "";
+    if (!dateStr) return '';
     return dateStr.substring(0, 10);
   };
 
@@ -150,7 +162,7 @@ export const ClassGroups: React.FC = () => {
       c.code.toLowerCase().includes(search.toLowerCase()) ||
       (c.curriculum?.name &&
         c.curriculum.name.toLowerCase().includes(search.toLowerCase()));
-    const matchesShift = shiftFilter === "all" || c.shift === shiftFilter;
+    const matchesShift = shiftFilter === 'all' || c.shift === shiftFilter;
     return matchesSearch && matchesShift;
   });
 
@@ -202,15 +214,15 @@ export const ClassGroups: React.FC = () => {
             <span>Turno:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
-                { id: "all", label: "Todos" },
-                { id: "Manhã", label: "Manhã" },
-                { id: "Tarde", label: "Tarde" },
-                { id: "Noite", label: "Noite" },
+                { id: 'all', label: 'Todos' },
+                { id: 'Manhã', label: 'Manhã' },
+                { id: 'Tarde', label: 'Tarde' },
+                { id: 'Noite', label: 'Noite' },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setShiftFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${shiftFilter === s.id ? "bg-menu-turmas text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${shiftFilter === s.id ? 'bg-menu-turmas text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                 >
                   {s.label}
                 </button>
@@ -269,7 +281,7 @@ export const ClassGroups: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-slate-500 font-medium">
-                      {turma.curriculum?.name || "-"}
+                      {turma.curriculum?.name || '-'}
                     </td>
                     <td className="py-4 px-4 text-slate-500 font-medium">
                       {formatDate(turma.startDate)}
@@ -280,11 +292,11 @@ export const ClassGroups: React.FC = () => {
                     <td className="py-4 px-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          turma.shift === "Manhã"
-                            ? "bg-amber-100 text-amber-700"
-                            : turma.shift === "Tarde"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-indigo-100 text-indigo-700"
+                          turma.shift === 'Manhã'
+                            ? 'bg-amber-100 text-amber-700'
+                            : turma.shift === 'Tarde'
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-indigo-100 text-indigo-700'
                         }`}
                       >
                         {turma.shift}
@@ -461,7 +473,7 @@ export const ClassGroups: React.FC = () => {
                   disabled={isSaving}
                   className="bg-menu-turmas hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-turmas/30"
                 >
-                  {isSaving ? "Salvando..." : "Salvar"}
+                  {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>
@@ -474,9 +486,9 @@ export const ClassGroups: React.FC = () => {
         description="Gerencie os grupos de alunos e seus respectivos períodos letivos."
         icon={<Layers className="text-menu-turmas" size={24} />}
         tips={[
-          "Toda turma precisa de uma Matriz Curricular (Grade) para ter disciplinas.",
-          "Use o ícone de trilha para planejar módulos e o ícone de engrenagem para gestão operacional.",
-          "Fique atento às datas de início e término para a correta geração de aulas.",
+          'Toda turma precisa de uma Matriz Curricular (Grade) para ter disciplinas.',
+          'Use o ícone de trilha para planejar módulos e o ícone de engrenagem para gestão operacional.',
+          'Fique atento às datas de início e término para a correta geração de aulas.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
@@ -490,19 +502,19 @@ export const ClassGroups: React.FC = () => {
           <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
             <span>Turno Manhã:</span>
             <span className="font-bold">
-              {classGroups.filter((c) => c.shift === "Manhã").length}
+              {classGroups.filter((c) => c.shift === 'Manhã').length}
             </span>
           </div>
           <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
             <span>Turno Tarde:</span>
             <span className="font-bold">
-              {classGroups.filter((c) => c.shift === "Tarde").length}
+              {classGroups.filter((c) => c.shift === 'Tarde').length}
             </span>
           </div>
           <div className="flex justify-between items-center text-xs text-slate-600">
             <span>Turno Noite:</span>
             <span className="font-bold">
-              {classGroups.filter((c) => c.shift === "Noite").length}
+              {classGroups.filter((c) => c.shift === 'Noite').length}
             </span>
           </div>
         </div>

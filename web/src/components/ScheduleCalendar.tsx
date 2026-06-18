@@ -1,36 +1,38 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import listPlugin from "@fullcalendar/list";
-import interactionPlugin from "@fullcalendar/interaction";
-import ptBrLocale from "@fullcalendar/core/locales/pt-br";
-import { Check } from "lucide-react";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { LoadingOverlay } from "./LoadingOverlay";
-import { buildScheduleCalendarQueryParams } from "../utils/scheduleCalendarParams";
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import ptBrLocale from '@fullcalendar/core/locales/pt-br';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import listPlugin from '@fullcalendar/list';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import { Check } from 'lucide-react';
+
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { buildScheduleCalendarQueryParams } from '../utils/scheduleCalendarParams';
+import { LoadingOverlay } from './LoadingOverlay';
 
 // Google Calendar-like color palette
 const subjectColors = [
-  "#039be5",
-  "#33b679",
-  "#d60000",
-  "#e67c73",
-  "#f4511e",
-  "#f6bf26",
-  "#3f51b5",
-  "#7986cb",
-  "#8e24aa",
-  "#616161",
-  "#0b8043",
-  "#d50000",
-  "#e4a147",
-  "#b39ddb",
-  "#ad1457",
-  "#795548",
-  "#a79b8e",
-  "#616161",
+  '#039be5',
+  '#33b679',
+  '#d60000',
+  '#e67c73',
+  '#f4511e',
+  '#f6bf26',
+  '#3f51b5',
+  '#7986cb',
+  '#8e24aa',
+  '#616161',
+  '#0b8043',
+  '#d50000',
+  '#e4a147',
+  '#b39ddb',
+  '#ad1457',
+  '#795548',
+  '#a79b8e',
+  '#616161',
 ];
 
 const stringToColorHash = (str: string): number => {
@@ -57,34 +59,34 @@ function getSubjectAccentColor(subjectKey: string): string {
 function getEventColors(subjectKey: string, status: string) {
   const accent = getSubjectAccentColor(subjectKey);
 
-  if (status === "PLANNED") {
+  if (status === 'PLANNED') {
     return {
       bg: `${accent}28`,
       border: accent,
-      text: "#334155",
+      text: '#334155',
     };
   }
 
-  if (status === "CANCELLED") {
+  if (status === 'CANCELLED') {
     return {
-      bg: "#fef2f2",
-      border: "#fca5a5",
-      text: "#e11d48",
+      bg: '#fef2f2',
+      border: '#fca5a5',
+      text: '#e11d48',
     };
   }
 
-  if (status === "COMPLETED") {
+  if (status === 'COMPLETED') {
     return {
       bg: `${accent}99`,
       border: accent,
-      text: "#ffffff",
+      text: '#ffffff',
     };
   }
 
   return {
     bg: accent,
     border: accent,
-    text: "#ffffff",
+    text: '#ffffff',
   };
 }
 
@@ -96,7 +98,7 @@ export interface ScheduleResponse {
   professor: { name: string };
   room: { name: string };
   classGroup: { code: string };
-  status?: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "PLANNED";
+  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'PLANNED';
   cancelReason?: string;
 }
 
@@ -142,8 +144,8 @@ export default function ScheduleCalendar({
   const calendarRef = useRef<FullCalendar>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [calendarView, setCalendarView] = usePersistentState(
-    "schedule_calendar_view",
-    "timeGridWeek",
+    'schedule_calendar_view',
+    'timeGridWeek',
   );
 
   const filtersRef = useRef(filters);
@@ -191,30 +193,30 @@ export default function ScheduleCalendar({
           response.data?.data || response.data || [];
 
         const calendarEvents = data.map((schedule) => {
-          const status = schedule.status || "SCHEDULED";
+          const status = schedule.status || 'SCHEDULED';
           const subjectKey = getSubjectColorKey(schedule);
           const colors = getEventColors(subjectKey, status);
           const classNames: string[] = [];
 
-          if (status === "PLANNED") {
-            classNames.push("!border-dashed", "!border-2", "opacity-90");
-          } else if (status === "CANCELLED") {
-            classNames.push("opacity-70");
-          } else if (status === "COMPLETED") {
-            classNames.push("opacity-90");
+          if (status === 'PLANNED') {
+            classNames.push('!border-dashed', '!border-2', 'opacity-90');
+          } else if (status === 'CANCELLED') {
+            classNames.push('opacity-70');
+          } else if (status === 'COMPLETED') {
+            classNames.push('opacity-90');
           }
 
           return {
             id: String(schedule.id),
-            title: `${schedule.subject ? schedule.subject.code + ": " + schedule.subject.name : "N/D"}`,
+            title: `${schedule.subject ? schedule.subject.code + ': ' + schedule.subject.name : 'N/D'}`,
             start: schedule.startTime,
             end: schedule.endTime,
             extendedProps: {
-              professor: schedule.professor?.name || "N/D",
-              room: schedule.room?.name || "N/D",
-              classGroup: schedule.classGroup?.code || "N/D",
-              subjectCode: schedule.subject?.code || "N/D",
-              subjectName: schedule.subject?.name || "N/D",
+              professor: schedule.professor?.name || 'N/D',
+              room: schedule.room?.name || 'N/D',
+              classGroup: schedule.classGroup?.code || 'N/D',
+              subjectCode: schedule.subject?.code || 'N/D',
+              subjectName: schedule.subject?.name || 'N/D',
               subjectColor: colors.border,
               status: schedule.status,
               cancelReason: schedule.cancelReason,
@@ -222,13 +224,13 @@ export default function ScheduleCalendar({
             backgroundColor: colors.bg,
             borderColor: colors.border,
             textColor: colors.text,
-            className: classNames.join(" "),
+            className: classNames.join(' '),
           };
         });
 
         return calendarEvents;
       } catch (error) {
-        console.error("Failed to load schedule:", error);
+        console.error('Failed to load schedule:', error);
         return [];
       }
     },
@@ -239,8 +241,8 @@ export default function ScheduleCalendar({
     <div
       className={
         isFullscreen
-          ? "h-[calc(100vh-140px)] flex flex-col relative overflow-hidden"
-          : "h-200 flex flex-col relative overflow-hidden"
+          ? 'h-[calc(100vh-140px)] flex flex-col relative overflow-hidden'
+          : 'h-200 flex flex-col relative overflow-hidden'
       }
     >
       <LoadingOverlay
@@ -338,9 +340,9 @@ export default function ScheduleCalendar({
           initialDate={selectedDate}
           initialView={calendarView}
           headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listYear',
           }}
           locales={[ptBrLocale]}
           locale="pt-br"
@@ -349,7 +351,7 @@ export default function ScheduleCalendar({
           slotMaxTime="23:00:00"
           views={{
             dayGridMonth: {
-              eventDisplay: "block",
+              eventDisplay: 'block',
               dayMaxEvents: 5,
             },
           }}
@@ -375,8 +377,8 @@ export default function ScheduleCalendar({
           }}
           eventContent={(eventInfo) => {
             const status = eventInfo.event.extendedProps.status;
-            const isCancelled = status === "CANCELLED";
-            const isCompleted = status === "COMPLETED";
+            const isCancelled = status === 'CANCELLED';
+            const isCompleted = status === 'COMPLETED';
 
             const tooltipTitle = [
               `Disciplina: ${eventInfo.event.extendedProps.subjectCode} - ${eventInfo.event.extendedProps.subjectName}`,
@@ -384,18 +386,18 @@ export default function ScheduleCalendar({
               `Professor(a): ${eventInfo.event.extendedProps.professor}`,
               `Sala: ${eventInfo.event.extendedProps.room}`,
               isCancelled
-                ? `\nMotivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || "Não informado"}`
+                ? `\nMotivo do cancelamento: ${eventInfo.event.extendedProps.cancelReason || 'Não informado'}`
                 : null,
             ]
               .filter(Boolean)
-              .join("\n");
+              .join('\n');
 
-            const baseClasses = isCancelled ? "line-through" : "";
+            const baseClasses = isCancelled ? 'line-through' : '';
 
-            if (eventInfo.view.type === "dayGridMonth") {
+            if (eventInfo.view.type === 'dayGridMonth') {
               const subjectKey =
                 eventInfo.event.extendedProps.subjectCode || eventInfo.event.id;
-              const colors = getEventColors(subjectKey, status || "SCHEDULED");
+              const colors = getEventColors(subjectKey, status || 'SCHEDULED');
 
               return (
                 <div
@@ -409,7 +411,7 @@ export default function ScheduleCalendar({
                 >
                   <div className="font-bold flex items-start justify-between gap-1 leading-tight">
                     <span className="truncate">
-                      {eventInfo.event.extendedProps.subjectCode} -{" "}
+                      {eventInfo.event.extendedProps.subjectCode} -{' '}
                       {eventInfo.event.extendedProps.subjectName}
                     </span>
                     {isCompleted && (

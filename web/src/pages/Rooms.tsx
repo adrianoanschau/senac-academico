@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, MapPin, X, Info } from "lucide-react";
-import { Select } from "../components/Select";
-import { confirmDialog, alertDialog } from "../utils/dialog";
-import { CanAccess } from "../components/CanAccess";
-import { ContextPanel } from "../components/ContextPanel";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { usePersistentState } from "../hooks/usePersistentState";
-import api from "../services/api";
-import { Role } from "../utils/roles";
+import React, { useEffect, useState } from 'react';
+
+import { Edit2, Info, MapPin, Plus, Search, Trash2, X } from 'lucide-react';
+
+import { CanAccess } from '../components/CanAccess';
+import { ContextPanel } from '../components/ContextPanel';
+import { LoadingOverlay } from '../components/LoadingOverlay';
+import { Select } from '../components/Select';
+import { usePersistentState } from '../hooks/usePersistentState';
+import api from '../services/api';
+import { alertDialog, confirmDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 interface Room {
   id?: string | number;
@@ -17,8 +19,8 @@ interface Room {
 }
 
 const initialFormState: Room = {
-  name: "",
-  type: "Sala Teórica",
+  name: '',
+  type: 'Sala Teórica',
   capacity: 0,
 };
 
@@ -28,16 +30,16 @@ export const Rooms: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Room>(initialFormState);
-  const [typeFilter, setTypeFilter] = usePersistentState("rooms_type", "all");
-  const [search, setSearch] = usePersistentState("rooms_search", "");
+  const [typeFilter, setTypeFilter] = usePersistentState('rooms_type', 'all');
+  const [search, setSearch] = usePersistentState('rooms_search', '');
 
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/rooms");
+      const response = await api.get('/rooms');
       setRooms(response.data.data || []);
     } catch (error) {
-      console.error("Erro ao buscar salas:", error);
+      console.error('Erro ao buscar salas:', error);
       // keep existing empty state
     } finally {
       setIsLoading(false);
@@ -62,15 +64,15 @@ export const Rooms: React.FC = () => {
 
   const handleDelete = async (id: string | number | undefined) => {
     if (!id) return;
-    if (!(await confirmDialog("Tem certeza que deseja excluir esta sala?")))
+    if (!(await confirmDialog('Tem certeza que deseja excluir esta sala?')))
       return;
 
     try {
       await api.delete(`/rooms/${id}`);
       fetchRooms();
     } catch (error) {
-      console.error("Erro ao excluir sala:", error);
-      alertDialog("Erro ao excluir a sala. Verifique dependências.");
+      console.error('Erro ao excluir sala:', error);
+      alertDialog('Erro ao excluir a sala. Verifique dependências.');
     }
   };
 
@@ -80,7 +82,7 @@ export const Rooms: React.FC = () => {
 
     try {
       const isEditing = !!formData.id;
-      const url = isEditing ? `/rooms/${formData.id}` : "/rooms";
+      const url = isEditing ? `/rooms/${formData.id}` : '/rooms';
 
       const payload: Partial<Room> = { ...formData };
       if (!isEditing) delete payload.id;
@@ -94,8 +96,8 @@ export const Rooms: React.FC = () => {
       setIsModalOpen(false);
       fetchRooms();
     } catch (error) {
-      console.error("Erro ao salvar sala:", error);
-      alertDialog("Erro ao salvar os dados da sala.");
+      console.error('Erro ao salvar sala:', error);
+      alertDialog('Erro ao salvar os dados da sala.');
     } finally {
       setIsSaving(false);
     }
@@ -104,9 +106,9 @@ export const Rooms: React.FC = () => {
   const filteredRooms = rooms.filter((r) => {
     const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
     const matchesType =
-      typeFilter === "all" ||
-      (typeFilter === "lab" && r.type.includes("Laboratório")) ||
-      (typeFilter === "sala" && r.type === "Sala Teórica");
+      typeFilter === 'all' ||
+      (typeFilter === 'lab' && r.type.includes('Laboratório')) ||
+      (typeFilter === 'sala' && r.type === 'Sala Teórica');
     return matchesSearch && matchesType;
   });
 
@@ -158,14 +160,14 @@ export const Rooms: React.FC = () => {
             <span>Tipo:</span>
             <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
               {[
-                { id: "all", label: "Todos" },
-                { id: "lab", label: "Laboratórios" },
-                { id: "sala", label: "Salas Teóricas" },
+                { id: 'all', label: 'Todos' },
+                { id: 'lab', label: 'Laboratórios' },
+                { id: 'sala', label: 'Salas Teóricas' },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setTypeFilter(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${typeFilter === s.id ? "bg-menu-salas text-white shadow-md" : "text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${typeFilter === s.id ? 'bg-menu-salas text-white shadow-md' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
                 >
                   {s.label}
                 </button>
@@ -348,7 +350,7 @@ export const Rooms: React.FC = () => {
                   disabled={isSaving}
                   className="bg-menu-salas hover:opacity-90 disabled:opacity-70 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md shadow-menu-salas/30"
                 >
-                  {isSaving ? "Salvando..." : "Salvar"}
+                  {isSaving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>
@@ -361,8 +363,8 @@ export const Rooms: React.FC = () => {
         description="Cadastre as salas, laboratórios e auditórios. Verifique sempre a capacidade máxima para evitar conflitos com o número de alunos das turmas."
         icon={<Info className="text-menu-salas" size={24} />}
         tips={[
-          "Diferencie bem as Salas Teóricas dos Laboratórios Práticos.",
-          "Fique atento à capacidade do ambiente, ela deverá ser suficiente para abrigar a turma alocada lá.",
+          'Diferencie bem as Salas Teóricas dos Laboratórios Práticos.',
+          'Fique atento à capacidade do ambiente, ela deverá ser suficiente para abrigar a turma alocada lá.',
         ]}
       >
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
@@ -376,13 +378,13 @@ export const Rooms: React.FC = () => {
           <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
             <span>Salas Teóricas:</span>
             <span className="font-bold">
-              {rooms.filter((r) => r.type === "Sala Teórica").length}
+              {rooms.filter((r) => r.type === 'Sala Teórica').length}
             </span>
           </div>
           <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
             <span>Laboratórios:</span>
             <span className="font-bold">
-              {rooms.filter((r) => r.type.includes("Laboratório")).length}
+              {rooms.filter((r) => r.type.includes('Laboratório')).length}
             </span>
           </div>
           <div className="flex justify-between items-center text-xs text-slate-600">

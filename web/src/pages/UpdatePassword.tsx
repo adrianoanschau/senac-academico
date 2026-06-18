@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ArrowRight, Loader2 } from 'lucide-react';
+
+import { ArrowRight, Loader2, Lock } from 'lucide-react';
+
 import { supabase } from '../services/supabase';
 
 export const UpdatePassword: React.FC = () => {
@@ -37,7 +39,10 @@ export const UpdatePassword: React.FC = () => {
       // Redireciona para o dashboard/home com sucesso
       navigate('/', { replace: true });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Falha ao atualizar a senha. Tente novamente.';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Falha ao atualizar a senha. Tente novamente.';
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -54,13 +59,17 @@ export const UpdatePassword: React.FC = () => {
 
         <div className="relative z-10 max-w-lg">
           <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center mb-8 border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-             <div className="w-10 h-10 bg-senac-orange rounded-xl transform rotate-12 transition-colors"></div>
+            <div className="w-10 h-10 bg-senac-orange rounded-xl transform rotate-12 transition-colors"></div>
           </div>
           <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
-            Segurança da<br/>sua <span className="text-senac-orange transition-colors">Conta.</span>
+            Segurança da
+            <br />
+            sua{' '}
+            <span className="text-senac-orange transition-colors">Conta.</span>
           </h1>
           <p className="text-xl text-blue-100 font-medium leading-relaxed">
-            Crie uma nova senha para acessar a plataforma de gestão acadêmica com segurança.
+            Crie uma nova senha para acessar a plataforma de gestão acadêmica
+            com segurança.
           </p>
         </div>
       </div>
@@ -68,16 +77,21 @@ export const UpdatePassword: React.FC = () => {
       {/* Right side: Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md bg-white rounded-4xl p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
-          
           <div className="flex justify-center mb-6">
-            <img src="/logo.png" alt="Senac Logo" className="h-16 object-contain" />
+            <img
+              src="/logo.png"
+              alt="Senac Logo"
+              className="h-16 object-contain"
+            />
           </div>
-          
-          <h2 className="text-2xl font-bold text-slate-800 text-center mb-2">Atualize sua senha</h2>
+
+          <h2 className="text-2xl font-bold text-slate-800 text-center mb-2">
+            Atualize sua senha
+          </h2>
           <p className="text-slate-400 mb-8 text-center font-medium text-sm">
             Insira e confirme sua nova senha de acesso.
           </p>
-          
+
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
               {error}
@@ -86,31 +100,67 @@ export const UpdatePassword: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2" htmlFor="newPassword">
+              <label
+                className="block text-sm font-bold text-slate-700 mb-2"
+                htmlFor="newPassword"
+              >
                 Nova Senha
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
                 </div>
-                <input id="newPassword" type="password" required disabled={isSubmitting} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50" placeholder="No mínimo 6 caracteres" minLength={6} />
+                <input
+                  id="newPassword"
+                  type="password"
+                  required
+                  disabled={isSubmitting}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
+                  placeholder="No mínimo 6 caracteres"
+                  minLength={6}
+                />
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2" htmlFor="confirmPassword">
+              <label
+                className="block text-sm font-bold text-slate-700 mb-2"
+                htmlFor="confirmPassword"
+              >
                 Confirme a Nova Senha
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
                 </div>
-                <input id="confirmPassword" type="password" required disabled={isSubmitting} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50" placeholder="Confirme sua senha" minLength={6} />
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  required
+                  disabled={isSubmitting}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-senac-blue outline-none transition-all text-slate-800 font-medium placeholder-slate-400 disabled:opacity-50"
+                  placeholder="Confirme sua senha"
+                  minLength={6}
+                />
               </div>
             </div>
-            
-            <button type="submit" disabled={isSubmitting} className="w-full bg-senac-orange hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-md shadow-senac-orange/30 hover:shadow-lg hover:shadow-senac-orange/40">
-              {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <><ArrowRight size={18} /> Confirmar Nova Senha</>}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-senac-orange hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-md shadow-senac-orange/30 hover:shadow-lg hover:shadow-senac-orange/40"
+            >
+              {isSubmitting ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <>
+                  <ArrowRight size={18} /> Confirmar Nova Senha
+                </>
+              )}
             </button>
           </form>
         </div>

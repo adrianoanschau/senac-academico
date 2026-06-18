@@ -1,30 +1,32 @@
-import React from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { LogOut, Settings } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
-import { alertDialog } from "../utils/dialog";
-import { Role } from "../utils/roles";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { LogOut, Settings } from 'lucide-react';
+
+import { useAuth } from '../contexts/AuthContext';
+import { alertDialog } from '../utils/dialog';
+import { Role } from '../utils/roles';
 
 export const UserProfileCard: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
   const roleColors: Record<string, string> = {
-    [Role.ADMIN]: "bg-rose-100 text-rose-700 border-rose-200",
-    [Role.COORDINATOR]: "bg-amber-100 text-amber-700 border-amber-200",
-    [Role.INSTRUCTOR]: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    [Role.SECRETARY]: "bg-indigo-100 text-indigo-700 border-indigo-200",
-    [Role.MEMBER]: "bg-slate-300 text-slate-700 border-slate-400",
+    [Role.ADMIN]: 'bg-rose-100 text-rose-700 border-rose-200',
+    [Role.COORDINATOR]: 'bg-amber-100 text-amber-700 border-amber-200',
+    [Role.INSTRUCTOR]: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    [Role.SECRETARY]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    [Role.MEMBER]: 'bg-slate-300 text-slate-700 border-slate-400',
   };
 
   const handleLogout = async () => {
     try {
       await signOut();
-      navigate("/login", { replace: true });
-      alertDialog("Você saiu da sua conta com sucesso.");
+      navigate('/login', { replace: true });
+      alertDialog('Você saiu da sua conta com sucesso.');
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      alertDialog("Ocorreu um erro ao tentar sair. Tente novamente.");
+      console.error('Erro ao fazer logout:', error);
+      alertDialog('Ocorreu um erro ao tentar sair. Tente novamente.');
     }
   };
 
@@ -36,13 +38,13 @@ export const UserProfileCard: React.FC = () => {
 
   const getInitials = (name?: string, email?: string): string => {
     if (name) {
-      const names = name.split(" ").filter(Boolean);
+      const names = name.split(' ').filter(Boolean);
       if (names.length > 1) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
       return name.substring(0, 2).toUpperCase();
     }
-    return email ? email.substring(0, 2).toUpperCase() : "U";
+    return email ? email.substring(0, 2).toUpperCase() : 'U';
   };
 
   const fullName = (profile?.displayName || user.user_metadata?.full_name) as
@@ -68,7 +70,7 @@ export const UserProfileCard: React.FC = () => {
         className="font-bold text-slate-800 text-lg truncate w-full"
         title={fullName || user.email}
       >
-        {fullName || "Usuário"}
+        {fullName || 'Usuário'}
       </h3>
       <p className="text-sm text-slate-500 truncate w-full" title={user.email}>
         {user.email}
