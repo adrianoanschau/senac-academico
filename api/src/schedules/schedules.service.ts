@@ -1,9 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { ScheduleConflictService } from './conflict/schedule-conflict.service';
@@ -115,11 +112,7 @@ export class SchedulesService {
       },
     });
 
-    if (!schedule) {
-      throw new NotFoundException(`Aula com ID ${id} não encontrada.`);
-    }
-
-    return schedule;
+    return findOrThrow(schedule, `Aula com ID ${id} não encontrada.`);
   }
 
   async update(id: string, updateScheduleDto: UpdateScheduleDto) {
@@ -170,9 +163,7 @@ export class SchedulesService {
       where: { id: subjectId },
     });
 
-    if (!subject) {
-      throw new NotFoundException(`Disciplina não encontrada.`);
-    }
+    findOrThrow(subject, 'Disciplina não encontrada.');
 
     let actualStartDate = new Date(startDate);
 

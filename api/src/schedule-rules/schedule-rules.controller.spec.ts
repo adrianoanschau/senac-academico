@@ -45,7 +45,7 @@ describe('ScheduleRulesController', () => {
 });
 
 describe('ScheduleRulesController RBAC', () => {
-  it('não deve exigir roles específicas nas rotas de leitura', () => {
+  it('deve exigir MEMBER nas rotas de leitura', () => {
     const reflector = new Reflector();
 
     expect(
@@ -53,12 +53,12 @@ describe('ScheduleRulesController RBAC', () => {
         'roles',
         ScheduleRulesController.prototype.findAll,
       ),
-    ).toBeUndefined();
+    ).toEqual([AppRole.MEMBER]);
     expect(
       reflector.get<AppRole[]>(
         'roles',
         ScheduleRulesController.prototype.findOne,
       ),
-    ).toBeUndefined();
+    ).toEqual([AppRole.MEMBER]);
   });
 });

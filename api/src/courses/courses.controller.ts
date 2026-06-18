@@ -11,6 +11,7 @@ import {
 
 import { AppRole } from '@/prisma/generated';
 
+import { MemberRead } from '../auth/decorators/member-read.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -27,12 +28,14 @@ export class CoursesController {
     return { data };
   }
 
+  @MemberRead()
   @Get()
   async findAll() {
     const data = await this.coursesService.findAll();
     return { data };
   }
 
+  @MemberRead()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.coursesService.findOne(id);

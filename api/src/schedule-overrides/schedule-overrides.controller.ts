@@ -11,6 +11,7 @@ import {
 
 import { AppRole } from '@/prisma/generated';
 
+import { MemberRead } from '../auth/decorators/member-read.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
 import { UpdateScheduleOverrideDto } from './dto/update-schedule-override.dto';
@@ -31,12 +32,14 @@ export class ScheduleOverridesController {
     return { data };
   }
 
+  @MemberRead()
   @Get()
   async findAll() {
     const data = await this.scheduleOverridesService.findAll();
     return { data };
   }
 
+  @MemberRead()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.scheduleOverridesService.findOne(id);

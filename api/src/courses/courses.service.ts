@@ -1,9 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -42,11 +39,7 @@ export class CoursesService {
       // include: { curriculums: true }
     });
 
-    if (!course) {
-      throw new NotFoundException(`Curso com ID ${id} não encontrado`);
-    }
-
-    return course;
+    return findOrThrow(course, `Curso com ID ${id} não encontrado`);
   }
 
   async update(id: string, updateCourseDto: UpdateCourseDto) {

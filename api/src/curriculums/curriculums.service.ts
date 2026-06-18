@@ -2,9 +2,9 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
@@ -22,9 +22,7 @@ export class CurriculumsService {
       where: { id: courseId },
     });
 
-    if (!courseExists) {
-      throw new NotFoundException(`Curso com ID ${courseId} não encontrado.`);
-    }
+    findOrThrow(courseExists, `Curso com ID ${courseId} não encontrado.`);
 
     return this.prisma.curriculum.create({
       data: {
@@ -70,11 +68,10 @@ export class CurriculumsService {
       },
     });
 
-    if (!curriculum) {
-      throw new NotFoundException(`Plano de Curso com ID ${id} não encontrado`);
-    }
-
-    return curriculum;
+    return findOrThrow(
+      curriculum,
+      `Plano de Curso com ID ${id} não encontrado`,
+    );
   }
 
   async update(id: string, updateCurriculumDto: UpdateCurriculumDto) {
@@ -87,9 +84,7 @@ export class CurriculumsService {
       const courseExists = await this.prisma.course.findUnique({
         where: { id: courseId },
       });
-      if (!courseExists) {
-        throw new NotFoundException(`Curso com ID ${courseId} não encontrado.`);
-      }
+      findOrThrow(courseExists, `Curso com ID ${courseId} não encontrado.`);
     }
 
     return this.prisma.curriculum.update({
@@ -159,11 +154,10 @@ export class CurriculumsService {
         const subject = await tx.subject.findUnique({
           where: { id: resolvedSubjectId },
         });
-        if (!subject) {
-          throw new NotFoundException(
-            `Disciplina com ID ${resolvedSubjectId} não encontrada`,
-          );
-        }
+        findOrThrow(
+          subject,
+          `Disciplina com ID ${resolvedSubjectId} não encontrada`,
+        );
       }
 
       const existingLink = await tx.curriculumSubject.findUnique({
@@ -201,11 +195,10 @@ export class CurriculumsService {
       where: { id: curriculumSubjectId, curriculumId },
     });
 
-    if (!link) {
-      throw new NotFoundException(
-        `Vínculo de disciplina com ID ${curriculumSubjectId} não encontrado nesta grade.`,
-      );
-    }
+    findOrThrow(
+      link,
+      `Vínculo de disciplina com ID ${curriculumSubjectId} não encontrado nesta grade.`,
+    );
 
     return this.prisma.curriculumSubject.delete({
       where: { id: curriculumSubjectId },

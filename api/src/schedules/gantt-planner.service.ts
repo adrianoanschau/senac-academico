@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
@@ -265,14 +262,13 @@ export class GanttPlannerService {
     moduleNumber: number,
     subjectConfigs: GanttSubjectConfigDto[],
   ) {
-    const classGroup = await this.prisma.classGroup.findUnique({
-      where: { id: classGroupId },
-      select: { id: true, curriculumId: true },
-    });
-
-    if (!classGroup) {
-      throw new NotFoundException('Turma não encontrada.');
-    }
+    const classGroup = findOrThrow(
+      await this.prisma.classGroup.findUnique({
+        where: { id: classGroupId },
+        select: { id: true, curriculumId: true },
+      }),
+      'Turma não encontrada.',
+    );
 
     if (!classGroup.curriculumId) {
       throw new BadRequestException('A turma não possui matriz curricular.');

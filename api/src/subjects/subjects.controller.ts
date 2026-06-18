@@ -12,6 +12,7 @@ import {
 
 import { AppRole } from '@/prisma/generated';
 
+import { MemberRead } from '../auth/decorators/member-read.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
@@ -29,12 +30,14 @@ export class SubjectsController {
     return { data };
   }
 
+  @MemberRead()
   @Get()
   async findAll(@Query() query: FindSubjectsQueryDto) {
     const data = await this.subjectsService.findAll(query);
     return { data };
   }
 
+  @MemberRead()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.subjectsService.findOne(id);

@@ -58,7 +58,7 @@ describe('UsersController', () => {
       // Assert
       // Garante de que um usuário sem esta role lançaria uma ForbiddenException pelo RolesGuard no ambiente real
       expect(roles).toBeDefined();
-      expect(roles).toEqual([AppRole.ADMIN]);
+      expect(roles).toEqual([AppRole.ADMIN, AppRole.SECRETARY]);
     });
   });
 

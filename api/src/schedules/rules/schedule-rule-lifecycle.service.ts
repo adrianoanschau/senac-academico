@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -35,15 +32,12 @@ export class ScheduleRuleLifecycleService {
   ) {}
 
   async migrateRulePattern(ruleId: string, dto: MigrateRuleDto) {
-    const oldRule = await this.prisma.scheduleRule.findUnique({
-      where: { id: ruleId },
-    });
-
-    if (!oldRule) {
-      throw new NotFoundException(
-        `Regra de agendamento com ID ${ruleId} não encontrada.`,
-      );
-    }
+    const oldRule = findOrThrow(
+      await this.prisma.scheduleRule.findUnique({
+        where: { id: ruleId },
+      }),
+      `Regra de agendamento com ID ${ruleId} não encontrada.`,
+    );
 
     const startOfDay = startOfScheduleDay(new Date(dto.transitionDate));
     const targetRootId = resolveRuleRootId(oldRule);
@@ -132,15 +126,12 @@ export class ScheduleRuleLifecycleService {
   async publishRule(
     ruleId: string,
   ): Promise<{ message: string; count: number }> {
-    const rule = await this.prisma.scheduleRule.findUnique({
-      where: { id: ruleId },
-    });
-
-    if (!rule) {
-      throw new NotFoundException(
-        `Regra de agendamento com ID ${ruleId} não encontrada.`,
-      );
-    }
+    const rule = findOrThrow(
+      await this.prisma.scheduleRule.findUnique({
+        where: { id: ruleId },
+      }),
+      `Regra de agendamento com ID ${ruleId} não encontrada.`,
+    );
 
     const targetRootId = resolveRuleRootId(rule);
 

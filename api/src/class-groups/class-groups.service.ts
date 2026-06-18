@@ -1,9 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
@@ -26,11 +23,10 @@ export class ClassGroupsService {
     const curriculum = await this.prisma.curriculum.findUnique({
       where: { id: curriculumId },
     });
-    if (!curriculum) {
-      throw new NotFoundException(
-        `Plano de curso com ID ${curriculumId} não encontrado.`,
-      );
-    }
+    findOrThrow(
+      curriculum,
+      `Plano de curso com ID ${curriculumId} não encontrado.`,
+    );
 
     return this.prisma.classGroup.create({
       data: createClassGroupDto,
@@ -63,11 +59,7 @@ export class ClassGroupsService {
       },
     });
 
-    if (!classGroup) {
-      throw new NotFoundException(`Turma com ID ${id} não encontrada.`);
-    }
-
-    return classGroup;
+    return findOrThrow(classGroup, `Turma com ID ${id} não encontrada.`);
   }
 
   async update(id: string, updateClassGroupDto: UpdateClassGroupDto) {
@@ -78,11 +70,10 @@ export class ClassGroupsService {
         where: { id: updateClassGroupDto.curriculumId },
       });
 
-      if (!curriculum) {
-        throw new NotFoundException(
-          `Plano de curso com ID ${updateClassGroupDto.curriculumId} não encontrado.`,
-        );
-      }
+      findOrThrow(
+        curriculum,
+        `Plano de curso com ID ${updateClassGroupDto.curriculumId} não encontrado.`,
+      );
     }
 
     return this.prisma.classGroup.update({

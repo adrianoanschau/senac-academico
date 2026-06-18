@@ -1,9 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
+import { findOrThrow } from '@/common/entity.utils';
 import { Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -104,11 +101,7 @@ export class SubjectsService {
       where: { id },
     });
 
-    if (!subject) {
-      throw new NotFoundException(`Disciplina com ID ${id} não encontrada`);
-    }
-
-    return subject;
+    return findOrThrow(subject, `Disciplina com ID ${id} não encontrada`);
   }
 
   async update(id: string, updateSubjectDto: UpdateSubjectDto) {

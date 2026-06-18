@@ -11,6 +11,7 @@ import {
 
 import { AppRole } from '@/prisma/generated';
 
+import { MemberRead } from '../auth/decorators/member-read.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
@@ -27,24 +28,28 @@ export class ClassGroupsController {
     return { data };
   }
 
+  @MemberRead()
   @Get()
   async findAll() {
     const data = await this.classGroupsService.findAll();
     return { data };
   }
 
+  @MemberRead()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.classGroupsService.findOne(id);
     return { data };
   }
 
+  @MemberRead()
   @Get(':id/modules')
   async findModules(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.classGroupsService.findModules(id);
     return { data };
   }
 
+  @MemberRead()
   @Get(':id/modules/:moduleNumber/subjects')
   async findModuleSubjects(
     @Param('id', ParseUUIDPipe) id: string,

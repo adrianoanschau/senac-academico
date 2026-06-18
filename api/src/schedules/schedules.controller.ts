@@ -11,6 +11,7 @@ import {
 
 import { AppRole } from '@/prisma/generated';
 
+import { MemberRead } from '../auth/decorators/member-read.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
@@ -41,11 +42,13 @@ export class SchedulesController {
     return { data };
   }
 
+  @MemberRead()
   @Get()
   async findAll(@Query() query: FindSchedulesQueryDto) {
     return this.schedulesService.findAll(query);
   }
 
+  @MemberRead()
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.schedulesService.findOne(id);
