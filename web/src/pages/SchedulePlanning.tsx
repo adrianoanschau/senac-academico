@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import {
   AlertTriangle,
-  ArrowLeft,
   CalendarClock,
   ChevronDown,
   ChevronUp,
@@ -20,6 +19,7 @@ import { GanttPlanner } from '../components/GanttPlanning/GanttPlanner';
 import { SubjectConfigPanel } from '../components/GanttPlanning/SubjectConfigPanel';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ModulePlanningForm } from '../components/ModulePlanning/ModulePlanningForm';
+import { PageBackLink, PageHeader, PageLayout } from '../components/ui';
 import { useClassGroup } from '../hooks/useFetchedList';
 import { useGanttBlueprint } from '../hooks/useGanttBlueprint';
 import { usePersistentState } from '../hooks/usePersistentState';
@@ -232,44 +232,29 @@ export const SchedulePlanning: React.FC = () => {
 
   return (
     <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-      <div
-        className={`w-full mx-auto pb-10 px-4 ${isFullscreen ? '' : 'max-w-[1600px]'}`}
-      >
+      <PageLayout size={isFullscreen ? 'default' : 'wide'}>
         {!isFullscreen && (
-          <div className="mb-6">
-            <Link
-              to="/class-groups"
-              className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-senac-blue transition-colors mb-4"
-            >
-              <ArrowLeft size={18} />
-              Voltar para Turmas
-            </Link>
-
-            <div className="flex flex-wrap justify-between items-start gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-                  <div className="p-2 bg-senac-blue/10 text-senac-blue rounded-xl">
-                    <Route size={28} />
-                  </div>
-                  Planejador Gantt
-                </h1>
-                <p className="text-slate-500 mt-1">
-                  Configure dias por UC, gere o rascunho e publique quando
-                  estiver sem conflitos.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(`/schedule?classGroupId=${classGroupId}`)
-                }
-                className="shrink-0 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"
-              >
-                <CalendarClock size={18} />
-                Ver Cronograma
-              </button>
-            </div>
-          </div>
+          <>
+            <PageBackLink to="/class-groups" label="Voltar para Turmas" />
+            <PageHeader
+              accent="senac"
+              icon={<Route size={28} />}
+              title="Planejador Gantt"
+              description="Configure dias por UC, gere o rascunho e publique quando estiver sem conflitos."
+              action={
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(`/schedule?classGroupId=${classGroupId}`)
+                  }
+                  className="shrink-0 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"
+                >
+                  <CalendarClock size={18} />
+                  Ver Cronograma
+                </button>
+              }
+            />
+          </>
         )}
 
         <div
@@ -283,7 +268,7 @@ export const SchedulePlanning: React.FC = () => {
 
           {notFound ? <ClassGroupNotFound /> : plannerBody}
         </div>
-      </div>
+      </PageLayout>
     </CanAccess>
   );
 };

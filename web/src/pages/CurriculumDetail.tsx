@@ -1,19 +1,28 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { ArrowLeft, CheckCircle2, Edit2, Library, Plus } from 'lucide-react';
+import { CheckCircle2, Edit2, Library, Plus } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { AddSubjectDrawer } from '../components/Curriculum/AddSubjectDrawer';
 import { CurriculumMetadataForm } from '../components/Curriculum/CurriculumMetadataForm';
 import { ModuleSection } from '../components/Curriculum/ModuleSection';
-import { LoadingOverlay } from '../components/LoadingOverlay';
-import { FormModal } from '../components/ui';
+import {
+  FormModal,
+  PageBackLink,
+  PageCard,
+  PageHeader,
+  PageLayout,
+  PrimaryButton,
+} from '../components/ui';
 import api from '../services/api';
 import type { CurriculumForm } from '../types/entities';
 import type { Course, Curriculum } from '../types/subject.types';
+import { extractListData } from '../utils/apiResponse';
 import { alertDialog, confirmDialog } from '../utils/dialog';
 import { Role } from '../utils/roles';
+
+const ACCENT = 'matriz' as const;
 
 export const CurriculumDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,12 +63,12 @@ export const CurriculumDetail: React.FC = () => {
           fetchCurriculum(),
           api.get('/courses'),
         ]);
-        setCourses(coursesRes.data.data || coursesRes.data || []);
+        setCourses(extractListData<Course>(coursesRes));
       } finally {
         setIsLoading(false);
       }
     };
-    load();
+    void load();
   }, [fetchCurriculum]);
 
   useEffect(() => {
@@ -140,21 +149,21 @@ export const CurriculumDetail: React.FC = () => {
 
   if (isLoading || !curriculum) {
     return (
-      <div className="w-full max-w-4xl mx-auto pb-10 relative min-h-[400px]">
-        <LoadingOverlay visible message="Carregando grade..." />
-      </div>
+      <PageLayout size="narrow">
+        <PageCard isLoading loadingMessage="Carregando grade...">
+          <div className="min-h-48" />
+        </PageCard>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto pb-10">
-      <Link
+    <PageLayout size="narrow">
+      <PageBackLink
         to="/curriculums"
-        className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-menu-matriz mb-6 transition-colors"
-      >
-        <ArrowLeft size={18} />
-        Voltar para Grades
-      </Link>
+        label="Voltar para Grades"
+        accent={ACCENT}
+      />
 
       {successMessage && (
         <div className="mb-6 flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm font-bold border border-emerald-100">
@@ -163,56 +172,57 @@ export const CurriculumDetail: React.FC = () => {
         </div>
       )}
 
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-menu-matriz/10 text-menu-matriz rounded-xl">
-              <Library size={28} />
-            </div>
-            {curriculum.name}
-          </h1>
-          <p className="text-slate-500 mt-2">
+      <PageHeader
+        accent={ACCENT}
+        icon={<Library size={28} />}
+        title={curriculum.name}
+        description={
+          <>
             Curso:{' '}
             <span className="font-bold text-slate-700">
               {curriculum.course?.name ?? '—'}
             </span>
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-bold ${
-              curriculum.active
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-slate-100 text-slate-500'
-            }`}
-          >
-            {curriculum.active ? 'Ativa' : 'Inativa'}
-          </span>
-          <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <button
-              onClick={handleOpenMetadataModal}
-              className="p-2 text-slate-400 hover:text-menu-matriz hover:bg-menu-matriz/10 rounded-lg transition-colors"
-              title="Editar metadados"
+          </>
+        }
+        action={
+          <div className="flex items-center gap-3">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                curriculum.active
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-slate-100 text-slate-500'
+              }`}
             >
-              <Edit2 size={20} />
-            </button>
-          </CanAccess>
-        </div>
-      </div>
+              {curriculum.active ? 'Ativa' : 'Inativa'}
+            </span>
+            <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
+              <button
+                type="button"
+                onClick={handleOpenMetadataModal}
+                className="p-2 text-slate-400 hover:text-menu-matriz hover:bg-menu-matriz/10 rounded-lg transition-colors"
+                title="Editar metadados"
+              >
+                <Edit2 size={20} />
+              </button>
+            </CanAccess>
+          </div>
+        }
+      />
 
-      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100">
+      <PageCard>
         <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-100">
           <h2 className="text-lg font-bold text-slate-800">
             Disciplinas da Grade
           </h2>
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <button
+            <PrimaryButton
+              accent={ACCENT}
               onClick={() => handleOpenDrawer(maxModule > 0 ? maxModule : 1)}
-              className="bg-menu-matriz hover:opacity-90 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-md shadow-menu-matriz/30 text-sm"
+              className="text-sm px-4 py-2"
             >
               <Plus size={18} />
               Adicionar Disciplina
-            </button>
+            </PrimaryButton>
           </CanAccess>
         </div>
 
@@ -222,13 +232,13 @@ export const CurriculumDetail: React.FC = () => {
               Nenhuma disciplina adicionada a esta grade ainda.
             </p>
             <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-              <button
+              <PrimaryButton
+                accent={ACCENT}
                 onClick={() => handleOpenDrawer(1)}
-                className="bg-menu-matriz hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold inline-flex items-center gap-2 transition-colors shadow-md shadow-menu-matriz/30"
               >
                 <Plus size={20} />
                 Adicionar primeira disciplina
-              </button>
+              </PrimaryButton>
             </CanAccess>
           </div>
         ) : (
@@ -246,6 +256,7 @@ export const CurriculumDetail: React.FC = () => {
         {modules.length > 0 && (
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
             <button
+              type="button"
               onClick={() => handleOpenDrawer(maxModule + 1)}
               className="w-full mt-2 py-3 text-sm font-bold text-menu-matriz bg-menu-matriz/5 hover:bg-menu-matriz/10 rounded-xl transition-colors border border-dashed border-menu-matriz/30"
             >
@@ -253,17 +264,15 @@ export const CurriculumDetail: React.FC = () => {
             </button>
           </CanAccess>
         )}
-      </div>
+      </PageCard>
 
-      {curriculum && (
-        <AddSubjectDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          curriculum={curriculum}
-          defaultModule={drawerModule}
-          onSuccess={handleSubjectAdded}
-        />
-      )}
+      <AddSubjectDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        curriculum={curriculum}
+        defaultModule={drawerModule}
+        onSuccess={handleSubjectAdded}
+      />
 
       <FormModal
         open={isMetadataModalOpen}
@@ -282,6 +291,6 @@ export const CurriculumDetail: React.FC = () => {
           onCancel={() => setIsMetadataModalOpen(false)}
         />
       </FormModal>
-    </div>
+    </PageLayout>
   );
 };

@@ -11,7 +11,7 @@ export { FormModal } from './FormModal';
 export { ListFooter, ListToolbar } from './ListToolbar';
 export { PageCard } from './PageCard';
 export { PageHeader } from './PageHeader';
-export { PageLayout } from './PageLayout';
+export { PageBackLink, PageLayout } from './PageLayout';
 export { PrimaryButton } from './PrimaryButton';
 export { SearchInput } from './SearchInput';
 export { SegmentControl, type SegmentOption } from './SegmentControl';

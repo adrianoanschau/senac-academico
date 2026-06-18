@@ -1,13 +1,13 @@
 import React, { lazy, Suspense, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
-import { ArrowLeft, CalendarClock, Settings2 } from 'lucide-react';
+import { CalendarClock, Settings2 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
 import { ClassGroupNotFound } from '../components/class-groups/ClassGroupNotFound';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ScheduleFilterBar } from '../components/schedule/ScheduleFilterBar';
-import { PageHeader, PageLayout } from '../components/ui';
+import { PageBackLink, PageHeader, PageLayout } from '../components/ui';
 import { useClassGroup } from '../hooks/useFetchedList';
 import { useScheduleFilters } from '../hooks/useScheduleFilters';
 import type { ClassGroupInfo } from '../types/entities';
@@ -69,13 +69,11 @@ export const ScheduleOperations: React.FC = () => {
   return (
     <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
       <PageLayout>
-        <Link
+        <PageBackLink
           to="/class-groups"
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-senac-blue transition-colors mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar para Turmas
-        </Link>
+          label="Voltar para Turmas"
+          accent="operacional"
+        />
 
         <PageHeader
           accent="operacional"
