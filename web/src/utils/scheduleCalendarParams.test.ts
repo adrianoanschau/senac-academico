@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildScheduleCalendarQueryParams } from './scheduleCalendarParams';
+import {
+  buildScheduleCalendarQueryParams,
+  buildScheduleListQueryParams,
+} from './scheduleCalendarParams';
 
 describe('buildScheduleCalendarQueryParams', () => {
   it('deve usar start e end como parâmetros da API', () => {
@@ -37,5 +40,27 @@ describe('buildScheduleCalendarQueryParams', () => {
     expect(params.get('professorId')).toBe('prof-1');
     expect(params.get('roomId')).toBe('room-1');
     expect(params.get('subjectId')).toBe('subj-1');
+  });
+});
+
+describe('buildScheduleListQueryParams', () => {
+  it('deve montar query string de listagem sem intervalo de datas', () => {
+    const params = buildScheduleListQueryParams({
+      search: 'java',
+      status: ['PLANNED', 'SCHEDULED'],
+      classGroupId: 'cg-1',
+      professorId: 'prof-1',
+      roomId: 'room-1',
+      subjectId: 'subj-1',
+    });
+
+    expect(params.get('search')).toBe('java');
+    expect(params.getAll('status')).toEqual(['PLANNED', 'SCHEDULED']);
+    expect(params.get('classGroupId')).toBe('cg-1');
+    expect(params.get('professorId')).toBe('prof-1');
+    expect(params.get('roomId')).toBe('room-1');
+    expect(params.get('subjectId')).toBe('subj-1');
+    expect(params.has('start')).toBe(false);
+    expect(params.has('end')).toBe(false);
   });
 });

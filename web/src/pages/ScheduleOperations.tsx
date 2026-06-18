@@ -1,14 +1,15 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
 import { ArrowLeft, CalendarClock, Settings2 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
+import { ClassGroupNotFound } from '../components/class-groups/ClassGroupNotFound';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ScheduleFilterBar } from '../components/schedule/ScheduleFilterBar';
+import { useClassGroup } from '../hooks/useFetchedList';
 import { useScheduleFilters } from '../hooks/useScheduleFilters';
-import api from '../services/api';
-import { extractEntityData } from '../utils/apiResponse';
+import type { ClassGroupInfo } from '../types/entities';
 import { Role } from '../utils/roles';
 
 const ScheduleCalendar = lazy(() => import('../components/ScheduleCalendar'));
@@ -18,18 +19,16 @@ const ScheduleDetailsModal = lazy(() =>
   })),
 );
 
-interface ClassGroupInfo {
-  id: string;
-  code: string;
-}
-
 export const ScheduleOperations: React.FC = () => {
   const { classGroupId } = useParams<{ classGroupId: string }>();
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [classGroup, setClassGroup] = useState<ClassGroupInfo | null>(null);
-  const [isLoadingClassGroup, setIsLoadingClassGroup] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+
+  const {
+    classGroup,
+    isLoading: isLoadingClassGroup,
+    notFound,
+  } = useClassGroup<ClassGroupInfo>(classGroupId);
 
   const {
     search,
@@ -56,25 +55,6 @@ export const ScheduleOperations: React.FC = () => {
     fixedClassGroupId: classGroupId,
     scopeSubjectsToClassGroup: true,
   });
-
-  useEffect(() => {
-    if (!classGroupId) return;
-
-    const fetchClassGroup = async () => {
-      setIsLoadingClassGroup(true);
-      try {
-        const response = await api.get(`/class-groups/${classGroupId}`);
-        setClassGroup(extractEntityData<ClassGroupInfo>(response));
-        setNotFound(false);
-      } catch {
-        setNotFound(true);
-      } finally {
-        setIsLoadingClassGroup(false);
-      }
-    };
-
-    void fetchClassGroup();
-  }, [classGroupId]);
 
   if (!classGroupId) {
     return <Navigate to="/class-groups" replace />;
@@ -136,17 +116,7 @@ export const ScheduleOperations: React.FC = () => {
           />
 
           {notFound ? (
-            <div className="text-center py-12">
-              <p className="text-slate-600 font-medium mb-4">
-                Turma não encontrada.
-              </p>
-              <Link
-                to="/class-groups"
-                className="text-senac-blue font-bold hover:underline"
-              >
-                Retornar para a lista de turmas
-              </Link>
-            </div>
+            <ClassGroupNotFound />
           ) : (
             <>
               <ScheduleFilterBar

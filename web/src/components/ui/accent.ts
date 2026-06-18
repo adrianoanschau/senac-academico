@@ -63,6 +63,14 @@ export const accentPresets = {
     segmentActive: 'bg-[#f37021] text-white shadow-md',
     actionHover: 'hover:text-[#f37021] hover:bg-orange-50',
   },
+  uc: {
+    iconBadge: 'bg-menu-uc/10 text-menu-uc',
+    primaryButton:
+      'bg-menu-uc hover:opacity-90 text-white shadow-md shadow-menu-uc/30',
+    ring: 'focus:ring-menu-uc',
+    segmentActive: 'bg-menu-uc text-white shadow-md',
+    actionHover: 'hover:text-menu-uc hover:bg-menu-uc/10',
+  },
 } as const;
 
 export type AccentPreset = keyof typeof accentPresets;

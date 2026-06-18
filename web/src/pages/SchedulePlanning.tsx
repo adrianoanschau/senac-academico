@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -15,28 +15,22 @@ import {
 } from 'lucide-react';
 
 import { CanAccess } from '../components/CanAccess';
+import { ClassGroupNotFound } from '../components/class-groups/ClassGroupNotFound';
 import { GanttPlanner } from '../components/GanttPlanning/GanttPlanner';
 import { SubjectConfigPanel } from '../components/GanttPlanning/SubjectConfigPanel';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { ModulePlanningForm } from '../components/ModulePlanning/ModulePlanningForm';
+import { useClassGroup } from '../hooks/useFetchedList';
 import { useGanttBlueprint } from '../hooks/useGanttBlueprint';
 import { usePersistentState } from '../hooks/usePersistentState';
-import api from '../services/api';
+import type { ClassGroupInfo } from '../types/entities';
 import { Role } from '../utils/roles';
-
-interface ClassGroupInfo {
-  id: string;
-  code: string;
-  shift: string;
-  curriculum?: { name: string };
-}
 
 export const SchedulePlanning: React.FC = () => {
   const { classGroupId } = useParams<{ classGroupId: string }>();
   const navigate = useNavigate();
-  const [classGroup, setClassGroup] = useState<ClassGroupInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const { classGroup, isLoading, notFound } =
+    useClassGroup<ClassGroupInfo>(classGroupId);
   const [showLegacyForm, setShowLegacyForm] = useState(false);
   const [isFullscreen, setIsFullscreen] = usePersistentState(
     'schedule_planning_fullscreen',
@@ -48,25 +42,6 @@ export const SchedulePlanning: React.FC = () => {
   );
 
   const gantt = useGanttBlueprint(classGroupId ?? '');
-
-  useEffect(() => {
-    if (!classGroupId) return;
-
-    const fetchClassGroup = async () => {
-      setIsLoading(true);
-      try {
-        const response = await api.get(`/class-groups/${classGroupId}`);
-        setClassGroup(response.data?.data || response.data);
-        setNotFound(false);
-      } catch {
-        setNotFound(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchClassGroup();
-  }, [classGroupId]);
 
   if (!classGroupId) {
     return <Navigate to="/class-groups" replace />;
@@ -306,21 +281,7 @@ export const SchedulePlanning: React.FC = () => {
         >
           <LoadingOverlay visible={isLoading} message="Carregando turma..." />
 
-          {notFound ? (
-            <div className="text-center py-12">
-              <p className="text-slate-600 font-medium mb-4">
-                Turma não encontrada.
-              </p>
-              <Link
-                to="/class-groups"
-                className="text-senac-blue font-bold hover:underline"
-              >
-                Retornar para a lista de turmas
-              </Link>
-            </div>
-          ) : (
-            plannerBody
-          )}
+          {notFound ? <ClassGroupNotFound /> : plannerBody}
         </div>
       </div>
     </CanAccess>

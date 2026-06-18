@@ -30,6 +30,13 @@ export interface ClassGroup extends EntityId {
   curriculum?: Pick<Curriculum, 'id' | 'name'>;
 }
 
+export interface ClassGroupInfo {
+  id: string;
+  code: string;
+  shift?: string;
+  curriculum?: { name: string };
+}
+
 export interface CurriculumForm {
   id?: string;
   name: string;

@@ -1,22 +1,43 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { BookOpen, Info, Library, Search } from 'lucide-react';
+import { BookOpen, Info, Library } from 'lucide-react';
 
 import { ContextPanel } from '../components/ContextPanel';
 import { SubjectCurriculumBadges } from '../components/Curriculum/SubjectCurriculumBadges';
-import { LoadingOverlay } from '../components/LoadingOverlay';
 import { Select } from '../components/Select';
+import {
+  ContextSummaryCard,
+  DataTable,
+  type DataTableColumn,
+  getFormControlClass,
+  ListFooter,
+  ListToolbar,
+  PageCard,
+  PageHeader,
+  PageLayout,
+  SearchInput,
+  SegmentControl,
+} from '../components/ui';
+import { useFetchedList } from '../hooks/useFetchedList';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
-import type { Course, Subject } from '../types/subject.types';
+import type { Course } from '../types/entities';
+import type { Subject } from '../types/subject.types';
+import { extractListData } from '../utils/apiResponse';
+
+const ACCENT = 'uc' as const;
 
 type LinkFilter = 'all' | 'linked' | 'orphan';
 
+const LINK_FILTER_OPTIONS = [
+  { id: 'all', label: 'Todas' },
+  { id: 'linked', label: 'Vinculadas' },
+  { id: 'orphan', label: 'Sem vínculo' },
+];
+
 export const Subjects: React.FC = () => {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = usePersistentState('subjects_search', '');
   const [linkFilter, setLinkFilter] = usePersistentState<LinkFilter>(
     'subjects_link_filter',
@@ -31,25 +52,22 @@ export const Subjects: React.FC = () => {
     false,
   );
 
-  const fetchSubjects = async () => {
-    setIsLoading(true);
-    try {
-      const [subjectsRes, coursesRes] = await Promise.all([
-        api.get('/subjects', { params: { includeCurriculums: true } }),
-        api.get('/courses'),
-      ]);
-      setSubjects(subjectsRes.data.data || []);
-      setCourses(coursesRes.data.data || coursesRes.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar unidades curriculares:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { items: subjects, isLoading } = useFetchedList<Subject>({
+    endpoint: '/subjects',
+    params: { includeCurriculums: true },
+  });
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchSubjects();
+    const fetchCourses = async () => {
+      try {
+        const response = await api.get('/courses');
+        setCourses(extractListData<Course>(response));
+      } catch (error) {
+        console.error('Erro ao buscar cursos:', error);
+      }
+    };
+
+    void fetchCourses();
   }, []);
 
   const effectiveLinkFilter = showOrphans
@@ -59,12 +77,12 @@ export const Subjects: React.FC = () => {
       : linkFilter;
 
   const filteredSubjects = useMemo(() => {
-    return subjects.filter((s) => {
+    return subjects.filter((subject) => {
       const matchesSearch =
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.code.toLowerCase().includes(search.toLowerCase());
+        subject.name.toLowerCase().includes(search.toLowerCase()) ||
+        subject.code.toLowerCase().includes(search.toLowerCase());
 
-      const linkCount = s.curriculums?.length ?? 0;
+      const linkCount = subject.curriculums?.length ?? 0;
       const isOrphan = linkCount === 0;
 
       if (!showOrphans && isOrphan) return false;
@@ -76,8 +94,8 @@ export const Subjects: React.FC = () => {
 
       const matchesCourse =
         courseFilter === 'all' ||
-        (s.curriculums?.some(
-          (l) => l.curriculum?.course?.id === courseFilter,
+        (subject.curriculums?.some(
+          (link) => link.curriculum?.course?.id === courseFilter,
         ) ??
           false);
 
@@ -86,93 +104,107 @@ export const Subjects: React.FC = () => {
   }, [subjects, search, effectiveLinkFilter, courseFilter, showOrphans]);
 
   const linkedCount = subjects.filter(
-    (s) => (s.curriculums?.length ?? 0) > 0,
+    (subject) => (subject.curriculums?.length ?? 0) > 0,
   ).length;
   const orphanCount = subjects.length - linkedCount;
 
+  const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer text-sm font-bold min-w-40 py-2`;
+
+  const columns = useMemo<DataTableColumn<Subject>[]>(
+    () => [
+      {
+        key: 'name',
+        header: 'Nome da UC',
+        render: (subject) => {
+          const isOrphan = (subject.curriculums?.length ?? 0) === 0;
+          return (
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-800">{subject.name}</span>
+              {isOrphan && showOrphans && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">
+                  Órfã
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: 'code',
+        header: 'Código',
+        cellClassName: 'text-slate-500 font-medium',
+        render: (subject) => subject.code,
+      },
+      {
+        key: 'hours',
+        header: 'Carga Horária',
+        headerClassName: 'text-center',
+        cellClassName: 'text-center font-bold text-menu-uc',
+        render: (subject) => `${subject.hours}h`,
+      },
+      {
+        key: 'curriculums',
+        header: 'Vinculada a',
+        render: (subject) => (
+          <SubjectCurriculumBadges links={subject.curriculums ?? []} />
+        ),
+      },
+    ],
+    [showOrphans],
+  );
+
   return (
-    <div className="w-full max-w-6xl mx-auto pb-10">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-menu-uc/10 text-menu-uc rounded-xl">
-              <BookOpen size={28} />
-            </div>
-            Dicionário de Unidades Curriculares
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Consulte todas as disciplinas cadastradas e seus vínculos com cursos
-            e grades.
-          </p>
-        </div>
-        <Link
-          to="/curriculums"
-          className="text-sm font-bold text-menu-matriz hover:opacity-80 flex items-center gap-2 bg-menu-matriz/10 px-4 py-2.5 rounded-xl transition-colors"
-        >
-          <Library size={18} />
-          Adicionar via Matriz Curricular
-        </Link>
-      </div>
+    <PageLayout>
+      <PageHeader
+        accent={ACCENT}
+        icon={<BookOpen size={28} />}
+        title="Dicionário de Unidades Curriculares"
+        description="Consulte todas as disciplinas cadastradas e seus vínculos com cursos e grades."
+        action={
+          <Link
+            to="/curriculums"
+            className="text-sm font-bold text-menu-matriz hover:opacity-80 flex items-center gap-2 bg-menu-matriz/10 px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <Library size={18} />
+            Adicionar via Matriz Curricular
+          </Link>
+        }
+      />
 
-      <div className="bg-white rounded-4xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-        <LoadingOverlay visible={isLoading} message="Buscando disciplinas..." />
-
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-          <div className="relative w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={18} className="text-slate-400" />
-            </div>
-            <input
-              type="text"
-              className="w-full pl-11 pr-4 py-2.5 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 focus:ring-menu-uc outline-none transition-all text-slate-800 font-medium placeholder-slate-400"
+      <PageCard isLoading={isLoading} loadingMessage="Buscando disciplinas...">
+        <ListToolbar>
+          <div className="flex flex-wrap justify-between items-center gap-4 w-full">
+            <SearchInput
+              accent={ACCENT}
               placeholder="Buscar unidade curricular..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={setSearch}
             />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-500">
-                Curso:
-              </span>
-              <Select
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
-                className="px-3 py-2 bg-[#f8f9fc] border-none rounded-xl text-sm font-bold text-slate-700 cursor-pointer min-w-[160px]"
-              >
-                <option value="all">Todos</option>
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="flex bg-[#f8f9fc] rounded-xl p-1 gap-1">
-              {(
-                [
-                  { id: 'all' as const, label: 'Todas' },
-                  { id: 'linked' as const, label: 'Vinculadas' },
-                  { id: 'orphan' as const, label: 'Sem vínculo' },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setLinkFilter(f.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    effectiveLinkFilter === f.id
-                      ? 'bg-menu-uc text-white shadow-md'
-                      : 'text-slate-500 hover:bg-slate-200'
-                  }`}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+                <span>Curso:</span>
+                <Select
+                  value={courseFilter}
+                  onChange={(e) => setCourseFilter(e.target.value)}
+                  className={selectClassName}
                 >
-                  {f.label}
-                </button>
-              ))}
+                  <option value="all">Todos</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <SegmentControl
+                accent={ACCENT}
+                options={LINK_FILTER_OPTIONS}
+                value={effectiveLinkFilter}
+                onChange={(value) => setLinkFilter(value as LinkFilter)}
+              />
             </div>
           </div>
-        </div>
+        </ListToolbar>
 
         {!showOrphans && orphanCount > 0 && (
           <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm">
@@ -181,6 +213,7 @@ export const Subjects: React.FC = () => {
               {orphanCount !== 1 ? 's' : ''}.
             </span>
             <button
+              type="button"
               onClick={() => {
                 setShowOrphans(true);
                 setLinkFilter('all');
@@ -198,6 +231,7 @@ export const Subjects: React.FC = () => {
               Exibindo UCs sem vínculo ({orphanCount}).
             </span>
             <button
+              type="button"
               onClick={() => {
                 setShowOrphans(false);
                 if (linkFilter === 'orphan') setLinkFilter('linked');
@@ -209,77 +243,18 @@ export const Subjects: React.FC = () => {
           </div>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Nome da UC
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Código
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm text-center">
-                  Carga Horária
-                </th>
-                <th className="py-4 px-4 font-bold text-slate-400 text-sm">
-                  Vinculada a
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSubjects.length === 0 && !isLoading ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="py-8 text-center text-slate-500 font-medium"
-                  >
-                    Nenhuma disciplina encontrada.
-                  </td>
-                </tr>
-              ) : (
-                filteredSubjects.map((subject) => {
-                  const isOrphan = (subject.curriculums?.length ?? 0) === 0;
-                  return (
-                    <tr
-                      key={subject.id}
-                      className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-800">
-                            {subject.name}
-                          </span>
-                          {isOrphan && showOrphans && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">
-                              Órfã
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-slate-500 font-medium">
-                        {subject.code}
-                      </td>
-                      <td className="py-4 px-4 text-center font-bold text-menu-uc">
-                        {subject.hours}h
-                      </td>
-                      <td className="py-4 px-4">
-                        <SubjectCurriculumBadges
-                          links={subject.curriculums ?? []}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={columns}
+          data={filteredSubjects}
+          rowKey={(subject) => subject.id}
+          emptyMessage="Nenhuma disciplina encontrada."
+          isLoading={isLoading}
+        />
 
-        <div className="mt-6 pt-6 border-t border-slate-100 text-sm font-medium text-slate-400">
-          Mostrando {filteredSubjects.length} de {subjects.length} disciplina(s)
-        </div>
-      </div>
+        <ListFooter
+          summary={`Mostrando ${filteredSubjects.length} de ${subjects.length} disciplina(s)`}
+        />
+      </PageCard>
 
       <ContextPanel
         title="Dicionário de UCs"
@@ -291,36 +266,37 @@ export const Subjects: React.FC = () => {
           'Para adicionar disciplinas, acesse a Matriz Curricular e abra a grade desejada.',
         ]}
       >
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
-          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <BookOpen size={16} className="text-menu-uc" /> Resumo
-          </h4>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Total de Disciplinas:</span>
-            <span className="font-bold">{subjects.length}</span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Vinculadas:</span>
-            <span className="font-bold text-emerald-600">{linkedCount}</span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-2">
-            <span>Sem vínculo:</span>
-            <span className="font-bold text-amber-600">{orphanCount}</span>
-          </div>
-          <div className="flex justify-between items-center text-xs text-slate-600">
-            <span>Carga Horária Média:</span>
-            <span className="font-bold">
-              {subjects.length > 0
-                ? Math.round(
-                    subjects.reduce((acc, s) => acc + (s.hours || 0), 0) /
-                      subjects.length,
-                  )
-                : 0}
-              h
-            </span>
-          </div>
-        </div>
+        <ContextSummaryCard
+          title="Resumo"
+          icon={<BookOpen size={16} className="text-menu-uc" />}
+          rows={[
+            { label: 'Total de Disciplinas:', value: subjects.length },
+            {
+              label: 'Vinculadas:',
+              value: linkedCount,
+              valueClassName: 'text-emerald-600',
+            },
+            {
+              label: 'Sem vínculo:',
+              value: orphanCount,
+              valueClassName: 'text-amber-600',
+            },
+            {
+              label: 'Carga Horária Média:',
+              value: `${
+                subjects.length > 0
+                  ? Math.round(
+                      subjects.reduce(
+                        (acc, subject) => acc + (subject.hours || 0),
+                        0,
+                      ) / subjects.length,
+                    )
+                  : 0
+              }h`,
+            },
+          ]}
+        />
       </ContextPanel>
-    </div>
+    </PageLayout>
   );
 };
