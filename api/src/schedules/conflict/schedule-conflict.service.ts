@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
+import {
+  buildOverlapWhere,
+  buildResourceOrConditions,
+} from '../utils/schedule-query.utils';
 
 export interface ScheduleConflictParams {
   startTime: Date;
@@ -29,20 +33,16 @@ export class ScheduleConflictService {
       );
     }
 
+    const slot = { startTime, endTime };
     const excludeFilter: Prisma.ScheduleWhereInput = excludeId
       ? { id: { not: excludeId } }
       : {};
 
-    const roomConflict = await this.prisma.schedule.findFirst({
-      where: {
-        roomId,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-        status: { not: ClassStatus.CANCELLED },
-        ...excludeFilter,
-      },
-      include: { classGroup: true },
-    });
+    const roomConflict = await this.findPersistedOverlapConflict(
+      { roomId },
+      slot,
+      excludeFilter,
+    );
 
     if (roomConflict) {
       throw new ConflictException(
@@ -50,16 +50,11 @@ export class ScheduleConflictService {
       );
     }
 
-    const professorConflict = await this.prisma.schedule.findFirst({
-      where: {
-        professorId,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-        status: { not: ClassStatus.CANCELLED },
-        ...excludeFilter,
-      },
-      include: { classGroup: true },
-    });
+    const professorConflict = await this.findPersistedOverlapConflict(
+      { professorId },
+      slot,
+      excludeFilter,
+    );
 
     if (professorConflict) {
       throw new ConflictException(
@@ -78,19 +73,36 @@ export class ScheduleConflictService {
     },
     excludeIds: string[],
   ) {
+    const orConditions = buildResourceOrConditions({
+      classGroupId: rule.classGroupId,
+      professorIds: rule.professorId,
+      roomIds: rule.roomId,
+    });
+
     return tx.schedule.findFirst({
       where: {
-        OR: [
-          { classGroupId: rule.classGroupId },
-          { professorId: rule.professorId },
-          { roomId: rule.roomId },
-        ],
-        startTime: { lt: slot.endTime },
-        endTime: { gt: slot.startTime },
+        ...(orConditions.length > 0 && { OR: orConditions }),
+        ...buildOverlapWhere(slot),
         status: { in: [ClassStatus.SCHEDULED, ClassStatus.PLANNED] },
         id: { notIn: excludeIds },
       },
       include: { subject: true, rule: true },
+    });
+  }
+
+  private findPersistedOverlapConflict(
+    resourceFilter: Prisma.ScheduleWhereInput,
+    slot: { startTime: Date; endTime: Date },
+    excludeFilter: Prisma.ScheduleWhereInput,
+  ) {
+    return this.prisma.schedule.findFirst({
+      where: {
+        ...resourceFilter,
+        ...buildOverlapWhere(slot),
+        status: { not: ClassStatus.CANCELLED },
+        ...excludeFilter,
+      },
+      include: { classGroup: true },
     });
   }
 }
