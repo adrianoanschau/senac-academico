@@ -4,12 +4,17 @@ import { useSearchParams } from 'react-router-dom';
 import { CalendarClock, Info, Maximize, Minimize, Search } from 'lucide-react';
 
 import { ContextPanel } from '../components/ContextPanel';
-import { ExportButtons } from '../components/ExportButtons';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { Select } from '../components/Select';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
-import type { ScheduleItem } from '../utils/exportUtils';
+import type { ScheduleItem } from '../types/schedule-export.types';
+
+const ExportButtons = lazy(() =>
+  import('../components/ExportButtons').then((m) => ({
+    default: m.ExportButtons,
+  })),
+);
 
 const ScheduleCalendar = lazy(() => import('../components/ScheduleCalendar'));
 const ScheduleDetailsModal = lazy(() =>
@@ -142,7 +147,9 @@ export const Schedule: React.FC = () => {
             Visualize o cronograma de aulas de cada turma.
           </p>
         </div>
-        <ExportButtons fetchData={fetchReportData} />
+        <Suspense fallback={null}>
+          <ExportButtons fetchData={fetchReportData} />
+        </Suspense>
       </div>
 
       <div
