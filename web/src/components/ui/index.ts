@@ -1,4 +1,9 @@
-export { type AccentPreset, accentPresets, getAccentClasses } from './accent';
+export {
+  type AccentPreset,
+  accentPresets,
+  getAccentClasses,
+  getFormControlClass,
+} from './accent';
 export { ContextSummaryCard } from './ContextSummaryCard';
 export { DataTable, type DataTableColumn } from './DataTable';
 export { FormActions, FormField, FormInput } from './FormField';

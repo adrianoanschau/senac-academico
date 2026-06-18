@@ -54,3 +54,8 @@ export type AccentPreset = keyof typeof accentPresets;
 export function getAccentClasses(preset: AccentPreset) {
   return accentPresets[preset];
 }
+
+export function getFormControlClass(preset: AccentPreset) {
+  const { ring } = getAccentClasses(preset);
+  return `w-full px-4 py-3 bg-[#f8f9fc] border-none rounded-xl focus:ring-2 ${ring} outline-none transition-all text-slate-800`;
+}
