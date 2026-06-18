@@ -40,3 +40,13 @@ export function resolveOriginalTotalHours(
 
   return rule.totalHours;
 }
+
+export function computeRemainingHoursForClasses(
+  rule: { totalHours: number; rootRuleId: string | null },
+  classes: Array<{ startTime: Date; endTime: Date }>,
+  rootRule?: { totalHours: number } | null,
+): number {
+  const originalTotalHours = resolveOriginalTotalHours(rule, rootRule);
+  const consumedMinutes = sumScheduleDurationMinutes(classes);
+  return computeRemainingHours(originalTotalHours, consumedMinutes);
+}

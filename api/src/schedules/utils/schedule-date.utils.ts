@@ -214,3 +214,20 @@ export function addScheduleDays(date: Date, days: number): Date {
     day: parts.day + days,
   });
 }
+
+/** Avança a data em anos civis (mesma semântica de `Date#setFullYear`). */
+export function addYears(date: Date, years: number): Date {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+}
+
+export interface TimeInterval {
+  startTime: Date;
+  endTime: Date;
+}
+
+/** Verdadeiro quando dois intervalos [start, end) se sobrepõem. */
+export function intervalsOverlap(a: TimeInterval, b: TimeInterval): boolean {
+  return a.startTime < b.endTime && a.endTime > b.startTime;
+}
