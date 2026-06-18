@@ -25,25 +25,12 @@ import {
   SegmentControl,
   TableRowActions,
 } from '../components/ui';
+import { useCrudList } from '../hooks/useCrudList';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { ClassGroup, Curriculum } from '../types/entities';
+import { extractListData } from '../utils/apiResponse';
 import { Role } from '../utils/roles';
-
-interface Curriculum {
-  id: string;
-  name: string;
-}
-
-interface ClassGroup {
-  id?: string | number;
-  code: string;
-  startDate: string;
-  endDate: string;
-  shift: string;
-  curriculumId: string;
-  curriculum?: Curriculum;
-}
 
 const ACCENT = 'turmas' as const;
 
@@ -87,96 +74,53 @@ const shiftBadgeClass = (shift: string) => {
 };
 
 export const ClassGroups: React.FC = () => {
-  const [classGroups, setClassGroups] = useState<ClassGroup[]>([]);
-  const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<ClassGroup>(initialFormState);
+  const [curriculums, setCurriculums] = useState<
+    Pick<Curriculum, 'id' | 'name'>[]
+  >([]);
   const [shiftFilter, setShiftFilter] = usePersistentState(
     'classGroups_shift',
     'all',
   );
   const [search, setSearch] = usePersistentState('classGroups_search', '');
 
-  const fetchClassGroups = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get('/class-groups');
-      setClassGroups(response.data.data || response.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar turmas:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchCurriculums = async () => {
-    try {
-      const response = await api.get('/curriculums');
-      setCurriculums(response.data.data || response.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar grades curriculares:', error);
-    }
-  };
+  const {
+    items: classGroups,
+    isLoading,
+    isSaving,
+    isModalOpen,
+    formData,
+    setFormData,
+    openNew,
+    openEdit,
+    closeModal,
+    handleDelete,
+    handleSave,
+  } = useCrudList<ClassGroup>({
+    endpoint: '/class-groups',
+    initialFormState,
+    confirmDeleteMessage: 'Tem certeza que deseja excluir esta turma?',
+    deleteErrorMessage: 'Erro ao excluir a turma. Verifique dependências.',
+    saveErrorMessage: 'Erro ao salvar os dados da turma.',
+    preparePayload: (data, isEditing) => {
+      const payload = { ...data };
+      delete payload.curriculum;
+      if (!isEditing) delete payload.id;
+      return payload;
+    },
+  });
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchClassGroups();
-    fetchCurriculums();
-  }, []);
-
-  const handleOpenNewModal = () => {
-    setFormData(initialFormState);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (classGroup: ClassGroup) => {
-    setFormData(classGroup);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string | number | undefined) => {
-    if (!id) return;
-    if (!(await confirmDialog('Tem certeza que deseja excluir esta turma?')))
-      return;
-
-    try {
-      await api.delete(`/class-groups/${id}`);
-      fetchClassGroups();
-    } catch (error) {
-      console.error('Erro ao excluir turma:', error);
-      alertDialog('Erro ao excluir a turma. Verifique dependências.');
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const isEditing = !!formData.id;
-      const url = isEditing ? `/class-groups/${formData.id}` : '/class-groups';
-
-      const payload: Partial<ClassGroup> = { ...formData };
-      if (!isEditing) delete payload.id;
-      delete payload.curriculum;
-
-      if (isEditing) {
-        await api.patch(url, payload);
-      } else {
-        await api.post(url, payload);
+    const fetchCurriculums = async () => {
+      try {
+        const response = await api.get('/curriculums');
+        setCurriculums(extractListData<Curriculum>(response));
+      } catch (error) {
+        console.error('Erro ao buscar grades curriculares:', error);
       }
+    };
 
-      setIsModalOpen(false);
-      fetchClassGroups();
-    } catch (error) {
-      console.error('Erro ao salvar turma:', error);
-      alertDialog('Erro ao salvar os dados da turma.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    void fetchCurriculums();
+  }, []);
 
   const filteredClassGroups = classGroups.filter((c) => {
     const matchesSearch =
@@ -245,7 +189,7 @@ export const ClassGroups: React.FC = () => {
         description="Gerencie os grupos de alunos e seus períodos letivos."
         action={
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+            <PrimaryButton accent={ACCENT} onClick={openNew}>
               <Plus size={20} />
               Nova Turma
             </PrimaryButton>
@@ -281,7 +225,7 @@ export const ClassGroups: React.FC = () => {
               <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                 <TableRowActions
                   accent={ACCENT}
-                  onEdit={() => handleOpenEditModal(turma)}
+                  onEdit={() => openEdit(turma)}
                   onDelete={() => handleDelete(turma.id)}
                   extra={
                     <>
@@ -311,7 +255,7 @@ export const ClassGroups: React.FC = () => {
       <FormModal
         open={isModalOpen}
         title="Turma"
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando turma..."
       >
@@ -407,7 +351,7 @@ export const ClassGroups: React.FC = () => {
           <FormActions
             accent={ACCENT}
             isSaving={isSaving}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>

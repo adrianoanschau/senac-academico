@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import axios from 'axios';
 import { Calendar, CalendarDays, Check, Clock, Info, Plus } from 'lucide-react';
@@ -27,17 +27,11 @@ import {
   TableRowActions,
 } from '../components/ui';
 import { usePersistentState } from '../hooks/usePersistentState';
+import { useResourceList } from '../hooks/useResourceList';
 import api from '../services/api';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { ScheduleOverride } from '../types/entities';
+import { alertDialog } from '../utils/dialog';
 import { Role } from '../utils/roles';
-
-interface ScheduleOverride {
-  id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  type: string;
-}
 
 const ACCENT = 'especiais' as const;
 
@@ -57,40 +51,38 @@ const emptyFormData = {
 };
 
 export const CalendarReserves: React.FC = () => {
-  const [feriados, setFeriados] = useState<ScheduleOverride[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAllDay, setIsAllDay] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState(emptyFormData);
   const [yearFilter, setYearFilter] = usePersistentState(
     'reserves_year',
     '2026',
   );
   const [search, setSearch] = usePersistentState('reserves_search', '');
-  const [formData, setFormData] = useState(emptyFormData);
 
-  const fetchOverrides = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get('/schedule-overrides');
-      setFeriados(response.data.data || response.data);
-    } catch (error) {
-      console.error('Erro ao buscar feriados/reservas:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchOverrides();
-  }, []);
+  const {
+    items: feriados,
+    isLoading,
+    refetch,
+    handleDelete,
+  } = useResourceList<ScheduleOverride>({
+    endpoint: '/schedule-overrides',
+    confirmDeleteMessage:
+      'Tem certeza que deseja remover esta reserva/bloqueio?',
+    deleteErrorMessage: 'Erro ao remover.',
+    onDeleted: () => {
+      void alertDialog('Removido com sucesso!');
+    },
+  });
 
   const openNewModal = () => {
     setFormData(emptyFormData);
     setIsAllDay(true);
     setIsModalOpen(true);
   };
+
+  const closeModal = () => setIsModalOpen(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -132,7 +124,7 @@ export const CalendarReserves: React.FC = () => {
       setFormData(emptyFormData);
       setIsAllDay(true);
       setIsModalOpen(false);
-      fetchOverrides();
+      await refetch();
     } catch (error) {
       console.error(error);
       if (axios.isAxiosError(error)) {
@@ -145,23 +137,6 @@ export const CalendarReserves: React.FC = () => {
       }
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (
-      !(await confirmDialog(
-        'Tem certeza que deseja remover esta reserva/bloqueio?',
-      ))
-    )
-      return;
-    try {
-      await api.delete(`/schedule-overrides/${id}`);
-      alertDialog('Removido com sucesso!');
-      fetchOverrides();
-    } catch (error) {
-      console.error(error);
-      alertDialog('Erro ao remover.');
     }
   };
 
@@ -265,7 +240,7 @@ export const CalendarReserves: React.FC = () => {
       <FormModal
         open={isModalOpen}
         title="Períodos Especiais"
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando período..."
       >
@@ -381,7 +356,7 @@ export const CalendarReserves: React.FC = () => {
           <FormActions
             accent={ACCENT}
             isSaving={isSaving}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>

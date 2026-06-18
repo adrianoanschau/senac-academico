@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Info, Plus, Users } from 'lucide-react';
 
@@ -22,17 +22,10 @@ import {
   SegmentControl,
   TableRowActions,
 } from '../components/ui';
+import { useCrudList } from '../hooks/useCrudList';
 import { usePersistentState } from '../hooks/usePersistentState';
-import api from '../services/api';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { Professor } from '../types/entities';
 import { Role } from '../utils/roles';
-
-interface Professor {
-  id?: string | number;
-  name: string;
-  email: string;
-  degree: string;
-}
 
 const ACCENT = 'professores' as const;
 
@@ -49,87 +42,32 @@ const STATUS_OPTIONS = [
 ];
 
 export const Professors: React.FC = () => {
-  const [professors, setProfessors] = useState<Professor[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<Professor>(initialFormState);
   const [statusFilter, setStatusFilter] = usePersistentState(
     'professors_status',
     'all',
   );
   const [search, setSearch] = usePersistentState('professors_search', '');
 
-  const fetchProfessors = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get('/professors');
-      setProfessors(response.data.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar professores:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProfessors();
-  }, []);
-
-  const handleOpenNewModal = () => {
-    setFormData(initialFormState);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (professor: Professor) => {
-    setFormData(professor);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string | number) => {
-    if (
-      !(await confirmDialog('Tem certeza que deseja excluir este professor?'))
-    )
-      return;
-
-    try {
-      await api.delete(`/professors/${id}`);
-      fetchProfessors();
-    } catch (error) {
-      console.error('Erro ao excluir professor:', error);
-      alertDialog(
-        'Erro ao excluir professor. Verifique se ele está vinculado a alguma turma.',
-      );
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const isEditing = !!formData.id;
-      const url = isEditing ? `/professors/${formData.id}` : '/professors';
-
-      const payload = { ...formData };
-      if (!isEditing) delete payload.id;
-
-      if (isEditing) {
-        await api.patch(url, payload);
-      } else {
-        await api.post(url, payload);
-      }
-
-      setIsModalOpen(false);
-      fetchProfessors();
-    } catch (error) {
-      console.error('Erro ao salvar professor:', error);
-      alertDialog('Erro ao salvar os dados do professor.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const {
+    items: professors,
+    isLoading,
+    isSaving,
+    isModalOpen,
+    formData,
+    setFormData,
+    openNew,
+    openEdit,
+    closeModal,
+    handleDelete,
+    handleSave,
+  } = useCrudList<Professor>({
+    endpoint: '/professors',
+    initialFormState,
+    confirmDeleteMessage: 'Tem certeza que deseja excluir este professor?',
+    deleteErrorMessage:
+      'Erro ao excluir professor. Verifique se ele está vinculado a alguma turma.',
+    saveErrorMessage: 'Erro ao salvar os dados do professor.',
+  });
 
   const filteredProfessors = professors.filter((p) => {
     const matchesSearch =
@@ -178,7 +116,7 @@ export const Professors: React.FC = () => {
         description="Gerencie o corpo docente da instituição."
         action={
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+            <PrimaryButton accent={ACCENT} onClick={openNew}>
               <Plus size={20} />
               Novo Professor
             </PrimaryButton>
@@ -214,7 +152,7 @@ export const Professors: React.FC = () => {
               <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                 <TableRowActions
                   accent={ACCENT}
-                  onEdit={() => handleOpenEditModal(prof)}
+                  onEdit={() => openEdit(prof)}
                   onDelete={() => prof.id && handleDelete(prof.id)}
                 />
               </CanAccess>
@@ -243,7 +181,7 @@ export const Professors: React.FC = () => {
       <FormModal
         open={isModalOpen}
         title="Professor"
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando professor..."
       >
@@ -285,7 +223,7 @@ export const Professors: React.FC = () => {
           <FormActions
             accent={ACCENT}
             isSaving={isSaving}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>

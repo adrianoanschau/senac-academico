@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { GraduationCap, Info, Plus } from 'lucide-react';
 
@@ -22,20 +22,14 @@ import {
   SegmentControl,
   TableRowActions,
 } from '../components/ui';
+import { useCrudList } from '../hooks/useCrudList';
 import { usePersistentState } from '../hooks/usePersistentState';
-import api from '../services/api';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { CrudCourse } from '../types/entities';
 import { Role } from '../utils/roles';
-
-interface Course {
-  id?: string | number;
-  name: string;
-  code: string;
-}
 
 const ACCENT = 'cursos' as const;
 
-const initialFormState: Course = {
+const initialFormState: CrudCourse = {
   name: '',
   code: '',
 };
@@ -49,87 +43,32 @@ const MODALITY_OPTIONS = [
 ];
 
 export const Courses: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<Course>(initialFormState);
   const [modalityFilter, setModalityFilter] = usePersistentState(
     'courses_modality',
     'all',
   );
   const [search, setSearch] = usePersistentState('courses_search', '');
 
-  const fetchCourses = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get('/courses');
-      setCourses(response.data.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar cursos:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      await fetchCourses();
-    })();
-  }, []);
-
-  const handleOpenNewModal = () => {
-    setFormData(initialFormState);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (course: Course) => {
-    setFormData(course);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string | number | undefined) => {
-    if (!id) return;
-    if (!(await confirmDialog('Tem certeza que deseja excluir este curso?')))
-      return;
-
-    try {
-      await api.delete(`/courses/${id}`);
-      fetchCourses();
-    } catch (error) {
-      console.error('Erro ao excluir curso:', error);
-      alertDialog(
-        'Erro ao excluir o curso. Verifique dependências (ex: turmas ativas).',
-      );
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const isEditing = !!formData.id;
-      const url = isEditing ? `/courses/${formData.id}` : '/courses';
-
-      const payload: Partial<Course> = { ...formData };
-      if (!isEditing) delete payload.id;
-
-      if (isEditing) {
-        await api.patch(url, payload);
-      } else {
-        await api.post(url, payload);
-      }
-
-      setIsModalOpen(false);
-      fetchCourses();
-    } catch (error) {
-      console.error('Erro ao salvar curso:', error);
-      alertDialog('Erro ao salvar os dados do curso.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const {
+    items: courses,
+    isLoading,
+    isSaving,
+    isModalOpen,
+    formData,
+    setFormData,
+    openNew,
+    openEdit,
+    closeModal,
+    handleDelete,
+    handleSave,
+  } = useCrudList<CrudCourse>({
+    endpoint: '/courses',
+    initialFormState,
+    confirmDeleteMessage: 'Tem certeza que deseja excluir este curso?',
+    deleteErrorMessage:
+      'Erro ao excluir o curso. Verifique dependências (ex: turmas ativas).',
+    saveErrorMessage: 'Erro ao salvar os dados do curso.',
+  });
 
   const filteredCourses = courses.filter((c) => {
     const matchesSearch =
@@ -138,7 +77,7 @@ export const Courses: React.FC = () => {
     return matchesSearch;
   });
 
-  const columns = useMemo<DataTableColumn<Course>[]>(
+  const columns = useMemo<DataTableColumn<CrudCourse>[]>(
     () => [
       {
         key: 'name',
@@ -168,7 +107,7 @@ export const Courses: React.FC = () => {
         description="Gerencie os cursos oferecidos pela instituição."
         action={
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+            <PrimaryButton accent={ACCENT} onClick={openNew}>
               <Plus size={20} />
               Novo Curso
             </PrimaryButton>
@@ -204,7 +143,7 @@ export const Courses: React.FC = () => {
               <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                 <TableRowActions
                   accent={ACCENT}
-                  onEdit={() => handleOpenEditModal(course)}
+                  onEdit={() => openEdit(course)}
                   onDelete={() => handleDelete(course.id)}
                 />
               </CanAccess>
@@ -233,7 +172,7 @@ export const Courses: React.FC = () => {
       <FormModal
         open={isModalOpen}
         title="Curso"
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando curso..."
       >
@@ -264,7 +203,7 @@ export const Courses: React.FC = () => {
             accent={ACCENT}
             isSaving={isSaving}
             savingLabel="Salvando..."
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Info, MapPin, Plus } from 'lucide-react';
 
@@ -24,17 +24,10 @@ import {
   SegmentControl,
   TableRowActions,
 } from '../components/ui';
+import { useCrudList } from '../hooks/useCrudList';
 import { usePersistentState } from '../hooks/usePersistentState';
-import api from '../services/api';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { Room } from '../types/entities';
 import { Role } from '../utils/roles';
-
-interface Room {
-  id?: string | number;
-  name: string;
-  type: string;
-  capacity: number;
-}
 
 const ACCENT = 'salas' as const;
 
@@ -51,82 +44,28 @@ const TYPE_OPTIONS = [
 ];
 
 export const Rooms: React.FC = () => {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<Room>(initialFormState);
   const [typeFilter, setTypeFilter] = usePersistentState('rooms_type', 'all');
   const [search, setSearch] = usePersistentState('rooms_search', '');
 
-  const fetchRooms = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get('/rooms');
-      setRooms(response.data.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar salas:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      await fetchRooms();
-    })();
-  }, []);
-
-  const handleOpenNewModal = () => {
-    setFormData(initialFormState);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (room: Room) => {
-    setFormData(room);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string | number | undefined) => {
-    if (!id) return;
-    if (!(await confirmDialog('Tem certeza que deseja excluir esta sala?')))
-      return;
-
-    try {
-      await api.delete(`/rooms/${id}`);
-      fetchRooms();
-    } catch (error) {
-      console.error('Erro ao excluir sala:', error);
-      alertDialog('Erro ao excluir a sala. Verifique dependências.');
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const isEditing = !!formData.id;
-      const url = isEditing ? `/rooms/${formData.id}` : '/rooms';
-
-      const payload: Partial<Room> = { ...formData };
-      if (!isEditing) delete payload.id;
-
-      if (isEditing) {
-        await api.patch(url, payload);
-      } else {
-        await api.post(url, payload);
-      }
-
-      setIsModalOpen(false);
-      fetchRooms();
-    } catch (error) {
-      console.error('Erro ao salvar sala:', error);
-      alertDialog('Erro ao salvar os dados da sala.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const {
+    items: rooms,
+    isLoading,
+    isSaving,
+    isModalOpen,
+    formData,
+    setFormData,
+    openNew,
+    openEdit,
+    closeModal,
+    handleDelete,
+    handleSave,
+  } = useCrudList<Room>({
+    endpoint: '/rooms',
+    initialFormState,
+    confirmDeleteMessage: 'Tem certeza que deseja excluir esta sala?',
+    deleteErrorMessage: 'Erro ao excluir a sala. Verifique dependências.',
+    saveErrorMessage: 'Erro ao salvar os dados da sala.',
+  });
 
   const filteredRooms = rooms.filter((r) => {
     const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
@@ -136,6 +75,8 @@ export const Rooms: React.FC = () => {
       (typeFilter === 'sala' && r.type === 'Sala Teórica');
     return matchesSearch && matchesType;
   });
+
+  const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer`;
 
   const columns = useMemo<DataTableColumn<Room>[]>(
     () => [
@@ -161,8 +102,6 @@ export const Rooms: React.FC = () => {
     [],
   );
 
-  const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer`;
-
   return (
     <PageLayout>
       <PageHeader
@@ -172,7 +111,7 @@ export const Rooms: React.FC = () => {
         description="Gerencie os espaços físicos e alocações."
         action={
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+            <PrimaryButton accent={ACCENT} onClick={openNew}>
               <Plus size={20} />
               Nova Sala
             </PrimaryButton>
@@ -208,7 +147,7 @@ export const Rooms: React.FC = () => {
               <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                 <TableRowActions
                   accent={ACCENT}
-                  onEdit={() => handleOpenEditModal(room)}
+                  onEdit={() => openEdit(room)}
                   onDelete={() => handleDelete(room.id)}
                 />
               </CanAccess>
@@ -237,7 +176,7 @@ export const Rooms: React.FC = () => {
       <FormModal
         open={isModalOpen}
         title="Sala / Ambiente"
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando ambiente..."
       >
@@ -285,7 +224,7 @@ export const Rooms: React.FC = () => {
           <FormActions
             accent={ACCENT}
             isSaving={isSaving}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>

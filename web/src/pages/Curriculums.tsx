@@ -22,121 +22,88 @@ import {
   PrimaryButton,
   SearchInput,
 } from '../components/ui';
+import { extractEntityData, useCrudList } from '../hooks/useCrudList';
 import { usePersistentState } from '../hooks/usePersistentState';
 import api from '../services/api';
-import type { Course, Curriculum } from '../types/subject.types';
-import { alertDialog, confirmDialog } from '../utils/dialog';
+import type { Course, Curriculum, CurriculumForm } from '../types/entities';
+import { extractListData } from '../utils/apiResponse';
 import { Role } from '../utils/roles';
 
 const ACCENT = 'matriz' as const;
 
-const initialFormState = {
+const initialFormState: CurriculumForm = {
   name: '',
   active: true,
   courseId: '',
 };
 
+type CurriculumRow = Curriculum & CurriculumForm;
+
 export const Curriculums: React.FC = () => {
   const navigate = useNavigate();
-  const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState(initialFormState);
   const [search, setSearch] = usePersistentState('curriculums_search', '');
 
-  const fetchCurriculums = async () => {
-    try {
-      const response = await api.get('/curriculums');
-      setCurriculums(response.data.data || response.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar grades curriculares:', error);
-    }
-  };
+  const {
+    items: curriculums,
+    isLoading,
+    isSaving,
+    isModalOpen,
+    isEditing,
+    formData,
+    setFormData,
+    openNew,
+    openEdit,
+    closeModal,
+    handleDelete,
+    handleSave,
+  } = useCrudList<CurriculumRow>({
+    endpoint: '/curriculums',
+    initialFormState: initialFormState as CurriculumRow,
+    confirmDeleteMessage:
+      'Tem certeza que deseja excluir esta grade curricular?',
+    deleteErrorMessage:
+      'Erro ao excluir. Verifique se existem turmas vinculadas a ela.',
+    saveErrorMessage: 'Erro ao salvar os dados.',
+    onSave: async ({ formData: data, isEditing: editing, endpoint }) => {
+      const payload = {
+        name: data.name,
+        active: data.active,
+        courseId: data.courseId,
+      };
 
-  const fetchCourses = async () => {
-    try {
-      const response = await api.get('/courses');
-      setCourses(response.data.data || response.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar cursos:', error);
-    }
-  };
+      if (editing) {
+        await api.patch(`${endpoint}/${data.id}`, payload);
+        return { closeModal: true, refetch: true };
+      }
+
+      const response = await api.post(endpoint, payload);
+      const created = extractEntityData<Curriculum>(response);
+      navigate(`/curriculums/${created.id}`);
+      return { closeModal: true, refetch: false };
+    },
+  });
 
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchCurriculums(), fetchCourses()]);
-      setIsLoading(false);
+    const fetchCourses = async () => {
+      try {
+        const response = await api.get('/courses');
+        setCourses(extractListData<Course>(response));
+      } catch (error) {
+        console.error('Erro ao buscar cursos:', error);
+      }
     };
-    loadData();
+
+    void fetchCourses();
   }, []);
 
-  const handleOpenNewModal = () => {
-    setEditingId(null);
-    setFormData(initialFormState);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (curriculum: Curriculum) => {
-    setEditingId(curriculum.id);
-    setFormData({
+  const handleOpenEdit = (curriculum: Curriculum) => {
+    openEdit({
+      ...curriculum,
       name: curriculum.name,
       active: curriculum.active,
       courseId: curriculum.courseId,
     });
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string | undefined) => {
-    if (!id) return;
-    if (
-      !(await confirmDialog(
-        'Tem certeza que deseja excluir esta grade curricular?',
-      ))
-    )
-      return;
-
-    try {
-      await api.delete(`/curriculums/${id}`);
-      fetchCurriculums();
-    } catch (error) {
-      console.error('Erro ao excluir grade curricular:', error);
-      alertDialog(
-        'Erro ao excluir. Verifique se existem turmas vinculadas a ela.',
-      );
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const payload = {
-        name: formData.name,
-        active: formData.active,
-        courseId: formData.courseId,
-      };
-
-      if (editingId) {
-        await api.patch(`/curriculums/${editingId}`, payload);
-        setIsModalOpen(false);
-        fetchCurriculums();
-      } else {
-        const response = await api.post('/curriculums', payload);
-        const created = response.data.data || response.data;
-        setIsModalOpen(false);
-        navigate(`/curriculums/${created.id}`);
-      }
-    } catch (error) {
-      console.error('Erro ao salvar grade curricular:', error);
-      alertDialog('Erro ao salvar os dados.');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const filteredCurriculums = curriculums.filter(
@@ -148,7 +115,7 @@ export const Curriculums: React.FC = () => {
 
   const selectClassName = `${getFormControlClass(ACCENT)} cursor-pointer`;
 
-  const columns = useMemo<DataTableColumn<Curriculum>[]>(
+  const columns = useMemo<DataTableColumn<CurriculumRow>[]>(
     () => [
       {
         key: 'name',
@@ -204,7 +171,7 @@ export const Curriculums: React.FC = () => {
         description="Gerencie as grades e adicione disciplinas diretamente em cada matriz."
         action={
           <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
-            <PrimaryButton accent={ACCENT} onClick={handleOpenNewModal}>
+            <PrimaryButton accent={ACCENT} onClick={openNew}>
               <Plus size={20} />
               Nova Grade
             </PrimaryButton>
@@ -242,7 +209,7 @@ export const Curriculums: React.FC = () => {
                 <CanAccess roles={[Role.ADMIN, Role.SECRETARY]}>
                   <button
                     type="button"
-                    onClick={() => handleOpenEditModal(curriculum)}
+                    onClick={() => handleOpenEdit(curriculum)}
                     className="p-2 text-slate-400 hover:text-menu-matriz hover:bg-menu-matriz/10 rounded-lg transition-colors"
                     title="Editar metadados"
                   >
@@ -265,8 +232,8 @@ export const Curriculums: React.FC = () => {
 
       <FormModal
         open={isModalOpen}
-        title={editingId ? 'Editar Grade' : 'Nova Grade'}
-        onClose={() => setIsModalOpen(false)}
+        title={isEditing ? 'Editar Grade' : 'Nova Grade'}
+        onClose={closeModal}
         isSaving={isSaving}
         savingMessage="Salvando grade..."
       >
@@ -317,7 +284,7 @@ export const Curriculums: React.FC = () => {
             </Select>
           </FormField>
 
-          {!editingId && (
+          {!isEditing && (
             <p className="text-sm text-slate-500 bg-slate-50 rounded-xl p-3">
               Após criar, você será direcionado para adicionar as disciplinas da
               grade.
@@ -327,8 +294,8 @@ export const Curriculums: React.FC = () => {
           <FormActions
             accent={ACCENT}
             isSaving={isSaving}
-            submitLabel={editingId ? 'Salvar' : 'Criar e Continuar'}
-            onCancel={() => setIsModalOpen(false)}
+            submitLabel={isEditing ? 'Salvar' : 'Criar e Continuar'}
+            onCancel={closeModal}
           />
         </form>
       </FormModal>
