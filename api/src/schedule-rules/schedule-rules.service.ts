@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { CreateScheduleRuleDto } from './dto/create-schedule-rule.dto';
-import { UpdateScheduleRuleDto } from './dto/update-schedule-rule.dto';
+import {
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class ScheduleRulesService {
-  create(createScheduleRuleDto: CreateScheduleRuleDto) {
-    return 'This action adds a new scheduleRule';
+  constructor(private readonly prisma: PrismaService) {}
+
+  findAll(classGroupId?: string) {
+    return this.prisma.scheduleRule.findMany({
+      where: classGroupId ? { classGroupId } : undefined,
+      include: {
+        subject: true,
+        professor: true,
+        room: true,
+        classGroup: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findAll() {
-    return `This action returns all scheduleRules`;
-  }
+  async findOne(id: string) {
+    const rule = await this.prisma.scheduleRule.findUnique({
+      where: { id },
+      include: {
+        subject: true,
+        professor: true,
+        room: true,
+        classGroup: true,
+        schedules: {
+          orderBy: { startTime: 'asc' },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} scheduleRule`;
-  }
+    if (!rule) {
+      throw new NotFoundException(
+        `Regra de agendamento com ID ${id} não encontrada.`,
+      );
+    }
 
-  update(id: number, updateScheduleRuleDto: UpdateScheduleRuleDto) {
-    return `This action updates a #${id} scheduleRule`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} scheduleRule`;
+    return rule;
   }
 }

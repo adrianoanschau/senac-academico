@@ -7,6 +7,9 @@ import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { RuleDependencyListener } from './listeners/rule-dependency.listener';
 import { ClassCompletionCronService } from './class-completion-cron.service';
 import { GanttPlannerService } from './gantt-planner.service';
+import { ScheduleConflictService } from './conflict/schedule-conflict.service';
+import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
+import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
 
 @Module({
   controllers: [SchedulesController],
@@ -14,6 +17,9 @@ import { GanttPlannerService } from './gantt-planner.service';
     SchedulesService,
     PrismaService,
     ScheduleGeneratorService,
+    ScheduleConflictService,
+    ScheduleRuleLifecycleService,
+    SchedulePostponeService,
     ModuleOrchestratorService,
     GanttPlannerService,
     RuleDependencyListener,

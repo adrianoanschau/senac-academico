@@ -1,45 +1,19 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ScheduleRulesService } from './schedule-rules.service';
-import { CreateScheduleRuleDto } from './dto/create-schedule-rule.dto';
-import { UpdateScheduleRuleDto } from './dto/update-schedule-rule.dto';
 
 @Controller('schedule-rules')
 export class ScheduleRulesController {
   constructor(private readonly scheduleRulesService: ScheduleRulesService) {}
 
-  @Post()
-  create(@Body() createScheduleRuleDto: CreateScheduleRuleDto) {
-    return this.scheduleRulesService.create(createScheduleRuleDto);
-  }
-
   @Get()
-  findAll() {
-    return this.scheduleRulesService.findAll();
+  async findAll(@Query('classGroupId') classGroupId?: string) {
+    const data = await this.scheduleRulesService.findAll(classGroupId);
+    return { data };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.scheduleRulesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateScheduleRuleDto: UpdateScheduleRuleDto,
-  ) {
-    return this.scheduleRulesService.update(+id, updateScheduleRuleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.scheduleRulesService.remove(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.scheduleRulesService.findOne(id);
+    return { data };
   }
 }
