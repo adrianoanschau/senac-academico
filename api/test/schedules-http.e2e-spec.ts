@@ -1,15 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { GanttPlannerService } from '../src/schedules/gantt-planner.service';
+import { ModuleOrchestratorService } from '../src/schedules/module-orchestrator.service';
 import { SchedulesController } from '../src/schedules/schedules.controller';
 import { SchedulesService } from '../src/schedules/schedules.service';
-import { ModuleOrchestratorService } from '../src/schedules/module-orchestrator.service';
-import { GanttPlannerService } from '../src/schedules/gantt-planner.service';
 
 describe('Schedules HTTP (e2e)', () => {
   let app: INestApplication;

@@ -1,5 +1,6 @@
 import { Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
+
 import {
   ProjectedSchedule,
   ScheduleGeneratorService,

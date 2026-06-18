@@ -1,18 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
+
+import { AppRole } from '@/prisma/generated';
+
+import { Roles } from '../auth/decorators/roles.decorator';
 import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
 import { UpdateClassGroupDto } from './dto/update-class-group.dto';
-import { AppRole } from '@/prisma/generated';
-import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('class-groups')
 export class ClassGroupsController {

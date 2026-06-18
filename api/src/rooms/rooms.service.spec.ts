@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
-import { RoomsService } from './rooms.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateRoomDto } from './dto/create-room.dto';
+import { RoomsService } from './rooms.service';
 
 type MockRoom = {
   id: string;

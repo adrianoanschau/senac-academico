@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { PrismaService } from '@/prisma/prisma.service';
-import { SchedulesService } from './schedules.service';
+
 import { PlanModuleDto } from './dto/plan-module.dto';
+import { SchedulesService } from './schedules.service';
 
 @Injectable()
 export class ModuleOrchestratorService {

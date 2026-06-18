@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { AppRole } from '@/prisma/generated';
+
 import { ScheduleRulesController } from './schedule-rules.controller';
 import { ScheduleRulesService } from './schedule-rules.service';
 

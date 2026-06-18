@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { ScheduleRulesService } from './schedule-rules.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ScheduleRulesService } from './schedule-rules.service';
 
 describe('ScheduleRulesService', () => {
   let service: ScheduleRulesService;

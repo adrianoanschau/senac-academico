@@ -1,5 +1,6 @@
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
+
 import { computeRemainingHoursForClasses } from './schedule-hours.utils';
 
 export const RULE_MIGRATE_CONSUMED_STATUSES: ClassStatus[] = [

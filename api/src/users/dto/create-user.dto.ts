@@ -1,11 +1,12 @@
 import {
+  IsArray,
   IsEmail,
+  IsEnum,
+  IsOptional,
   IsString,
   MinLength,
-  IsOptional,
-  IsArray,
-  IsEnum,
 } from 'class-validator';
+
 import { AppRole } from '@/prisma/generated';
 
 export class CreateUserDto {

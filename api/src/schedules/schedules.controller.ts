@@ -1,28 +1,30 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
+
 import { AppRole } from '@/prisma/generated';
+
 import { Roles } from '../auth/decorators/roles.decorator';
-import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
-import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
-import { MigrateRuleDto } from './dto/migrate-rule.dto';
 import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
-import { ModuleOrchestratorService } from './module-orchestrator.service';
-import { PlanModuleDto } from './dto/plan-module.dto';
-import { GanttPlannerService } from './gantt-planner.service';
 import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
 import { GanttPublishDto } from './dto/gantt-publish.dto';
 import { GanttRecalculateDto } from './dto/gantt-recalculate.dto';
+import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
+import { MigrateRuleDto } from './dto/migrate-rule.dto';
+import { PlanModuleDto } from './dto/plan-module.dto';
+import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { GanttPlannerService } from './gantt-planner.service';
+import { ModuleOrchestratorService } from './module-orchestrator.service';
+import { SchedulesService } from './schedules.service';
 
 @Controller('schedules')
 export class SchedulesController {

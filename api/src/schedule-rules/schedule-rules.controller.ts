@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Query, ParseUUIDPipe } from '@nestjs/common';
-import { ScheduleRulesService } from './schedule-rules.service';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+
 import { FindScheduleRulesQueryDto } from './dto/find-schedule-rules-query.dto';
+import { ScheduleRulesService } from './schedule-rules.service';
 
 @Controller('schedule-rules')
 export class ScheduleRulesController {

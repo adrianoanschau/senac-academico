@@ -5,10 +5,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
 import { AppRole } from '@/prisma/generated';
+
 import { PrismaService } from '../../prisma/prisma.service';
-import { ROLES_KEY } from '../decorators/roles.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { ROLES_KEY } from '../decorators/roles.decorator';
 
 type AuthenticatedUser = {
   userId: string;

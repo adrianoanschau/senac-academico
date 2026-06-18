@@ -1,13 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
-import { SchedulePostponeService } from './schedule-postpone.service';
-import { ScheduleConflictService } from '../conflict/schedule-conflict.service';
-import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { RULE_EVENTS } from '../events/rule-end-date-changed.event';
+
+import { ScheduleConflictService } from '../conflict/schedule-conflict.service';
 import { SCHEDULE_ERROR_ACTIONS } from '../constants/schedule-error.constants';
+import { RULE_EVENTS } from '../events/rule-end-date-changed.event';
+import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
+import { SchedulePostponeService } from './schedule-postpone.service';
 
 describe('SchedulePostponeService', () => {
   let service: SchedulePostponeService;

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+
 import { findOrThrow } from '@/common/entity.utils';
+import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class ScheduleRulesService {

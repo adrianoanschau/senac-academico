@@ -7,12 +7,14 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+
 import { AppRole } from '@/prisma/generated';
-import { UsersService } from './users.service';
+
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UsersService } from './users.service';
 
 @Controller('users')
 @UseGuards(RolesGuard)

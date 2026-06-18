@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { AppRole } from '@/prisma/generated';
+
+import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
 import { ScheduleOverridesController } from './schedule-overrides.controller';
 import { ScheduleOverridesService } from './schedule-overrides.service';
-import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
 
 describe('ScheduleOverridesController', () => {
   let controller: ScheduleOverridesController;

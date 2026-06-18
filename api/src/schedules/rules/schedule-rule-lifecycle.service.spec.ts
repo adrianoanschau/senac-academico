@@ -1,12 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ScheduleRuleLifecycleService } from './schedule-rule-lifecycle.service';
-import { ScheduleGeneratorService } from '../schedule-generator.service';
-import { PrismaService } from '@/prisma/prisma.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
 import { RULE_EVENTS } from '../events/rule-end-date-changed.event';
+import { ScheduleGeneratorService } from '../schedule-generator.service';
+import { ScheduleRuleLifecycleService } from './schedule-rule-lifecycle.service';
 
 describe('ScheduleRuleLifecycleService', () => {
   let service: ScheduleRuleLifecycleService;

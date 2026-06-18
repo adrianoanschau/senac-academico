@@ -6,6 +6,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
 import { CreateSubjectDto } from '../../subjects/dto/create-subject.dto';
 
 export class AddSubjectToCurriculumDto {

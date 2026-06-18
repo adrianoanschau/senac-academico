@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { CoursesController } from './courses.controller';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';

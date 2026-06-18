@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
-import { SubjectsService } from './subjects.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
+import { SubjectsService } from './subjects.service';
 
 type MockSubject = {
   id: string;

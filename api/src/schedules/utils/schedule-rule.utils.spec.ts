@@ -1,5 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
+
 import {
   computeRuleRemainingHours,
   dependentRuleWhere,

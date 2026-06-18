@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClassGroupsController } from './class-groups.controller';
 import { ClassGroupsService } from './class-groups.service';
 

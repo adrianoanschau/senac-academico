@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { ScheduleConflictService } from './schedule-conflict.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ScheduleConflictService } from './schedule-conflict.service';
 
 describe('ScheduleConflictService', () => {
   let service: ScheduleConflictService;

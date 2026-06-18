@@ -1,11 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
+import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
+import { GanttPlannerService } from './gantt-planner.service';
+import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { SchedulesController } from './schedules.controller';
 import { SchedulesService } from './schedules.service';
-import { ModuleOrchestratorService } from './module-orchestrator.service';
-import { PostponeScheduleDto } from './dto/postpone-schedule.dto';
-import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
-import { GanttPlannerService } from './gantt-planner.service';
 
 describe('SchedulesController', () => {
   let controller: SchedulesController;

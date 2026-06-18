@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { ConflictException } from '@nestjs/common';
+import { describe, expect, it } from 'vitest';
+
 import {
   SCHEDULE_ERROR_ACTIONS,
   throwPostponeConfirmRequired,

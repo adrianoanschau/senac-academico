@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { PrismaService } from '@/prisma/prisma.service';
+
+import { PlanModuleDto } from './dto/plan-module.dto';
 import { ModuleOrchestratorService } from './module-orchestrator.service';
 import { SchedulesService } from './schedules.service';
-import { PrismaService } from '@/prisma/prisma.service';
-import { PlanModuleDto } from './dto/plan-module.dto';
 
 describe('ModuleOrchestratorService', () => {
   let service: ModuleOrchestratorService;

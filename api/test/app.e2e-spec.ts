@@ -1,13 +1,14 @@
-import { describe, it, beforeEach, afterEach } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { AppController } from './../src/app.controller';
+import { afterEach, beforeEach, describe, it } from 'vitest';
+
 import pkg from '../package.json';
+import { AppController } from './../src/app.controller';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;

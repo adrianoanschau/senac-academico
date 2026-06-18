@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClassCompletionCronService } from './class-completion-cron.service';
-import { PrismaService } from '@/prisma/prisma.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
+import { ClassCompletionCronService } from './class-completion-cron.service';
 
 describe('ClassCompletionCronService', () => {
   let service: ClassCompletionCronService;

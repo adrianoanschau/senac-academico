@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -10,7 +11,6 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class GanttSubjectConfigDto {
   @IsUUID()

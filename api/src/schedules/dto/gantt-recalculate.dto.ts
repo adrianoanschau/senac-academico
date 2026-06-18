@@ -10,6 +10,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
 import { GanttSubjectConfigDto } from './gantt-subject-config.dto';
 
 export class GanttRecalculateDto {

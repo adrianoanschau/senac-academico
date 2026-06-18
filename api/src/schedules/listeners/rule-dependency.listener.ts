@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { PrismaService } from '@/prisma/prisma.service';
+
 import { ClassStatus } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
 import {
+  emitRuleEndDateChanged,
   RULE_EVENTS,
   RuleEndDateChangedEvent,
-  emitRuleEndDateChanged,
 } from '../events/rule-end-date-changed.event';
 import { SchedulesService } from '../schedules.service';
 import { dayAfterInScheduleTz } from '../utils/schedule-date.utils';

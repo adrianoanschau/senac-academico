@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { GanttPlannerService } from './gantt-planner.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { GanttPlannerService } from './gantt-planner.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 
 describe('GanttPlannerService', () => {

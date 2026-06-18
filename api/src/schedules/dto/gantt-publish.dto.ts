@@ -9,6 +9,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
 import { GanttTaskDto } from './gantt-task.dto';
 
 export class GanttPublishDto {

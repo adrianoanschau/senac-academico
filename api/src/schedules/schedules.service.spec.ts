@@ -1,13 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
-import { SchedulesService } from './schedules.service';
-import { ScheduleGeneratorService } from './schedule-generator.service';
-import { ScheduleConflictService } from './conflict/schedule-conflict.service';
-import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
-import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ScheduleConflictService } from './conflict/schedule-conflict.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
+import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
+import { ScheduleGeneratorService } from './schedule-generator.service';
+import { SchedulesService } from './schedules.service';
 
 describe('SchedulesService', () => {
   let service: SchedulesService;

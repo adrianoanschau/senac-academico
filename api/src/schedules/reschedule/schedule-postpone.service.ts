@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
+
 import { ScheduleConflictService } from '../conflict/schedule-conflict.service';
-import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
 import { throwPostponeConfirmRequired } from '../constants/schedule-error.constants';
 import { emitRuleEndDateChanged } from '../events/rule-end-date-changed.event';
+import { ScheduleRuleLifecycleService } from '../rules/schedule-rule-lifecycle.service';
 import {
   dayAfterInScheduleTz,
   findFirstRuleOccurrence as findFirstRuleOccurrenceSlot,

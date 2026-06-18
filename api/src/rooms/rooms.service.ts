@@ -1,6 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { ConflictException, Injectable } from '@nestjs/common';
+
 import { findOrThrow } from '@/common/entity.utils';
+import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 

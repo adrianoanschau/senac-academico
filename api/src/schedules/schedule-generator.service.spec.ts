@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ScheduleGeneratorService } from './schedule-generator.service';
-import { PrismaService } from '@/prisma/prisma.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { OverrideType } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
+import { ScheduleGeneratorService } from './schedule-generator.service';
 
 describe('ScheduleGeneratorService', () => {
   let service: ScheduleGeneratorService;

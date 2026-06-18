@@ -1,13 +1,15 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+
 import { Prisma } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateSubjectDto } from './dto/create-subject.dto';
-import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
+import { UpdateSubjectDto } from './dto/update-subject.dto';
 
 @Injectable()
 export class SubjectsService {

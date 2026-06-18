@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+
 import { findOrThrow } from '@/common/entity.utils';
 import { assertValidTimeRange } from '@/common/validation.utils';
+import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
 import { UpdateScheduleOverrideDto } from './dto/update-schedule-override.dto';
 

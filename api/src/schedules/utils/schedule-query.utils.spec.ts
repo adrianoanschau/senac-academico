@@ -1,15 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
+
+import { SCHEDULES_MAX_PAGE_LIMIT } from '../constants/schedule-query.constants';
+import { addYears } from './schedule-date.utils';
 import {
+  buildDateRangeOverlapConditions,
+  buildOverlapWhere,
   buildResourceOrConditions,
   buildScheduleWhereInput,
-  buildOverlapWhere,
-  buildDateRangeOverlapConditions,
   fetchOccupiedSlots,
   resolveSchedulePageLimit,
 } from './schedule-query.utils';
-import { SCHEDULES_MAX_PAGE_LIMIT } from '../constants/schedule-query.constants';
-import { addYears } from './schedule-date.utils';
 
 describe('schedule-query.utils', () => {
   it('deve montar filtro com cursor de paginação', () => {

@@ -1,13 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RuleDependencyListener } from './rule-dependency.listener';
-import { PrismaService } from '@/prisma/prisma.service';
-import { SchedulesService } from '../schedules.service';
-import { RuleEndDateChangedEvent } from '../events/rule-end-date-changed.event';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClassStatus } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
+import { RuleEndDateChangedEvent } from '../events/rule-end-date-changed.event';
+import { SchedulesService } from '../schedules.service';
 import { dayAfterInScheduleTz } from '../utils/schedule-date.utils';
 import { ruleFamilyWhere } from '../utils/schedule-rule.utils';
+import { RuleDependencyListener } from './rule-dependency.listener';
 
 describe('RuleDependencyListener', () => {
   let listener: RuleDependencyListener;

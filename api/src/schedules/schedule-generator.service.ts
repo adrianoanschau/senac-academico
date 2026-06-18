@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
+import { OverrideType } from '@/prisma/generated';
+
 import { PrismaService } from '../prisma/prisma.service';
 import {
   buildScheduleSlotWithDuration,
@@ -9,7 +12,6 @@ import {
   startOfScheduleDay,
 } from './utils/schedule-date.utils';
 import { hoursToMinutes } from './utils/schedule-hours.utils';
-import { OverrideType } from '@/prisma/generated';
 
 export interface ProjectedSchedule {
   startTime: Date;

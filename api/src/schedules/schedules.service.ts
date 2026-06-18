@@ -1,18 +1,20 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ScheduleConflictService } from './conflict/schedule-conflict.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { ScheduleGeneratorService } from './schedule-generator.service';
+import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
 import { GenerateSchedulesDto } from './dto/generate-schedules.dto';
 import { MigrateRuleDto } from './dto/migrate-rule.dto';
-import { FindSchedulesQueryDto } from './dto/find-schedules-query.dto';
-import { ScheduleConflictService } from './conflict/schedule-conflict.service';
-import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { SchedulePostponeService } from './reschedule/schedule-postpone.service';
+import { ScheduleRuleLifecycleService } from './rules/schedule-rule-lifecycle.service';
+import { ScheduleGeneratorService } from './schedule-generator.service';
 import {
   buildScheduleProjections,
   persistGeneratedScheduleBatch,

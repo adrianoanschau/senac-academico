@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { ScheduleOverridesService } from './schedule-overrides.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
 import { CreateScheduleOverrideDto } from './dto/create-schedule-override.dto';
+import { ScheduleOverridesService } from './schedule-overrides.service';
 
 type MockOverride = {
   id: string;

@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
 import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
-import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
 
 describe('SubjectsController', () => {
   let controller: SubjectsController;

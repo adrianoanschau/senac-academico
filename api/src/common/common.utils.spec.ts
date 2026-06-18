@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { NotFoundException } from '@nestjs/common';
+import { describe, expect, it } from 'vitest';
+
 import { findOrThrow } from './entity.utils';
 import { assertValidTimeRange } from './validation.utils';
 

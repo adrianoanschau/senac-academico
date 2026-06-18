@@ -1,13 +1,15 @@
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
   ConflictException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
-import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 
 @Injectable()
 export class CurriculumsService {

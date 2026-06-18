@@ -1,18 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
+
+import { AppRole } from '@/prisma/generated';
+
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { AppRole } from '@/prisma/generated';
-import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('courses')
 export class CoursesController {

@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
-import { ClassGroupsService } from './class-groups.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupDto } from './dto/create-class-group.dto';
 
 type MockClassGroup = {

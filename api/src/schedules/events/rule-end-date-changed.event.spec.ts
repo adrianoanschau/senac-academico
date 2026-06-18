@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
 import {
+  emitRuleEndDateChanged,
   RULE_EVENTS,
   RuleEndDateChangedEvent,
-  emitRuleEndDateChanged,
 } from './rule-end-date-changed.event';
 
 describe('rule-end-date-changed.event', () => {

@@ -4,12 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+
 import { PrismaService } from '@/prisma/prisma.service';
-import { ScheduleGeneratorService } from './schedule-generator.service';
+
 import { GanttBlueprintDto } from './dto/gantt-blueprint.dto';
 import { GanttPublishDto } from './dto/gantt-publish.dto';
 import { GanttRecalculateDto } from './dto/gantt-recalculate.dto';
 import { GanttSubjectConfigDto } from './dto/gantt-subject-config.dto';
+import { ScheduleGeneratorService } from './schedule-generator.service';
 import {
   dayAfterInScheduleTz,
   intervalsOverlap,

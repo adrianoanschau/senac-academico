@@ -4,25 +4,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
-import { ScheduleGeneratorService } from '../schedule-generator.service';
+
 import { MigrateRuleDto } from '../dto/migrate-rule.dto';
 import { emitRuleEndDateChanged } from '../events/rule-end-date-changed.event';
+import { ScheduleGeneratorService } from '../schedule-generator.service';
 import {
   dayAfterInScheduleTz,
   startOfScheduleDay,
 } from '../utils/schedule-date.utils';
+import {
+  buildScheduleProjections,
+  persistPlannedSchedules,
+} from '../utils/schedule-generation.utils';
 import {
   computeRuleRemainingHours,
   resolveRuleRootId,
   RULE_MIGRATE_CONSUMED_STATUSES,
   ruleFamilyWhere,
 } from '../utils/schedule-rule.utils';
-import {
-  buildScheduleProjections,
-  persistPlannedSchedules,
-} from '../utils/schedule-generation.utils';
 
 @Injectable()
 export class ScheduleRuleLifecycleService {

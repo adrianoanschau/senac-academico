@@ -1,20 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Query,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { SubjectsService } from './subjects.service';
-import { CreateSubjectDto } from './dto/create-subject.dto';
-import { UpdateSubjectDto } from './dto/update-subject.dto';
-import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
+
 import { AppRole } from '@/prisma/generated';
+
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CreateSubjectDto } from './dto/create-subject.dto';
+import { FindSubjectsQueryDto } from './dto/find-subjects-query.dto';
+import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { SubjectsService } from './subjects.service';
 
 @Controller('subjects')
 export class SubjectsController {

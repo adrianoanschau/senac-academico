@@ -1,11 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ClassStatus } from '@/prisma/generated';
+import { PrismaService } from '@/prisma/prisma.service';
+
+import { RuleEndDateChangedEvent } from '../src/schedules/events/rule-end-date-changed.event';
 import { RuleDependencyListener } from '../src/schedules/listeners/rule-dependency.listener';
 import { SchedulesService } from '../src/schedules/schedules.service';
-import { PrismaService } from '@/prisma/prisma.service';
-import { RuleEndDateChangedEvent } from '../src/schedules/events/rule-end-date-changed.event';
-import { ClassStatus } from '@/prisma/generated';
 
 describe('Schedules domino flow (e2e)', () => {
   let listener: RuleDependencyListener;

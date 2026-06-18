@@ -1,13 +1,13 @@
 import {
-  IsDateString,
+  ArrayNotEmpty,
   IsArray,
+  IsDateString,
   IsInt,
   IsOptional,
   IsUUID,
   Matches,
-  Min,
   Max,
-  ArrayNotEmpty,
+  Min,
 } from 'class-validator';
 
 export class MigrateRuleDto {

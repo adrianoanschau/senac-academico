@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+
 import { ClassStatus } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
 

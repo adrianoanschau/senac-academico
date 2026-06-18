@@ -1,8 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
+
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {

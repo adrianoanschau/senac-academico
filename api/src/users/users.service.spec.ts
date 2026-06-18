@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeAll, beforeEach, Mock } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { createClient, User } from '@supabase/supabase-js';
-import { UsersService } from './users.service';
+import { beforeAll, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UsersService } from './users.service';
 
 // Mock do módulo do Supabase
 vi.mock('@supabase/supabase-js', () => ({

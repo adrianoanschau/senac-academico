@@ -11,6 +11,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
 import { GanttSessionDto } from './gantt-session.dto';
 
 export class GanttTaskDto {

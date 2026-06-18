@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomsController } from './rooms.controller';
 import { RoomsService } from './rooms.service';
-import { UpdateRoomDto } from './dto/update-room.dto';
 
 describe('RoomsController', () => {
   let controller: RoomsController;

@@ -2,9 +2,9 @@ import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDate,
   IsInt,
-  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,

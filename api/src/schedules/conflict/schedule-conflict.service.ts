@@ -3,8 +3,10 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
+
 import { ClassStatus, Prisma } from '@/prisma/generated';
 import { PrismaService } from '@/prisma/prisma.service';
+
 import {
   buildOverlapWhere,
   buildResourceOrConditions,

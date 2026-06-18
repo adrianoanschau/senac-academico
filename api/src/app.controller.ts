@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+
 import pkg from '../package.json';
 import { Public } from './auth/decorators/public.decorator';
 

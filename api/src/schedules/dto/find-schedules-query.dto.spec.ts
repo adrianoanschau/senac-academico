@@ -1,7 +1,9 @@
 import 'reflect-metadata';
-import { describe, it, expect } from 'vitest';
+
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { describe, expect, it } from 'vitest';
+
 import { FindSchedulesQueryDto } from './find-schedules-query.dto';
 
 describe('FindSchedulesQueryDto', () => {

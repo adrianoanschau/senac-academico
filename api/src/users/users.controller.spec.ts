@@ -1,12 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { AppRole } from '@/prisma/generated';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { RolesGuard } from '../auth/guards/roles.guard';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;

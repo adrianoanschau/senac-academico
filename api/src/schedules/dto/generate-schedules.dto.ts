@@ -4,10 +4,10 @@ import {
   IsDate,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  IsNumber,
   Max,
   Min,
 } from 'class-validator';

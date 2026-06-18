@@ -1,4 +1,3 @@
-import { ClassStatus } from '@/prisma/generated';
 import { Transform, Type } from 'class-transformer';
 import {
   IsDateString,
@@ -12,6 +11,9 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+
+import { ClassStatus } from '@/prisma/generated';
+
 import { SCHEDULES_MAX_PAGE_LIMIT } from '../constants/schedule-query.constants';
 
 export class FindSchedulesQueryDto {

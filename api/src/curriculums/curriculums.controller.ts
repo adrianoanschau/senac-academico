@@ -1,19 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
-  Patch,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
+
 import { AppRole } from '@/prisma/generated';
+
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurriculumsService } from './curriculums.service';
+import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
-import { AddSubjectToCurriculumDto } from './dto/add-subject-to-curriculum.dto';
 
 @Controller('curriculums')
 export class CurriculumsController {

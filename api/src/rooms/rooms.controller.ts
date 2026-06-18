@@ -1,18 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { RoomsService } from './rooms.service';
+
+import { AppRole } from '@/prisma/generated';
+
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { AppRole } from '@/prisma/generated';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RoomsService } from './rooms.service';
 
 @Controller('rooms')
 export class RoomsController {
