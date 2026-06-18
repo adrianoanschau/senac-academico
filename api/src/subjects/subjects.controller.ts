@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
@@ -33,7 +34,7 @@ export class SubjectsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.subjectsService.findOne(id);
     return { data };
   }
@@ -41,7 +42,7 @@ export class SubjectsController {
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSubjectDto: UpdateSubjectDto,
   ) {
     const data = await this.subjectsService.update(id, updateSubjectDto);
@@ -50,7 +51,7 @@ export class SubjectsController {
 
   @Roles(AppRole.ADMIN, AppRole.SECRETARY)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.subjectsService.remove(id);
     return { data };
   }
